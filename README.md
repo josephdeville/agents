@@ -24,6 +24,7 @@ Sub-agents are specialized AI assistants in Claude Code that focus on specific d
 ### 🔒 Security & Compliance
 - **[security-auditor](./security-auditor.md)** - OWASP compliance, vulnerability assessments, and security architecture evaluation
 - **[code-reviewer](./code-reviewer.md)** - Code quality, security review, and best practices enforcement
+- **[openclaw-bridge-handler](./openclaw-bridge-handler.md)** - Safe handling of the OpenClaw/Clawdi bridge: relay-only boundaries, credential hygiene, and routing control to Railway/Anthropic Console
 
 ### ⚡ Performance & Monitoring
 - **[performance-profiler](./performance-profiler.md)** - Performance bottleneck identification and optimization
@@ -229,6 +230,7 @@ For issues, questions, or contributions:
 | Documentation | `tech-writer` | `code-commentator` |
 | Deployment | `cicd-engineer` | `docker-specialist`, `iac-expert` |
 | Learning & Education | `mindful-dev` | `tech-writer`, `code-commentator` |
+| External Agent Bridges | `openclaw-bridge-handler` | `security-auditor` |
 
 ---
 
