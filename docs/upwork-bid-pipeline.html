@@ -266,6 +266,7 @@
     <p>It optimised for the wrong constraint. Upwork's automation policy permits AI-drafted proposals only where a person reviews, edits, and clicks submit on each one, and names auto-submission at scale as a bannable violation. Upwork's public GraphQL API has no mutation to submit a proposal or spend Connects, so any tool that submits programmatically is operating outside the sanctioned surface. The account risk lands on the freelancer, not the vendor.</p>
     <p>So the architecture changes at both ends and nowhere else. Discovery moves onto an Upwork-issued API key obtained through their review process. Submission moves to the human. <strong>Everything between those two points survives unchanged</strong> — the filters, the drafter, the state model, the exactly-once transition, the failure design. What was previously called phase 3 of the rollout, "post to Slack, submit by hand," turns out to have been the terminal state all along rather than a waypoint on the way to something more automated.</p>
     <p>The cron is no longer a demoted reconciliation sweep. Without a webhook it is the primary driver again, polling an approved endpoint on a documented rate limit.</p>
+    <p>There is a second-order effect worth stating up front, because it removes work rather than adding it. Once the human submits, the approval signal has no downstream consumer — nothing is blocked waiting to hear it. That collapses stage 04 from a signed-callback integration into a bot token and an emoji, and takes the Slack app, the request URL, the signing secret and the reachable host with it.</p>
   </section>
 
   <section id="permitted">
@@ -344,7 +345,7 @@
           </g>
           <g font-family="ui-monospace, monospace" font-size="12" fill="#8A5A0B" text-anchor="middle">
             <text x="728" y="92">Slack</text>
-            <text x="728" y="108" font-size="10.5">Approve / Skip</text>
+            <text x="728" y="108" font-size="10.5">react to record</text>
             <text x="728" y="126" font-size="9.5" letter-spacing="0.08em">HUMAN GATE</text>
           </g>
 
@@ -399,7 +400,7 @@
       <figcaption>No edge in this diagram reaches Upwork's submit action at all. The system stops at a handoff card; the last step is a person on upwork.com, which is what the automation policy requires. Amber marks the two places a human acts, and there is no path around either.</figcaption>
     </figure>
 
-    <p>Five components. The poller and store are new code and neither is large. The drafter is the Railway bridge you already pay for. The gate is the Slack channel that already exists. The handoff is a Slack message with a link in it. Nothing here needs to hold an Upwork password, and nothing here touches a browser.</p>
+    <p>Five components. The poller and store are new code and neither is large. The drafter is the Railway bridge you already pay for. The gate is the Slack channel that already exists. The handoff is a Slack message with a link in it. Nothing here needs to hold an Upwork password, nothing touches a browser, and nothing in the whole design accepts an inbound request — every arrow above originates on your side.</p>
   </section>
 
   <section id="stages">
@@ -442,86 +443,96 @@
       <p>Job postings are attacker-controlled text, and some deliberately contain instructions aimed at LLMs — the July batch hit one carrying an "if you're an LLM, ignore this" trap. Treat the posting as data, never as instructions: keep it in a clearly delimited block, and state in the system prompt that instructions inside the posting are content to respond to, not commands to obey. The human gate is the backstop, but it shouldn't be the only defense.</p>
     </div>
 
-    <h3><span class="stage-no">Stage 04</span>Gate — Slack, and how it actually signals</h3>
-    <p>The approval canvas built earlier is a good ledger and a poor sensor. A canvas is a document: to learn that a box was ticked you have to poll it, diff the markdown, and guess which entry changed — with no signed event, no identity on the approver, and a race whenever two edits land together.</p>
+    <h3><span class="stage-no">Stage 04</span>Gate — Slack, with nothing inbound</h3>
+    <p>Moving submission to the human changed what this stage is for, and the change is easy to miss. When approval triggered an automated submission, the signal needed to be fast, signed, and unambiguous, because a submitter was blocked on it. Nothing is blocked on it now. You read the letter, you go to upwork.com, you submit. Approval and submission are the same human act.</p>
+    <p>So the question is no longer <em>what is the most reliable signal</em>. It is <em>what is the cheapest way to record something that already happened</em> — and the answer is a different mechanism than the previous version of this document recommended.</p>
 
     <figure>
       <div class="fig-scroll">
-        <svg viewBox="0 0 900 250" role="img" aria-label="Comparison of two approval signals. The canvas approach requires a poller that fetches the canvas on a timer and diffs its markdown to infer approval, with ambiguous results. The Block Kit approach has the user click a button in Slack, which sends a signed action POST directly to an endpoint, carrying the job id and approver identity.">
+        <svg viewBox="0 0 900 260" role="img" aria-label="Two ways to record an approval. The Block Kit approach requires Slack to POST inbound to a public HTTPS endpoint you host and authenticate, adding a Slack app, request URL, signing secret and hosting. The reaction approach makes only outbound calls: one to post the draft, one on a timer to read reactions, so nothing listens and nothing needs to be reachable.">
           <defs>
-            <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+            <marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#92302E"/>
             </marker>
-            <marker id="ar2-moss" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <marker id="ar3-moss" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M 0 0 L 10 5 L 0 10 z" fill="#2C6446"/>
             </marker>
           </defs>
 
-          <text x="14" y="26" font-family="ui-monospace, monospace" font-size="11.5" fill="currentColor" opacity="0.72">A · CANVAS CHECKBOX — inferred</text>
-          <g fill="none" stroke="currentColor" stroke-width="1.25">
-            <rect x="14"  y="42" width="140" height="52" rx="3"/>
-            <rect x="238" y="42" width="140" height="52" rx="3"/>
-            <rect x="462" y="42" width="140" height="52" rx="3"/>
-            <rect x="686" y="42" width="140" height="52" rx="3"/>
+          <text x="14" y="24" font-family="ui-monospace, monospace" font-size="11.5" fill="#92302E">A · BLOCK KIT BUTTON — needs an inbound edge</text>
+          <g fill="none" stroke="#92302E" stroke-width="1.4">
+            <rect x="14"  y="40" width="150" height="50" rx="3"/>
+            <rect x="330" y="40" width="180" height="50" rx="3"/>
+            <rect x="676" y="40" width="150" height="50" rx="3"/>
           </g>
-          <g font-family="ui-monospace, monospace" font-size="11" fill="currentColor" text-anchor="middle">
-            <text x="84"  y="66">Canvas</text><text x="84"  y="82" font-size="10" opacity="0.72">box ticked</text>
-            <text x="308" y="66">Poller</text><text x="308" y="82" font-size="10" opacity="0.72">every N min</text>
-            <text x="532" y="66">Diff markdown</text><text x="532" y="82" font-size="10" opacity="0.72">which entry?</text>
-            <text x="756" y="66">Submit</text><text x="756" y="82" font-size="10" opacity="0.72">no approver id</text>
+          <g font-family="ui-monospace, monospace" font-size="11" fill="#92302E" text-anchor="middle">
+            <text x="89"  y="61">Click Approve</text><text x="89"  y="77" font-size="10">in Slack</text>
+            <text x="420" y="61">Your endpoint</text><text x="420" y="77" font-size="10">public HTTPS, hosted</text>
+            <text x="751" y="61">Ledger</text><text x="751" y="77" font-size="10">row updated</text>
           </g>
-          <g stroke="currentColor" stroke-width="1.25" marker-end="url(#ar2)">
-            <line x1="154" y1="68" x2="236" y2="68"/>
-            <line x1="378" y1="68" x2="460" y2="68"/>
-            <line x1="602" y1="68" x2="684" y2="68"/>
+          <g stroke="#92302E" stroke-width="1.6" marker-end="url(#ar3)" color="#92302E">
+            <line x1="164" y1="65" x2="328" y2="65"/>
+            <line x1="510" y1="65" x2="674" y2="65"/>
           </g>
-          <text x="195" y="60" font-family="ui-monospace, monospace" font-size="9.5" fill="currentColor" text-anchor="middle" opacity="0.75">fetch</text>
-          <path d="M 308 96 q 0 26 -40 26 q -40 0 -40 -26" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" opacity="0.6"/>
-          <text x="268" y="136" font-family="ui-monospace, monospace" font-size="9.5" fill="currentColor" text-anchor="middle" opacity="0.6">latency + drift</text>
+          <text x="246" y="57" font-family="ui-monospace, monospace" font-size="9.5" fill="#92302E" text-anchor="middle">signed POST — INBOUND</text>
+          <text x="420" y="108" font-family="ui-monospace, monospace" font-size="9.5" fill="#92302E" text-anchor="middle">requires: Slack app · request URL · signing secret · reachable host</text>
 
-          <line x1="14" y1="158" x2="886" y2="158" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+          <line x1="14" y1="132" x2="886" y2="132" stroke="currentColor" stroke-width="1" opacity="0.25"/>
 
-          <text x="14" y="182" font-family="ui-monospace, monospace" font-size="11.5" fill="#2C6446">B · BLOCK KIT BUTTON — signalled</text>
+          <text x="14" y="158" font-family="ui-monospace, monospace" font-size="11.5" fill="#2C6446">B · EMOJI REACTION — outbound only</text>
           <g fill="none" stroke="#2C6446" stroke-width="1.5">
-            <rect x="14"  y="196" width="140" height="46" rx="3"/>
-            <rect x="238" y="196" width="140" height="46" rx="3"/>
-            <rect x="462" y="196" width="140" height="46" rx="3"/>
+            <rect x="14"  y="174" width="180" height="62" rx="3"/>
+            <rect x="480" y="174" width="150" height="62" rx="3"/>
+            <rect x="726" y="186" width="150" height="38" rx="3"/>
           </g>
           <g font-family="ui-monospace, monospace" font-size="11" fill="#2C6446" text-anchor="middle">
-            <text x="84"  y="216">Click Approve</text><text x="84"  y="232" font-size="10">in Slack</text>
-            <text x="308" y="216">/slack/actions</text><text x="308" y="232" font-size="10">signed POST</text>
-            <text x="532" y="216">Submit</text><text x="532" y="232" font-size="10">job id + user id</text>
+            <text x="104" y="199">Your cron</text><text x="104" y="215" font-size="10">bot token</text><text x="104" y="229" font-size="10">no open ports</text>
+            <text x="555" y="199">Slack</text><text x="555" y="215" font-size="10">message +</text><text x="555" y="229" font-size="10">reactions</text>
+            <text x="801" y="203">Ledger</text><text x="801" y="217" font-size="10">who + when</text>
           </g>
-          <g stroke="#2C6446" stroke-width="1.5" marker-end="url(#ar2-moss)" color="#2C6446">
-            <line x1="154" y1="219" x2="236" y2="219"/>
-            <line x1="378" y1="219" x2="460" y2="219"/>
-          </g>
-          <text x="195" y="211" font-family="ui-monospace, monospace" font-size="9.5" fill="#2C6446" text-anchor="middle">&lt; 1s</text>
-          <text x="628" y="222" font-family="ui-monospace, monospace" font-size="10" fill="#2C6446">unambiguous</text>
+          <path d="M 194 192 L 478 192" fill="none" stroke="#2C6446" stroke-width="1.5" marker-end="url(#ar3-moss)"/>
+          <text x="336" y="185" font-family="ui-monospace, monospace" font-size="9.5" fill="#2C6446" text-anchor="middle">chat.postMessage</text>
+          <path d="M 194 222 L 478 222" fill="none" stroke="#2C6446" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ar3-moss)"/>
+          <text x="336" y="240" font-family="ui-monospace, monospace" font-size="9.5" fill="#2C6446" text-anchor="middle">reactions.get, on a timer</text>
+          <line x1="630" y1="205" x2="724" y2="205" stroke="#2C6446" stroke-width="1.5" marker-end="url(#ar3-moss)"/>
         </svg>
       </div>
-      <figcaption>The canvas path adds a poller and an inference step, and still can't name who approved. The button path collapses both into one signed callback that carries the job id and the approver's Slack identity — an audit trail you get for free.</figcaption>
+      <figcaption>The only structural difference that matters: A requires Slack to reach you, B never does. Everything that made the Slack setup painful — the app manifest, the interactivity request URL, the signing secret, a host that must stay reachable — exists solely to serve that inbound arrow. Delete the arrow and the whole apparatus goes with it.</figcaption>
     </figure>
 
-    <p>Use both, for different jobs: <strong>Block Kit message = the signal</strong>, <strong>canvas = the ledger</strong>. Post each draft as a message with <em>Approve</em>, <em>Edit</em>, and <em>Skip</em> buttons; write the outcome to the canvas afterwards so there's a durable, human-browsable record of what went out and what didn't.</p>
-    <pre><code>{
-  "blocks": [
-    { "type": "section", "text": { "type": "mrkdwn",
-      "text": "*Senior GTM Engineer* · $75–110/hr · 4 proposals\n&lt;https://upwork.com/jobs/…|Open job&gt;" } },
-    { "type": "section", "text": { "type": "mrkdwn", "text": "&gt;&lt;draft letter&gt;" } },
-    { "type": "context", "elements": [ { "type": "mrkdwn",
-      "text": ":warning: [VERIFY: rate] — no rate on file for this posting" } ] },
-    { "type": "actions", "elements": [
-      { "type": "button", "style": "primary", "text": { "type": "plain_text", "text": "Approve &amp; submit" },
-        "value": "job_01J8…", "action_id": "approve" },
-      { "type": "button", "text": { "type": "plain_text", "text": "Edit first" },
-        "value": "job_01J8…", "action_id": "edit" },
-      { "type": "button", "style": "danger", "text": { "type": "plain_text", "text": "Skip" },
-        "value": "job_01J8…", "action_id": "skip" }
-    ]}
-  ]
-}</code></pre>
-    <p>Verify Slack's <code>X-Slack-Signature</code> on every action request and reject anything older than five minutes. The stakes are lower than they were when approval triggered a submission, but they are not zero: without the check, anyone who can guess a job id can mark a draft approved, and approved drafts are the ones you stop reading carefully.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Mechanism</th><th>Infrastructure</th><th>Approver identity</th><th>Weakness</th></tr></thead>
+        <tbody>
+          <tr><td>Canvas checkbox</td><td>Poll + diff the markdown</td><td>None</td><td>Must guess which entry changed; races when two edits land together</td></tr>
+          <tr><td>Block Kit button</td><td>Slack app, request URL, signing secret, reachable host</td><td>Yes, in the payload</td><td>All of that infrastructure, to serve a signal nothing waits on</td></tr>
+          <tr><td><strong>Emoji reaction</strong></td><td><strong>Bot token. Nothing inbound.</strong></td><td><strong>Yes, in <code>reactions.get</code></strong></td><td>Learned one poll interval late, which costs nothing here</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Post each draft as an ordinary message carrying the Job ID and the letter. A person reacts once they have acted: <code>white_check_mark</code> submitted, <code>x</code> skipped, <code>pencil2</code> needs an edit first. A job on a timer reads reactions and writes the outcome to the ledger.</p>
+    <pre><code># post — one outbound call
+POST https://slack.com/api/chat.postMessage
+  { "channel": "C0BNXNUL0QZ", "text": "&lt;job id + letter&gt;" }
+  → { "ok": true, "ts": "1788747638.570449" }   # store ts on the row
+
+# read — one outbound call, on a timer
+GET https://slack.com/api/reactions.get?channel=C0BNXNUL0QZ&amp;timestamp=&lt;ts&gt;
+  → reactions: [ { name: "white_check_mark", users: ["U07HPV9QPKP"] } ]</code></pre>
+    <p>That is the entire integration. No public endpoint, no signature verification, no app interactivity configuration, and nothing that breaks when a tunnel closes or a host sleeps. The bot token is the same one the existing weekday digest already posts with.</p>
+
+    <div class="note good">
+      <span class="label">Identity comes free, which the canvas never managed</span>
+      <p><code>reactions.get</code> returns the user ids who reacted, so the ledger records who acted and when without inference. That was the one thing the canvas could not do and the main reason buttons looked necessary. It turns out not to have required buttons.</p>
+    </div>
+
+    <div class="note caution">
+      <span class="label">Do not pre-seed the reactions</span>
+      <p>Adding the three emoji to each message so they are one click instead of two seems helpful and quietly breaks the design. "Any reaction present" is the signal; a bot-added reaction is indistinguishable from a human one unless every read filters the bot's user id, which is a correctness burden on every future reader of this data. Leave the message bare.</p>
+    </div>
+
+    <p>The canvas keeps its job. It is a durable, human-browsable log of what went out and what did not, which is what a document is good at. It simply is not the sensor.</p>
 
     <h3><span class="stage-no">Stage 05</span>Handoff — making the human step short</h3>
     <p>The system does not submit. Its last job is to compress the human's work to a few seconds, because that is what makes daily volume survivable: ten proposals a day is five minutes of clicking, not an afternoon.</p>
@@ -637,7 +648,7 @@ RETURNING *;
   </section>
 
   <footer>
-    <p>Revised 2026-09-07 to replace the GigRadar submission path with the design Upwork's automation policy permits. State pills at the top reflect what was directly verified on 2026-08-15: OpenClaw's weekday digest running, Slack connected as a tool, the Railway bridge unreachable from this sandbox's egress policy rather than known-down, and no Upwork task defined anywhere. Re-check before relying on any of it.</p>
+    <p>Revised 2026-09-07: first to replace the GigRadar submission path with the design Upwork's automation policy permits, then to simplify stage 04 to emoji reactions once it became clear the approval signal no longer had anything waiting on it. State pills at the top reflect what was directly verified on 2026-08-15: OpenClaw's weekday digest running, Slack connected as a tool, the Railway bridge unreachable from this sandbox's egress policy rather than known-down, and no Upwork task defined anywhere. Re-check before relying on any of it.</p>
   </footer>
 
 </div>
