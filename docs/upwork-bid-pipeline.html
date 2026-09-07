@@ -1,0 +1,643 @@
+<title>Upwork Bid Pipeline</title>
+<style>
+  :root {
+    --paper:       #F6F8F8;
+    --surface:     #FFFFFF;
+    --sunk:        #ECF0F0;
+    --ink:         #12201F;
+    --ink-soft:    #3D5150;
+    --ink-mute:    #647A78;
+    --rule:        #D8E0DF;
+    --rule-strong: #B5C3C1;
+    --signal:      #0D6E75;
+    --signal-soft: #E2F0F1;
+    --amber:       #8A5A0B;
+    --amber-soft:  #F8F0DE;
+    --crimson:     #92302E;
+    --crimson-soft:#F9E9E8;
+    --moss:        #2C6446;
+    --moss-soft:   #E5F0EA;
+    --code-bg:     #EEF3F3;
+
+    --measure: 68ch;
+    --s--1: 0.8125rem;
+    --s-0:  1.0625rem;
+    --s-1:  1.25rem;
+    --s-2:  1.55rem;
+    --s-3:  2rem;
+    --s-4:  2.75rem;
+
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:       #0F1717;
+      --surface:     #172121;
+      --sunk:        #1C2827;
+      --ink:         #E2EAE8;
+      --ink-soft:    #AFC0BE;
+      --ink-mute:    #7F9391;
+      --rule:        #273634;
+      --rule-strong: #3E5250;
+      --signal:      #56C5CE;
+      --signal-soft: #102C2E;
+      --amber:       #D9A445;
+      --amber-soft:  #2C2413;
+      --crimson:     #E0817E;
+      --crimson-soft:#2C1817;
+      --moss:        #6FBF95;
+      --moss-soft:   #142418;
+      --code-bg:     #1A2524;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:       #0F1717;
+    --surface:     #172121;
+    --sunk:        #1C2827;
+    --ink:         #E2EAE8;
+    --ink-soft:    #AFC0BE;
+    --ink-mute:    #7F9391;
+    --rule:        #273634;
+    --rule-strong: #3E5250;
+    --signal:      #56C5CE;
+    --signal-soft: #102C2E;
+    --amber:       #D9A445;
+    --amber-soft:  #2C2413;
+    --crimson:     #E0817E;
+    --crimson-soft:#2C1817;
+    --moss:        #6FBF95;
+    --moss-soft:   #142418;
+    --code-bg:     #1A2524;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: var(--s-0);
+    line-height: 1.62;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 62rem;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+    padding-block: 3rem 6rem;
+  }
+
+  /* --- masthead --- */
+  .masthead { border-block-end: 2px solid var(--ink); padding-block-end: 1.75rem; margin-block-end: 2.5rem; }
+  .kicker {
+    font-family: var(--mono);
+    font-size: var(--s--1);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--signal);
+    margin: 0 0 0.85rem;
+  }
+  h1 {
+    font-family: var(--mono);
+    font-size: var(--s-4);
+    line-height: 1.05;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    margin: 0 0 0.9rem;
+  }
+  .standfirst { font-size: var(--s-1); line-height: 1.5; color: var(--ink-soft); max-width: var(--measure); margin: 0; }
+
+  .statebar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-block-start: 1.5rem;
+  }
+  .pill {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    padding: 0.28rem 0.6rem;
+    border-radius: 3px;
+    border: 1px solid var(--rule-strong);
+    color: var(--ink-mute);
+    white-space: nowrap;
+  }
+  .pill.live   { border-color: var(--moss);    color: var(--moss);    background: var(--moss-soft); }
+  .pill.absent { border-color: var(--crimson); color: var(--crimson); background: var(--crimson-soft); }
+  .pill.unk    { border-color: var(--amber);   color: var(--amber);   background: var(--amber-soft); }
+
+  /* --- structure --- */
+  section { margin-block-end: 3.5rem; scroll-margin-block-start: 1.5rem; }
+  section > p, section > ul, section > ol, section > .note, section > h3, section > h4 { max-width: var(--measure); }
+
+  h2 {
+    font-family: var(--mono);
+    font-size: var(--s-2);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    text-wrap: balance;
+    margin: 0 0 0.9rem;
+    padding-block-end: 0.5rem;
+    border-block-end: 1px solid var(--rule-strong);
+  }
+  h3 { font-size: var(--s-1); font-weight: 650; line-height: 1.3; margin: 2rem 0 0.5rem; text-wrap: balance; }
+  h4 {
+    font-family: var(--mono);
+    font-size: var(--s--1);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    font-weight: 500;
+    margin: 1.5rem 0 0.5rem;
+  }
+  p { margin: 0 0 1rem; }
+  a { color: var(--signal); }
+  :focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; border-radius: 2px; }
+  ul, ol { margin: 0 0 1rem; padding-inline-start: 1.25rem; }
+  li { margin-block-end: 0.35rem; }
+  li::marker { color: var(--ink-mute); }
+  strong { font-weight: 650; }
+
+  code { font-family: var(--mono); font-size: 0.875em; background: var(--code-bg); padding: 0.1em 0.34em; border-radius: 3px; }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 0.95rem 1.1rem;
+    overflow-x: auto;
+    margin: 0 0 1rem;
+    font-size: var(--s--1);
+    line-height: 1.55;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; }
+
+  figure { margin: 0 0 1.5rem; }
+  figure svg { max-width: 100%; height: auto; display: block; }
+  figcaption { font-size: var(--s--1); color: var(--ink-mute); margin-block-start: 0.7rem; max-width: var(--measure); }
+  .fig-scroll { overflow-x: auto; }
+
+  .table-wrap { overflow-x: auto; margin: 0 0 1rem; }
+  table { border-collapse: collapse; width: 100%; font-size: var(--s--1); font-variant-numeric: tabular-nums; }
+  th, td { text-align: start; padding: 0.55rem 0.85rem; border-block-end: 1px solid var(--rule); vertical-align: top; }
+  th {
+    font-family: var(--mono);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    color: var(--ink-mute);
+    border-block-end: 1px solid var(--rule-strong);
+    white-space: nowrap;
+  }
+
+  .note {
+    border-inline-start: 3px solid var(--rule-strong);
+    background: var(--sunk);
+    padding: 0.9rem 1.1rem;
+    margin: 0 0 1rem;
+    border-radius: 0 4px 4px 0;
+  }
+  .note.caution { border-inline-start-color: var(--amber);   background: var(--amber-soft); }
+  .note.stop    { border-inline-start-color: var(--crimson); background: var(--crimson-soft); }
+  .note.good    { border-inline-start-color: var(--moss);    background: var(--moss-soft); }
+  .note p:last-child { margin-block-end: 0; }
+  .note .label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    display: block;
+    margin-block-end: 0.35rem;
+    color: var(--ink-mute);
+  }
+  .note.caution .label { color: var(--amber); }
+  .note.stop .label    { color: var(--crimson); }
+  .note.good .label    { color: var(--moss); }
+
+  .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); margin: 0 0 1rem; }
+  .card { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 0.95rem 1.1rem; }
+  .card h4 { margin-block-start: 0; }
+  .card p:last-child { margin-block-end: 0; }
+
+  .stage-no {
+    font-family: var(--mono);
+    font-size: var(--s--1);
+    color: var(--signal);
+    letter-spacing: 0.1em;
+    display: block;
+    margin-block-end: 0.3rem;
+  }
+
+  footer {
+    border-block-start: 1px solid var(--rule);
+    padding-block-start: 1.25rem;
+    margin-block-start: 3rem;
+    color: var(--ink-mute);
+    font-size: var(--s--1);
+    max-width: var(--measure);
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="kicker">Systems Architecture</p>
+    <h1>Upwork Bid Pipeline</h1>
+    <p class="standfirst">A design for Upwork API → Claude → Slack approval → you, built inside what Upwork's automation policy permits, on infrastructure that already exists, with a human gate that can't be bypassed and failures that can't be silent.</p>
+    <div class="statebar">
+      <span class="pill live">OpenClaw · live</span>
+      <span class="pill live">Slack · connected</span>
+      <span class="pill unk">Railway bridge · unverified</span>
+      <span class="pill absent">Upwork task · does not exist</span>
+      <span class="pill absent">Upwork API key · not yet requested</span>
+    </div>
+  </header>
+
+  <section id="premise">
+    <h2>What changes, and why</h2>
+    <p>An earlier draft of this document routed discovery through a GigRadar webhook and submission through GigRadar's application endpoint, which posts a real proposal via their own Upwork Business Manager. That design optimised for speed: bid inside the first fifteen minutes, because that is where the win rate lives.</p>
+    <p>It optimised for the wrong constraint. Upwork's automation policy permits AI-drafted proposals only where a person reviews, edits, and clicks submit on each one, and names auto-submission at scale as a bannable violation. Upwork's public GraphQL API has no mutation to submit a proposal or spend Connects, so any tool that submits programmatically is operating outside the sanctioned surface. The account risk lands on the freelancer, not the vendor.</p>
+    <p>So the architecture changes at both ends and nowhere else. Discovery moves onto an Upwork-issued API key obtained through their review process. Submission moves to the human. <strong>Everything between those two points survives unchanged</strong> — the filters, the drafter, the state model, the exactly-once transition, the failure design. What was previously called phase 3 of the rollout, "post to Slack, submit by hand," turns out to have been the terminal state all along rather than a waypoint on the way to something more automated.</p>
+    <p>The cron is no longer a demoted reconciliation sweep. Without a webhook it is the primary driver again, polling an approved endpoint on a documented rate limit.</p>
+  </section>
+
+  <section id="permitted">
+    <h2>The permitted line</h2>
+    <p>Upwork publishes the boundary directly, in <em>Use bots and other automation properly</em>. It is unusually specific, and it maps almost box for box onto the pipeline below.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Permitted</th><th>Prohibited</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Job alerts and routing: collecting new postings and forwarding them to Slack, email, or a dashboard, without auto-submitting</td>
+            <td>Auto-submitting proposals at scale, or sending bids without human review</td>
+          </tr>
+          <tr>
+            <td>Using AI to draft proposals, provided a person manually reviews, edits, and clicks submit for each one</td>
+            <td>Driving the site with OAuth2 tokens or session cookies from a script</td>
+          </tr>
+          <tr>
+            <td>CRMs, task boards, and dashboards that track proposals, contracts, milestones, and performance</td>
+            <td>Calling website pages instead of approved API endpoints</td>
+          </tr>
+          <tr>
+            <td>Automation running on an API key issued after Upwork reviews the account and the stated use case</td>
+            <td>Exceeding rate limits, or background polling that resembles scraping</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note good">
+      <span class="label">The human click is the compliance boundary, not a preference</span>
+      <p>Every earlier version of this design treated the approval gate as prudence: Connects cost money, proposals carry your name, a bug at 2am is expensive. Those reasons still hold, but they are now secondary. The gate is the specific condition under which Upwork permits AI-drafted proposals at all. Removing it does not make the pipeline faster and riskier; it makes it prohibited. Build it as structurally required, with no flag that disables it.</p>
+    </div>
+    <div class="note caution">
+      <span class="label">Sourcing caveat</span>
+      <p>Upwork's own domains are blocked by the egress policy of the sessions this document was written in, so the policy language above came from search results quoting the help article rather than from the article itself. Several corroborating write-ups are published by vendors who sell Upwork automation and have an interest in a permissive reading. Read the primary source before building, and treat the row contents as a claim to confirm rather than a settled fact.</p>
+    </div>
+  </section>
+
+  <section id="flow">
+    <h2>The pipeline</h2>
+
+    <figure>
+      <div class="fig-scroll">
+        <svg viewBox="0 0 980 330" role="img" aria-label="Permitted pipeline: a poller queries the approved Upwork job-search API on your own key, persists matches, drafts a letter via the Claude bridge, and posts it to Slack for human approval. Approval produces a handoff card with the letter and a deep link; the person submits on Upwork themselves. A cron sweep re-drives stuck records and every stage reports failures to Slack.">
+          <defs>
+            <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+            </marker>
+            <marker id="ar-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8A5A0B"/>
+            </marker>
+          </defs>
+
+          <!-- main row -->
+          <g fill="none" stroke="currentColor" stroke-width="1.25">
+            <rect x="14"  y="70" width="132" height="66" rx="3"/>
+            <rect x="176" y="70" width="132" height="66" rx="3"/>
+            <rect x="338" y="70" width="132" height="66" rx="3"/>
+            <rect x="500" y="70" width="132" height="66" rx="3"/>
+            <rect x="824" y="70" width="132" height="66" rx="3"/>
+          </g>
+          <!-- human gate box, amber -->
+          <rect x="662" y="70" width="132" height="66" rx="3" fill="none" stroke="#8A5A0B" stroke-width="2"/>
+
+          <g font-family="ui-monospace, monospace" font-size="12" fill="currentColor" text-anchor="middle">
+            <text x="80"  y="96">Upwork API</text>
+            <text x="80"  y="113" font-size="10.5" opacity="0.72">approved key</text>
+            <text x="242" y="96">Poller</text>
+            <text x="242" y="113" font-size="10.5" opacity="0.72">saved searches</text>
+            <text x="404" y="96">Job store</text>
+            <text x="404" y="113" font-size="10.5" opacity="0.72">Postgres</text>
+            <text x="566" y="96">Drafter</text>
+            <text x="566" y="113" font-size="10.5" opacity="0.72">ask_claude</text>
+            <text x="890" y="96">Handoff</text>
+            <text x="890" y="113" font-size="10.5" opacity="0.72">letter + deep link</text>
+          </g>
+          <g font-family="ui-monospace, monospace" font-size="12" fill="#8A5A0B" text-anchor="middle">
+            <text x="728" y="92">Slack</text>
+            <text x="728" y="108" font-size="10.5">Approve / Skip</text>
+            <text x="728" y="126" font-size="9.5" letter-spacing="0.08em">HUMAN GATE</text>
+          </g>
+
+          <!-- arrows main row -->
+          <g stroke="currentColor" stroke-width="1.25" marker-end="url(#ar)" color="currentColor">
+            <line x1="146" y1="103" x2="174" y2="103"/>
+            <line x1="308" y1="103" x2="336" y2="103"/>
+            <line x1="470" y1="103" x2="498" y2="103"/>
+            <line x1="632" y1="103" x2="660" y2="103"/>
+          </g>
+          <line x1="794" y1="103" x2="822" y2="103" stroke="#8A5A0B" stroke-width="2" marker-end="url(#ar-amber)"/>
+
+          <g font-family="ui-monospace, monospace" font-size="10" fill="currentColor" text-anchor="middle" opacity="0.8">
+            <text x="160" y="94">poll</text>
+            <text x="322" y="94">upsert</text>
+            <text x="484" y="94">draft</text>
+            <text x="646" y="94">post</text>
+          </g>
+          <text x="808" y="94" font-family="ui-monospace, monospace" font-size="10" fill="#8A5A0B" text-anchor="middle">approved</text>
+
+          <!-- upwork terminal: the human, not the system -->
+          <path d="M 890 140 L 890 166" fill="none" stroke="#8A5A0B" stroke-width="2" stroke-dasharray="3 3" marker-end="url(#ar-amber)"/>
+          <text x="890" y="184" font-family="ui-monospace, monospace" font-size="10.5" fill="#8A5A0B" text-anchor="middle">you click Submit</text>
+          <text x="890" y="198" font-family="ui-monospace, monospace" font-size="9.5" fill="#8A5A0B" text-anchor="middle" opacity="0.8">on upwork.com</text>
+
+          <!-- sweep band -->
+          <g fill="none" stroke="currentColor" stroke-width="1.25" stroke-dasharray="4 3">
+            <rect x="338" y="210" width="132" height="46" rx="3"/>
+          </g>
+          <g font-family="ui-monospace, monospace" font-size="11" fill="currentColor" text-anchor="middle">
+            <text x="404" y="230">Cron sweep</text>
+            <text x="404" y="246" font-size="10" opacity="0.72">every 30 min</text>
+          </g>
+          <path d="M 404 208 L 404 140" fill="none" stroke="currentColor" stroke-width="1.25" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+          <text x="416" y="178" font-family="ui-monospace, monospace" font-size="10" fill="currentColor" opacity="0.8">re-drive stalled rows</text>
+
+          <!-- alert band -->
+          <g fill="none" stroke="#92302E" stroke-width="1.25">
+            <rect x="662" y="210" width="132" height="46" rx="3"/>
+          </g>
+          <g font-family="ui-monospace, monospace" font-size="11" fill="#92302E" text-anchor="middle">
+            <text x="728" y="230">#upwork-alerts</text>
+            <text x="728" y="246" font-size="10">every failure</text>
+          </g>
+          <path d="M 242 140 L 242 233 L 660 233" fill="none" stroke="#92302E" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#ar)" opacity="0.75" color="#92302E"/>
+          <path d="M 566 140 L 566 233" fill="none" stroke="#92302E" stroke-width="1" stroke-dasharray="3 3" opacity="0.75"/>
+          <path d="M 890 140 L 890 275 L 736 275 L 736 258" fill="none" stroke="#92302E" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#ar)" opacity="0.75" color="#92302E"/>
+
+          <text x="14" y="300" font-family="ui-monospace, monospace" font-size="10" fill="currentColor" opacity="0.62">solid = happy path · dashed grey = recovery · dashed red = failure reporting · amber = human decision</text>
+        </svg>
+      </div>
+      <figcaption>No edge in this diagram reaches Upwork's submit action at all. The system stops at a handoff card; the last step is a person on upwork.com, which is what the automation policy requires. Amber marks the two places a human acts, and there is no path around either.</figcaption>
+    </figure>
+
+    <p>Five components. The poller and store are new code and neither is large. The drafter is the Railway bridge you already pay for. The gate is the Slack channel that already exists. The handoff is a Slack message with a link in it. Nothing here needs to hold an Upwork password, and nothing here touches a browser.</p>
+  </section>
+
+  <section id="stages">
+    <h2>Stage by stage</h2>
+
+    <h3><span class="stage-no">Stage 01</span>Ingest — the approved API, on your own key</h3>
+    <p>Upwork does not push. There is no webhook, so this stage is a poller, and the distinction that keeps a poller legitimate is <em>what</em> it polls: an approved GraphQL endpoint on a key Upwork issued you, within the documented rate limit. Polling web pages, or driving the site with a session cookie, is the prohibited version of the same shape.</p>
+    <p>Getting the key is therefore the first task in the whole project, and it gates everything else. Upwork reviews both the account and the stated use case, so the application is worth writing carefully; a description that mirrors their own allowlist language is describing a system they have already said is permitted.</p>
+    <ul>
+      <li><strong>Poll on a documented interval</strong>, not as fast as the limit allows. Five minutes is ample. The win-rate advantage of bidding early is real but it is not worth looking like a scraper, and a five-minute poll still puts you inside the first hour on almost every posting.</li>
+      <li><strong>Deduplicate on Upwork's job id.</strong> The same posting will come back on every poll until it is filtered or drafted.</li>
+      <li><strong>Persist the raw posting</strong> with <code>status = new</code> and treat it as untrusted text from there on. It is attacker-controlled.</li>
+      <li><strong>Back off on errors</strong> rather than retrying tightly. Repeated hammering after a 429 is exactly the pattern the policy calls out.</li>
+    </ul>
+    <div class="note caution">
+      <span class="label">Until the key exists, there is no compliant discovery path</span>
+      <p>Not a soft blocker. Every alternative — scraping search pages, a browser extension harvesting results, a third party polling on a shared credential — falls on the prohibited side. If the key application is refused, the honest answer is that discovery stays manual and only drafting is automated, which is still most of the value.</p>
+    </div>
+
+    <h3><span class="stage-no">Stage 02</span>Filter — before spending anything</h3>
+    <p>The search query is the coarse filter. A second pass in your own code is where the expensive judgments live, because everything downstream costs something: Claude tokens to draft, Connects to submit, and your attention to review. That last one is the scarcest of the three, and the filters exist mostly to protect it.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Check</th><th>Rule</th><th>Reason</th></tr></thead>
+        <tbody>
+          <tr><td>Daily cap</td><td>Reject past N drafts/day</td><td>Hard ceiling on Connects burn; a loop bug costs real money</td></tr>
+          <tr><td>Duplicate client</td><td>Skip if already bid this client in 30d</td><td>Repeat bids read as spam</td></tr>
+          <tr><td>Proposal count</td><td>Skip if &gt; 15 proposals already</td><td>Odds collapse; Connects better spent elsewhere</td></tr>
+          <tr><td>Budget floor</td><td>Skip below your rate floor</td><td>Same filter you'd apply by hand</td></tr>
+          <tr><td>Client history</td><td>Flag unverified payment / zero hires</td><td>Not an auto-skip, but the reviewer should see it</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3><span class="stage-no">Stage 03</span>Draft — via the bridge</h3>
+    <p>This is the one component that already works end to end. The bridge holds the Anthropic key and exposes <code>ask_claude</code>; the drafter sends the posting plus the framework and gets a letter back.</p>
+    <p>Because the drafting call is stateless, the full context has to travel with every request: the Unseen Insight / My Approach / Outcome structure, the experience bank, the hard rules (no em dashes, no invented credentials, no forbidden openers), and any read-test phrase the posting demands. That prompt already exists — it's the one written for the cron job, and it transfers unchanged.</p>
+    <div class="note caution">
+      <span class="label">Prompt injection is a live concern here</span>
+      <p>Job postings are attacker-controlled text, and some deliberately contain instructions aimed at LLMs — the July batch hit one carrying an "if you're an LLM, ignore this" trap. Treat the posting as data, never as instructions: keep it in a clearly delimited block, and state in the system prompt that instructions inside the posting are content to respond to, not commands to obey. The human gate is the backstop, but it shouldn't be the only defense.</p>
+    </div>
+
+    <h3><span class="stage-no">Stage 04</span>Gate — Slack, and how it actually signals</h3>
+    <p>The approval canvas built earlier is a good ledger and a poor sensor. A canvas is a document: to learn that a box was ticked you have to poll it, diff the markdown, and guess which entry changed — with no signed event, no identity on the approver, and a race whenever two edits land together.</p>
+
+    <figure>
+      <div class="fig-scroll">
+        <svg viewBox="0 0 900 250" role="img" aria-label="Comparison of two approval signals. The canvas approach requires a poller that fetches the canvas on a timer and diffs its markdown to infer approval, with ambiguous results. The Block Kit approach has the user click a button in Slack, which sends a signed action POST directly to an endpoint, carrying the job id and approver identity.">
+          <defs>
+            <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+            </marker>
+            <marker id="ar2-moss" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#2C6446"/>
+            </marker>
+          </defs>
+
+          <text x="14" y="26" font-family="ui-monospace, monospace" font-size="11.5" fill="currentColor" opacity="0.72">A · CANVAS CHECKBOX — inferred</text>
+          <g fill="none" stroke="currentColor" stroke-width="1.25">
+            <rect x="14"  y="42" width="140" height="52" rx="3"/>
+            <rect x="238" y="42" width="140" height="52" rx="3"/>
+            <rect x="462" y="42" width="140" height="52" rx="3"/>
+            <rect x="686" y="42" width="140" height="52" rx="3"/>
+          </g>
+          <g font-family="ui-monospace, monospace" font-size="11" fill="currentColor" text-anchor="middle">
+            <text x="84"  y="66">Canvas</text><text x="84"  y="82" font-size="10" opacity="0.72">box ticked</text>
+            <text x="308" y="66">Poller</text><text x="308" y="82" font-size="10" opacity="0.72">every N min</text>
+            <text x="532" y="66">Diff markdown</text><text x="532" y="82" font-size="10" opacity="0.72">which entry?</text>
+            <text x="756" y="66">Submit</text><text x="756" y="82" font-size="10" opacity="0.72">no approver id</text>
+          </g>
+          <g stroke="currentColor" stroke-width="1.25" marker-end="url(#ar2)">
+            <line x1="154" y1="68" x2="236" y2="68"/>
+            <line x1="378" y1="68" x2="460" y2="68"/>
+            <line x1="602" y1="68" x2="684" y2="68"/>
+          </g>
+          <text x="195" y="60" font-family="ui-monospace, monospace" font-size="9.5" fill="currentColor" text-anchor="middle" opacity="0.75">fetch</text>
+          <path d="M 308 96 q 0 26 -40 26 q -40 0 -40 -26" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" opacity="0.6"/>
+          <text x="268" y="136" font-family="ui-monospace, monospace" font-size="9.5" fill="currentColor" text-anchor="middle" opacity="0.6">latency + drift</text>
+
+          <line x1="14" y1="158" x2="886" y2="158" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+
+          <text x="14" y="182" font-family="ui-monospace, monospace" font-size="11.5" fill="#2C6446">B · BLOCK KIT BUTTON — signalled</text>
+          <g fill="none" stroke="#2C6446" stroke-width="1.5">
+            <rect x="14"  y="196" width="140" height="46" rx="3"/>
+            <rect x="238" y="196" width="140" height="46" rx="3"/>
+            <rect x="462" y="196" width="140" height="46" rx="3"/>
+          </g>
+          <g font-family="ui-monospace, monospace" font-size="11" fill="#2C6446" text-anchor="middle">
+            <text x="84"  y="216">Click Approve</text><text x="84"  y="232" font-size="10">in Slack</text>
+            <text x="308" y="216">/slack/actions</text><text x="308" y="232" font-size="10">signed POST</text>
+            <text x="532" y="216">Submit</text><text x="532" y="232" font-size="10">job id + user id</text>
+          </g>
+          <g stroke="#2C6446" stroke-width="1.5" marker-end="url(#ar2-moss)" color="#2C6446">
+            <line x1="154" y1="219" x2="236" y2="219"/>
+            <line x1="378" y1="219" x2="460" y2="219"/>
+          </g>
+          <text x="195" y="211" font-family="ui-monospace, monospace" font-size="9.5" fill="#2C6446" text-anchor="middle">&lt; 1s</text>
+          <text x="628" y="222" font-family="ui-monospace, monospace" font-size="10" fill="#2C6446">unambiguous</text>
+        </svg>
+      </div>
+      <figcaption>The canvas path adds a poller and an inference step, and still can't name who approved. The button path collapses both into one signed callback that carries the job id and the approver's Slack identity — an audit trail you get for free.</figcaption>
+    </figure>
+
+    <p>Use both, for different jobs: <strong>Block Kit message = the signal</strong>, <strong>canvas = the ledger</strong>. Post each draft as a message with <em>Approve</em>, <em>Edit</em>, and <em>Skip</em> buttons; write the outcome to the canvas afterwards so there's a durable, human-browsable record of what went out and what didn't.</p>
+    <pre><code>{
+  "blocks": [
+    { "type": "section", "text": { "type": "mrkdwn",
+      "text": "*Senior GTM Engineer* · $75–110/hr · 4 proposals\n&lt;https://upwork.com/jobs/…|Open job&gt;" } },
+    { "type": "section", "text": { "type": "mrkdwn", "text": "&gt;&lt;draft letter&gt;" } },
+    { "type": "context", "elements": [ { "type": "mrkdwn",
+      "text": ":warning: [VERIFY: rate] — no rate on file for this posting" } ] },
+    { "type": "actions", "elements": [
+      { "type": "button", "style": "primary", "text": { "type": "plain_text", "text": "Approve &amp; submit" },
+        "value": "job_01J8…", "action_id": "approve" },
+      { "type": "button", "text": { "type": "plain_text", "text": "Edit first" },
+        "value": "job_01J8…", "action_id": "edit" },
+      { "type": "button", "style": "danger", "text": { "type": "plain_text", "text": "Skip" },
+        "value": "job_01J8…", "action_id": "skip" }
+    ]}
+  ]
+}</code></pre>
+    <p>Verify Slack's <code>X-Slack-Signature</code> on every action request and reject anything older than five minutes. The stakes are lower than they were when approval triggered a submission, but they are not zero: without the check, anyone who can guess a job id can mark a draft approved, and approved drafts are the ones you stop reading carefully.</p>
+
+    <h3><span class="stage-no">Stage 05</span>Handoff — making the human step short</h3>
+    <p>The system does not submit. Its last job is to compress the human's work to a few seconds, because that is what makes daily volume survivable: ten proposals a day is five minutes of clicking, not an afternoon.</p>
+    <p>On <code>approve</code>, take the same conditional update as before. It is still the lock, and it still makes the transition exactly-once, but what it now guards is the handoff rather than an API call.</p>
+    <pre><code>UPDATE jobs SET status = 'approved', approved_by = $2, approved_at = now()
+WHERE id = $1 AND status = 'awaiting_approval'
+RETURNING *;
+-- zero rows returned means someone already acted. Stop.</code></pre>
+    <p>Then replace the Slack message in place with a handoff card carrying three things: the final letter in a copyable block, a direct link to the job's apply page on Upwork, and a single <strong>Mark submitted</strong> button. The person opens the link, pastes, reads it once more in context, and clicks submit on Upwork themselves.</p>
+    <div class="note caution">
+      <span class="label">You lose the submission receipt, so the ledger depends on the human</span>
+      <p>This is the one genuine cost of the permitted design and it is worth naming. When the system submitted, it got back a proposal id and a Connects figure and could write them down with certainty. Now nothing observes the submission, so <code>submitted</code> is a state only a person can assert. Two consequences: <em>Mark submitted</em> is a real part of the workflow rather than bookkeeping, and any row sitting in <code>approved</code> for more than a day is ambiguous rather than stuck. Have the sweep ask about those in Slack instead of re-driving them.</p>
+    </div>
+    <div class="note stop">
+      <span class="label">Do not build an auto-submit path, and do not buy one</span>
+      <p>Upwork's public API has no proposal mutation, so every product that offers auto-submission reaches the site some other way. That is the prohibited side of the line, and the account it suspends is yours rather than the vendor's, reportedly without appeal. The reasons that already applied still apply: proposals go out under your name, each one spends Connects, and a bug at 2am bills you for its mistakes. Build the gate as structurally required, with no flag that turns it off.</p>
+    </div>
+  </section>
+
+  <section id="data">
+    <h2>State</h2>
+    <p>One table carries the whole pipeline. Status is the coordination primitive: every stage advances it, the sweep looks for rows stuck in a non-terminal state, and the conditional update above makes submission exactly-once.</p>
+    <pre><code>jobs
+  id                text primary key      -- your id, e.g. job_01J8…
+  upwork_job_id     text unique not null   -- dedupe key; the same posting recurs on every poll
+  client_id         text                   -- for the 30-day repeat-bid filter
+  title             text
+  budget            text
+  proposals_seen    int
+  posting_raw       jsonb                  -- untrusted; never interpolate unescaped
+  draft             text
+  verify_flags      text[]                 -- [VERIFY: rate] etc., surfaced in Slack
+  status            text not null          -- see below
+  slack_ts          text                   -- to update the message in place
+  approved_by       text                   -- Slack user id
+  approved_at       timestamptz
+  submitted_at      timestamptz            -- asserted by a human, not observed
+  submitted_by      text                   -- Slack user id who clicked "Mark submitted"
+  error             text
+  attempts          int default 0
+  created_at        timestamptz default now()</code></pre>
+    <p><code>new → filtered → drafting → awaiting_approval → approved → submitted</code>, with <code>skipped</code> and <code>failed</code> as terminal branches. The <code>submitting</code> state is gone: nothing machine-driven happens between approval and submission any more, because the step in between is a person.</p>
+    <p>That changes what the sweep can do. Anything stuck before <code>approved</code> is a system fault and gets re-driven. Anything sitting in <code>approved</code> is waiting on a human, so re-driving it is meaningless — the sweep should ask in Slack instead, and let the row age out to <code>skipped</code> after a day, since a posting that old is not worth Connects anyway.</p>
+  </section>
+
+  <section id="failure">
+    <h2>Failure design</h2>
+    <p>This project has already lost eight days to a pipeline that failed silently — nothing arrived, and nothing said why. Build against that specifically.</p>
+    <div class="grid">
+      <div class="card">
+        <h4>Fail loud, always</h4>
+        <p>Every caught exception posts to an alert channel with the job id and the stage. A pipeline that produces nothing and says nothing is indistinguishable from a quiet market.</p>
+      </div>
+      <div class="card">
+        <h4>Heartbeat on empty</h4>
+        <p>If a day passes with zero webhooks, post that. "No matches today" is information; silence is ambiguity.</p>
+      </div>
+      <div class="card">
+        <h4>Retry with backoff</h4>
+        <p>Transient failures (5xx, timeout) retry three times with exponential backoff. Permanent ones (4xx, validation) go straight to <code>failed</code> and alert — retrying a malformed request just burns quota.</p>
+      </div>
+      <div class="card">
+        <h4>Cap the blast radius</h4>
+        <p>The daily cap is enforced in the store, independently of whatever the search query returns. A drafting loop can waste tokens; it cannot spend a Connect, because no code path spends Connects at all.</p>
+      </div>
+    </div>
+    <div class="note good">
+      <span class="label">The check that would have caught this from day one</span>
+      <p>Assert an end-to-end invariant on a schedule: <em>if the scanner matched jobs today and nothing reached Slack, something is broken.</em> Every failure so far — the missing task, the wrong output channel, the unverified Apify account — would have tripped that single check on its first day.</p>
+    </div>
+  </section>
+
+  <section id="verify">
+    <h2>Verify before building</h2>
+    <p>Upwork's own domains — the main site, the support centre, and the developer portal — are all blocked by this session's egress policy, so everything below came from search results rather than from primary documentation. The shapes are right; the details need confirming against the real thing before anyone writes code.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Item</th><th>What I have</th><th>Confirm</th></tr></thead>
+        <tbody>
+          <tr><td>Automation policy text</td><td>Allowed / prohibited lists quoted via search snippets of <em>Use bots and other automation properly</em></td><td>Read the help article itself. Everything in this document rests on it</td></tr>
+          <tr><td>API key application</td><td>Exists; Upwork reviews the account and the stated use case</td><td>Where to apply, what the form asks, and how long review takes</td></tr>
+          <tr><td>Job search query</td><td>GraphQL, read operations available on an approved key</td><td>The exact query shape, which posting fields come back, and whether saved searches are addressable</td></tr>
+          <tr><td>Rate limits</td><td>Documented but unread</td><td>Per-minute and per-day ceilings, and what a 429 returns, so the poller can back off correctly</td></tr>
+          <tr><td>No submit mutation</td><td>Reported absent from the schema</td><td>Confirm against the schema directly. If a sanctioned submission path exists, stage 05 changes</td></tr>
+          <tr><td>GigRadar's role</td><td>Unverified; their site is blocked here too</td><td>Whether they can serve as discovery only. Their submission path is out of scope regardless</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>One caution on sources. Much of the accessible writing about Upwork automation is published by companies selling Upwork automation, and it reads the policy generously. Where a vendor's summary and the help article disagree, the help article governs.</p>
+  </section>
+
+  <section id="rollout">
+    <h2>Rollout</h2>
+    <p>Each phase is independently useful, and each one ends with something observable. Don't build the whole thing before seeing a single draft land.</p>
+    <ol>
+      <li><strong>Apply for the API key.</strong> Nothing downstream is compliant without it, and review takes as long as it takes. Do this before writing any code, not alongside.</li>
+      <li><strong>Draft by hand, in Slack.</strong> While review is pending, run the whole thing manually: you paste a posting, Claude drafts against the framework, the letter lands in the approval queue, you submit. Zero infrastructure, and it produces submissions this week rather than next month.</li>
+      <li><strong>Prove the poller.</strong> Once the key lands, poll and log matches to Slack raw. A day of this tells you the real field shapes and the real volume, both of which the filters depend on.</li>
+      <li><strong>Add the store and the filters.</strong> Still no drafting. Confirm dedupe and the daily cap behave under real traffic.</li>
+      <li><strong>Add drafting and the gate.</strong> Buttons, Slack signature verification, conditional state transition, handoff card replacing the message in place.</li>
+      <li><strong>Add the sweep, alerts, and the daily invariant check.</strong> Only now is it safe to stop watching it.</li>
+    </ol>
+    <p>Phase 2 is the point at which daily submissions actually start, and it needs nothing built. Everything after it removes manual steps from a process that is already running, which is the right order: if the manual version does not produce wins, automating it just produces losses faster.</p>
+  </section>
+
+  <section id="adjacent">
+    <h2>Adjacent fixes worth doing first</h2>
+    <ul>
+      <li><strong>Verify the Apify account email.</strong> Its LinkedIn Jobs and Wellfound actors have been failing <code>403 user-email-not-verified</code> for days, degrading the W2 digest that already works. Cheapest win available.</li>
+      <li><strong>Disable the telegram, discord, and imessage providers.</strong> All three crash-loop continuously against misconfiguration, and iMessage can't work on Linux at all. They bury real signal in the logs — which is part of why this took a week to diagnose.</li>
+      <li><strong>Set a gateway token and <code>gateway.trustedProxies</code>.</strong> The Control UI is currently rejecting connections as unauthorized on first load.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p>Revised 2026-09-07 to replace the GigRadar submission path with the design Upwork's automation policy permits. State pills at the top reflect what was directly verified on 2026-08-15: OpenClaw's weekday digest running, Slack connected as a tool, the Railway bridge unreachable from this sandbox's egress policy rather than known-down, and no Upwork task defined anywhere. Re-check before relying on any of it.</p>
+  </footer>
+
+</div>

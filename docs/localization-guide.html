@@ -1,0 +1,783 @@
+<title>Localization Field Guide</title>
+<style>
+  /* ---- Tokens: complete light palette on bare :root ---- */
+  :root {
+    --paper:        #FAFAFC;
+    --surface:      #FFFFFF;
+    --surface-sunk: #F1F1F6;
+    --ink:          #1A1A2E;
+    --ink-soft:     #4A4A63;
+    --ink-mute:     #6B6B85;
+    --rule:         #DFDFE8;
+    --rule-strong:  #C4C4D4;
+    --indigo:       #4038A6;
+    --indigo-soft:  #EBEAF8;
+    --ochre:        #8A6114;
+    --ochre-soft:   #F7F0DE;
+    --pine:         #265C43;
+    --pine-soft:    #E4F0EA;
+    --code-bg:      #F4F4F9;
+
+    --measure: 66ch;
+    --step--1: 0.8125rem;
+    --step-0:  1.0625rem;
+    --step-1:  1.3rem;
+    --step-2:  1.6rem;
+    --step-3:  2.1rem;
+    --step-4:  2.9rem;
+
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+
+  /* System-dark, unless an explicit light choice was stamped */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:        #131320;
+      --surface:      #1B1B2B;
+      --surface-sunk: #21212F;
+      --ink:          #E6E6F0;
+      --ink-soft:     #B6B6C8;
+      --ink-mute:     #8A8AA0;
+      --rule:         #2E2E42;
+      --rule-strong:  #45455E;
+      --indigo:       #9A92EE;
+      --indigo-soft:  #23213D;
+      --ochre:        #D9A245;
+      --ochre-soft:   #322817;
+      --pine:         #6FBF95;
+      --pine-soft:    #16281F;
+      --code-bg:      #1E1E2E;
+    }
+  }
+
+  /* Explicit dark choice wins over a light OS */
+  :root[data-theme="dark"] {
+    --paper:        #131320;
+    --surface:      #1B1B2B;
+    --surface-sunk: #21212F;
+    --ink:          #E6E6F0;
+    --ink-soft:     #B6B6C8;
+    --ink-mute:     #8A8AA0;
+    --rule:         #2E2E42;
+    --rule-strong:  #45455E;
+    --indigo:       #9A92EE;
+    --indigo-soft:  #23213D;
+    --ochre:        #D9A245;
+    --ochre-soft:   #322817;
+    --pine:         #6FBF95;
+    --pine-soft:    #16281F;
+    --code-bg:      #1E1E2E;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: var(--step-0);
+    line-height: 1.65;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Logical properties throughout — this page follows its own advice. */
+  .shell {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    max-width: 78rem;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+    padding-block: 3rem 6rem;
+  }
+
+  @media (min-width: 62rem) {
+    .shell { grid-template-columns: 15rem minmax(0, 1fr); gap: 4.5rem; }
+    .rail { position: sticky; inset-block-start: 3rem; align-self: start; }
+  }
+
+  /* ---- Masthead ---- */
+  .masthead { grid-column: 1 / -1; border-block-end: 1px solid var(--rule-strong); padding-block-end: 2.25rem; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--indigo);
+    margin: 0 0 0.9rem;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-size: var(--step-4);
+    line-height: 1.08;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    margin: 0 0 1rem;
+  }
+  .standfirst {
+    font-size: var(--step-1);
+    line-height: 1.5;
+    color: var(--ink-soft);
+    max-width: var(--measure);
+    margin: 0;
+  }
+  .specimen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin-block-start: 2rem;
+    font-family: var(--serif);
+    font-size: var(--step-1);
+    color: var(--ink-mute);
+  }
+  .specimen span { white-space: nowrap; }
+
+  /* ---- Rail ---- */
+  .rail nav { border-inline-start: 2px solid var(--rule); padding-inline-start: 1rem; }
+  .rail h2 {
+    font-family: var(--mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    font-weight: 500;
+    margin: 0 0 0.85rem;
+  }
+  .rail ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+  .rail a { color: var(--ink-soft); text-decoration: none; font-size: var(--step--1); line-height: 1.4; display: block; }
+  .rail a:hover, .rail a:focus-visible { color: var(--indigo); }
+
+  /* ---- Body ---- */
+  main { min-width: 0; }
+  section { margin-block-end: 4rem; scroll-margin-block-start: 2rem; }
+  section > * { max-width: var(--measure); }
+  section > .wide, section > figure, section > .table-wrap { max-width: none; }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: var(--step-3);
+    line-height: 1.15;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0 0 0.4rem;
+  }
+  h3 {
+    font-size: var(--step-1);
+    font-weight: 650;
+    line-height: 1.3;
+    text-wrap: balance;
+    margin: 2.25rem 0 0.6rem;
+  }
+  h4 {
+    font-family: var(--mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    font-weight: 500;
+    margin: 1.75rem 0 0.5rem;
+  }
+  p { margin: 0 0 1.05rem; }
+  a { color: var(--indigo); }
+  :focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; border-radius: 2px; }
+
+  .phase-no {
+    font-family: var(--mono);
+    font-size: var(--step--1);
+    color: var(--indigo);
+    letter-spacing: 0.09em;
+    display: block;
+    margin-block-end: 0.35rem;
+  }
+
+  ul, ol { margin: 0 0 1.05rem; padding-inline-start: 1.3rem; }
+  li { margin-block-end: 0.4rem; }
+  li::marker { color: var(--ink-mute); }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.875em;
+    background: var(--code-bg);
+    padding: 0.12em 0.35em;
+    border-radius: 3px;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    border-radius: 5px;
+    padding: 1rem 1.15rem;
+    overflow-x: auto;
+    margin: 0 0 1.05rem;
+    font-size: var(--step--1);
+    line-height: 1.6;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; }
+
+  .table-wrap { overflow-x: auto; margin: 0 0 1.05rem; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: var(--step--1);
+    font-variant-numeric: tabular-nums;
+  }
+  th, td {
+    text-align: start;
+    padding: 0.6rem 0.9rem;
+    border-block-end: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  th {
+    font-family: var(--mono);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    color: var(--ink-mute);
+    border-block-end: 1px solid var(--rule-strong);
+    white-space: nowrap;
+  }
+  td code { white-space: nowrap; }
+
+  .note {
+    border-inline-start: 3px solid var(--rule-strong);
+    background: var(--surface-sunk);
+    padding: 1rem 1.15rem;
+    margin: 0 0 1.05rem;
+    border-radius: 0 4px 4px 0;
+  }
+  .note.caution { border-inline-start-color: var(--ochre); background: var(--ochre-soft); }
+  .note.good { border-inline-start-color: var(--pine); background: var(--pine-soft); }
+  .note p:last-child { margin-block-end: 0; }
+  .note .label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    display: block;
+    margin-block-end: 0.4rem;
+    color: var(--ink-mute);
+  }
+  .note.caution .label { color: var(--ochre); }
+  .note.good .label { color: var(--pine); }
+
+  .cols {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    margin: 0 0 1.05rem;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 5px;
+    padding: 1rem 1.15rem;
+  }
+  .card h4 { margin-block-start: 0; }
+  .card p:last-child { margin-block-end: 0; }
+
+  .checklist { list-style: none; padding: 0; }
+  .checklist li {
+    padding-inline-start: 1.7rem;
+    position: relative;
+    margin-block-end: 0.55rem;
+  }
+  .checklist li::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: 0.45em;
+    width: 0.85rem;
+    height: 0.85rem;
+    border: 1.5px solid var(--rule-strong);
+    border-radius: 3px;
+  }
+
+  .rtl-demo {
+    direction: rtl;
+    font-family: var(--serif);
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 5px;
+    padding: 0.85rem 1.15rem;
+    margin-block-end: 1.05rem;
+  }
+
+  footer {
+    grid-column: 1 / -1;
+    border-block-start: 1px solid var(--rule);
+    padding-block-start: 1.5rem;
+    color: var(--ink-mute);
+    font-size: var(--step--1);
+    max-width: var(--measure);
+  }
+</style>
+
+<div class="shell">
+
+  <header class="masthead">
+    <p class="eyebrow">Engineering Reference</p>
+    <h1>Localization Field Guide</h1>
+    <p class="standfirst">How to take a codebase that assumes one language, one script, and one calendar, and make it work everywhere else — without rewriting it twice.</p>
+    <div class="specimen" aria-hidden="true">
+      <span>English</span><span>Español</span><span>العربية</span><span>日本語</span><span>हिन्दी</span><span>Русский</span><span>Türkçe</span>
+    </div>
+  </header>
+
+  <aside class="rail">
+    <nav aria-label="Contents">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#terms">Terms worth being precise about</a></li>
+        <li><a href="#audit">1 · Audit for hardcoded text</a></li>
+        <li><a href="#keys">2 · Design the key namespace</a></li>
+        <li><a href="#icu">3 · Write messages in ICU</a></li>
+        <li><a href="#format">4 · Format with Intl, never by hand</a></li>
+        <li><a href="#routing">5 · Detect and route locales</a></li>
+        <li><a href="#rtl">6 · Support right-to-left</a></li>
+        <li><a href="#workflow">7 · Wire the translation loop</a></li>
+        <li><a href="#testing">8 · Test and gate in CI</a></li>
+        <li><a href="#pitfalls">Pitfalls that survive review</a></li>
+        <li><a href="#checklist">Pre-merge checklist</a></li>
+      </ol>
+    </nav>
+  </aside>
+
+  <main>
+
+    <section id="terms">
+      <h2>Terms worth being precise about</h2>
+      <p>These get used interchangeably and shouldn't be. The distinction decides who owns a task.</p>
+      <div class="cols">
+        <div class="card">
+          <h4>i18n — Internationalization</h4>
+          <p>Engineering work. Removing the assumption that text is English, dates are <code>MM/DD/YYYY</code>, and layout flows left-to-right. Done once, in code.</p>
+        </div>
+        <div class="card">
+          <h4>l10n — Localization</h4>
+          <p>Adapting the internationalized product for one locale: translation, currency, imagery, legal copy. Done per locale, mostly not by engineers.</p>
+        </div>
+        <div class="card">
+          <h4>Locale ≠ language</h4>
+          <p>A locale is language + region + optional script: <code>pt-BR</code> differs from <code>pt-PT</code> in vocabulary and currency; <code>zh-Hans</code> and <code>zh-Hant</code> differ in script.</p>
+        </div>
+      </div>
+      <p>The practical rule: if a string is baked into a component, that's an i18n bug and it's yours. If a string is translated badly, that's an l10n issue and it goes to the translator.</p>
+    </section>
+
+    <section id="audit">
+      <span class="phase-no">Phase 01</span>
+      <h2>Audit for hardcoded text</h2>
+      <p>Before choosing a library, find out how big the problem is. Hardcoded strings are the obvious target, but the expensive finds are the assumptions that don't look like text at all.</p>
+
+      <h4>What to grep for</h4>
+      <pre><code># User-facing strings in JSX
+rg '&gt;[A-Z][a-z]{2,}[^&lt;]*&lt;' --type tsx
+
+# Hand-rolled date and currency formatting
+rg 'toLocaleDateString\(\)|\$\{.*\.toFixed\(2\)\}|MM/DD|DD/MM'
+
+# Concatenated sentences — these break every language with different word order
+rg '["`].*\s\+\s|\+\s*["`]'
+
+# Physical CSS properties that won't mirror
+rg 'margin-left|margin-right|padding-left|padding-right|text-align:\s*(left|right)'</code></pre>
+
+      <h4>Assumptions that aren't strings</h4>
+      <ul>
+        <li><strong>Name fields.</strong> <code>firstName</code> + <code>lastName</code> fails for mononyms, patronymics, and cultures that order family name first. Prefer a single <code>fullName</code> unless you have a concrete reason.</li>
+        <li><strong>Address forms.</strong> A required "State" dropdown blocks most of the world. Postal codes are not all numeric, and not all countries have them.</li>
+        <li><strong>Sorting.</strong> <code>Array.sort()</code> sorts by code point, which puts <em>Ä</em> after <em>Z</em>. Swedish wants that; German doesn't.</li>
+        <li><strong>Text expansion.</strong> German runs 30–35% longer than English; Japanese runs shorter but taller. Fixed-width buttons will break.</li>
+        <li><strong>Calendars and week start.</strong> Not every locale starts the week on Sunday, and not every user is on the Gregorian calendar.</li>
+      </ul>
+
+      <div class="note caution">
+        <span class="label">Cost of skipping this</span>
+        <p>An audit takes a day. Discovering the name-field assumption after it's in three services, two schemas, and a partner API costs considerably more, because by then it's a migration rather than a decision.</p>
+      </div>
+    </section>
+
+    <section id="keys">
+      <span class="phase-no">Phase 02</span>
+      <h2>Design the key namespace</h2>
+      <p>Translation keys are an API between engineering and translators, and they age badly if chosen carelessly. Two rules carry most of the value: keys describe <em>location and purpose</em>, and one key means one sentence in one context.</p>
+
+      <div class="cols">
+        <div class="card">
+          <h4>Do</h4>
+          <pre><code>{
+  "checkout": {
+    "summary": {
+      "title": "Order summary",
+      "itemCount": "{count, plural,
+        one {# item} other {# items}}",
+      "submit": "Place order"
+    }
+  }
+}</code></pre>
+        </div>
+        <div class="card">
+          <h4>Don't</h4>
+          <pre><code>{
+  "orderSummary": "Order summary",
+  "submit": "Submit",
+  "ok": "OK",
+  "error1": "Something went wrong"
+}</code></pre>
+          <p>Flat keys collide. A shared <code>submit</code> gets reused in a context where the correct German verb is different, and now one of the two screens is wrong.</p>
+        </div>
+      </div>
+
+      <h4>Conventions worth writing down</h4>
+      <ul>
+        <li>Namespace by feature, then by component, then by element: <code>checkout.summary.title</code>.</li>
+        <li>Never reuse a key across contexts to save a line. Duplication in the source file is cheaper than a mistranslation.</li>
+        <li>One base language file is the source of truth, committed to the repo. Everything else is generated or pulled.</li>
+        <li>Give translators context. Most formats support a description field — use it: <code>"submit": { "message": "Place order", "description": "Button on the final checkout step" }</code>.</li>
+        <li>Never build a key at runtime (<code>t('status.' + code)</code>). Static extraction can't see it, so it silently ships untranslated.</li>
+      </ul>
+    </section>
+
+    <section id="icu">
+      <span class="phase-no">Phase 03</span>
+      <h2>Write messages in ICU</h2>
+      <p>String concatenation is the single most common i18n defect, because it hardcodes English word order and English plural rules into the code. ICU MessageFormat moves both into the translatable message, where a translator can change them.</p>
+
+      <pre><code>// Broken: assumes 2 plural forms and English clause order
+const label = count + (count === 1 ? ' item' : ' items') + ' in your cart';
+
+// Correct: the whole sentence is one translatable unit
+t('cart.itemCount', { count });</code></pre>
+
+      <h4>The forms you'll actually use</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Form</th><th>Syntax</th><th>Use for</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Plural</td>
+              <td><code>{count, plural, =0 {No items} one {# item} other {# items}}</code></td>
+              <td>Any count. Use <code>=0</code> when the empty case reads differently.</td>
+            </tr>
+            <tr>
+              <td>Select</td>
+              <td><code>{gender, select, female {She} male {He} other {They}} replied</code></td>
+              <td>Grammatical gender, roles, plan tiers.</td>
+            </tr>
+            <tr>
+              <td>Ordinal</td>
+              <td><code>{rank, selectordinal, one {#st} two {#nd} few {#rd} other {#th}}</code></td>
+              <td>Rankings, positions, dates as ordinals.</td>
+            </tr>
+            <tr>
+              <td>Number</td>
+              <td><code>{price, number, ::currency/USD}</code></td>
+              <td>Currency and compact notation inside a sentence.</td>
+            </tr>
+            <tr>
+              <td>Date</td>
+              <td><code>{when, date, medium}</code></td>
+              <td>Dates embedded in prose.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <span class="label">Why plural categories matter</span>
+        <p>English has two plural forms. Arabic has six (<code>zero</code>, <code>one</code>, <code>two</code>, <code>few</code>, <code>many</code>, <code>other</code>); Polish has four; Japanese has one. A ternary in your code can only ever express two. ICU lets each language file declare the forms that language actually needs, which is why the rule is <em>never branch on count in code</em>.</p>
+      </div>
+
+      <h4>Interpolating markup</h4>
+      <p>Don't split a sentence to wrap part of it in a tag — the split point moves between languages. Pass the element as a value instead:</p>
+      <pre><code>// message: "Read our {terms} before continuing."
+t.rich('legal.notice', {
+  terms: (chunks) =&gt; &lt;a href="/terms"&gt;{chunks}&lt;/a&gt;
+});</code></pre>
+    </section>
+
+    <section id="format">
+      <span class="phase-no">Phase 04</span>
+      <h2>Format with Intl, never by hand</h2>
+      <p>The <code>Intl</code> namespace is built into every runtime you target and carries the full CLDR dataset. Anything you write yourself will be a worse, staler subset of it.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>API</th><th>Handles</th><th>Example</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>Intl.NumberFormat</code></td><td>Decimal separators, grouping, currency placement, compact notation</td><td><code>1.234,56 €</code> vs <code>€1,234.56</code></td></tr>
+            <tr><td><code>Intl.DateTimeFormat</code></td><td>Field order, month names, 12/24-hour, calendar systems, time zones</td><td><code>14/03/2026</code> vs <code>3/14/2026</code></td></tr>
+            <tr><td><code>Intl.RelativeTimeFormat</code></td><td>"3 days ago" with correct plural and tense per language</td><td><code>hace 3 días</code></td></tr>
+            <tr><td><code>Intl.Collator</code></td><td>Locale-correct sorting and case-insensitive comparison</td><td>Sorts <em>ä</em> with <em>a</em> in German, after <em>z</em> in Swedish</td></tr>
+            <tr><td><code>Intl.PluralRules</code></td><td>The category a number falls into for a locale</td><td>Underpins ICU plural selection</td></tr>
+            <tr><td><code>Intl.ListFormat</code></td><td>"A, B, and C" with the right conjunction and commas</td><td><code>A, B y C</code></td></tr>
+            <tr><td><code>Intl.Segmenter</code></td><td>Grapheme, word, and sentence boundaries in scripts without spaces</td><td>Truncating Thai or Japanese safely</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <pre><code>// Construct once, reuse — the constructor is the expensive part
+const price = new Intl.NumberFormat(locale, {
+  style: 'currency',
+  currency: 'EUR',
+});
+price.format(1234.56);   // "1.234,56 €" in de-DE
+
+// Truncation that doesn't split a grapheme cluster
+const seg = new Intl.Segmenter(locale, { granularity: 'grapheme' });
+const chars = [...seg.segment(text)].map(s =&gt; s.segment);
+const clipped = chars.slice(0, 40).join('');</code></pre>
+
+      <div class="note caution">
+        <span class="label">Storage vs display</span>
+        <p>Store canonical, display localized. Timestamps as UTC ISO-8601, money as minor units plus a currency code, never as a formatted string. Formatting is a presentation concern; the moment a formatted value enters your database you've lost the ability to re-render it for a different reader.</p>
+      </div>
+    </section>
+
+    <section id="routing">
+      <span class="phase-no">Phase 05</span>
+      <h2>Detect and route locales</h2>
+      <p>Pick one routing strategy and apply it consistently, because it determines your URLs, your caching, and your SEO.</p>
+
+      <div class="cols">
+        <div class="card">
+          <h4>Subpath — <code>/de/pricing</code></h4>
+          <p>The default choice. Shareable, cacheable, indexable, one deployment. Use unless you have a reason not to.</p>
+        </div>
+        <div class="card">
+          <h4>Subdomain — <code>de.site.com</code></h4>
+          <p>Useful when locales are operated by different teams or need separate infrastructure.</p>
+        </div>
+        <div class="card">
+          <h4>ccTLD — <code>site.de</code></h4>
+          <p>Strongest local signal and sometimes a legal requirement. Most expensive to run.</p>
+        </div>
+      </div>
+
+      <h4>Resolution order</h4>
+      <ol>
+        <li>Explicit locale in the URL — always wins.</li>
+        <li>User preference persisted on the account.</li>
+        <li>Cookie from a previous manual switch.</li>
+        <li><code>Accept-Language</code> header, negotiated against supported locales.</li>
+        <li>Documented default.</li>
+      </ol>
+
+      <pre><code>import { match } from '@formatjs/intl-localematcher';
+import Negotiator from 'negotiator';
+
+const SUPPORTED = ['en', 'de', 'ja', 'ar'];
+const DEFAULT = 'en';
+
+export function resolveLocale(request) {
+  const url = new URL(request.url);
+  const fromPath = url.pathname.split('/')[1];
+  if (SUPPORTED.includes(fromPath)) return fromPath;
+
+  const cookie = request.cookies.get('locale')?.value;
+  if (SUPPORTED.includes(cookie)) return cookie;
+
+  const headers = { 'accept-language': request.headers.get('accept-language') ?? '' };
+  const wanted = new Negotiator({ headers }).languages();
+  return match(wanted, SUPPORTED, DEFAULT);
+}</code></pre>
+
+      <div class="note caution">
+        <span class="label">Don't geolocate by IP alone</span>
+        <p>Location is not language. A traveller in Tokyo, an expatriate, and anyone behind a VPN all get the wrong answer. IP is acceptable as a last-resort hint that surfaces a dismissible "View this page in Japanese?" banner — never as a silent redirect.</p>
+      </div>
+
+      <h4>Tell search engines</h4>
+      <pre><code>&lt;link rel="alternate" hreflang="en" href="https://site.com/en/pricing" /&gt;
+&lt;link rel="alternate" hreflang="de" href="https://site.com/de/pricing" /&gt;
+&lt;link rel="alternate" hreflang="x-default" href="https://site.com/en/pricing" /&gt;</code></pre>
+      <p>Set <code>&lt;html lang&gt;</code> and <code>&lt;html dir&gt;</code> from the resolved locale on every response. Screen readers switch pronunciation on <code>lang</code>, so getting it wrong degrades accessibility as well as SEO.</p>
+    </section>
+
+    <section id="rtl">
+      <span class="phase-no">Phase 06</span>
+      <h2>Support right-to-left</h2>
+      <p>Arabic, Hebrew, Persian, and Urdu mirror the entire interface, not just the text. If you write CSS in logical properties from the start, RTL costs almost nothing; retrofitting it later means auditing every stylesheet.</p>
+
+      <div class="rtl-demo" dir="rtl" lang="ar">مرحبا بك في التطبيق — النص يتدفق من اليمين إلى اليسار.</div>
+
+      <h4>Property mapping</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Instead of</th><th>Use</th><th>Note</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>margin-left</code></td><td><code>margin-inline-start</code></td><td>Flips with direction</td></tr>
+            <tr><td><code>padding-right</code></td><td><code>padding-inline-end</code></td><td>Flips with direction</td></tr>
+            <tr><td><code>left: 0</code></td><td><code>inset-inline-start: 0</code></td><td>Positioning</td></tr>
+            <tr><td><code>text-align: left</code></td><td><code>text-align: start</code></td><td></td></tr>
+            <tr><td><code>border-left</code></td><td><code>border-inline-start</code></td><td></td></tr>
+            <tr><td><code>width</code> / <code>height</code></td><td><code>inline-size</code> / <code>block-size</code></td><td>Also correct for vertical scripts</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>What logical properties won't fix</h4>
+      <ul>
+        <li><strong>Directional icons.</strong> Arrows, chevrons, and undo glyphs must mirror. Media transport controls (play, fast-forward) must <em>not</em>.</li>
+        <li><strong>Box shadows and gradients.</strong> The offsets are physical; set them per direction.</li>
+        <li><strong>Bidirectional runs.</strong> A Latin brand name or a number inside Arabic text needs isolation, or punctuation jumps to the wrong end. Use <code>&lt;bdi&gt;</code> or <code>unicode-bidi: isolate</code>.</li>
+        <li><strong>Charts and timelines.</strong> Whether a time axis mirrors is a product decision. Decide it explicitly rather than letting CSS decide for you.</li>
+      </ul>
+
+      <pre><code>/* Icons that should mirror */
+[dir="rtl"] .icon-arrow { transform: scaleX(-1); }
+
+/* Isolate a bidirectional run so punctuation stays put */
+&lt;p&gt;تم الإرسال بواسطة &lt;bdi&gt;@joe_deville&lt;/bdi&gt;.&lt;/p&gt;</code></pre>
+
+      <div class="note good">
+        <span class="label">Cheap early, expensive late</span>
+        <p>Adopting logical properties before you support any RTL locale costs one lint rule and no runtime code. Doing it after Arabic ships costs a full visual regression pass across every screen.</p>
+      </div>
+    </section>
+
+    <section id="workflow">
+      <span class="phase-no">Phase 07</span>
+      <h2>Wire the translation loop</h2>
+      <p>Translation is a pipeline, not an event. If a developer has to remember to email a spreadsheet, translations go stale within two sprints.</p>
+
+      <h4>The loop</h4>
+      <ol>
+        <li><strong>Extract.</strong> A parser scans source for keys and writes the base-language file. Run it in CI so drift between code and file is caught, not tolerated.</li>
+        <li><strong>Push.</strong> On merge to main, new and changed source keys go to the TMS automatically.</li>
+        <li><strong>Translate.</strong> Translators work in the TMS, with the description field and, ideally, a screenshot for context.</li>
+        <li><strong>Pull.</strong> Completed translations come back as a PR, reviewed like any other change.</li>
+        <li><strong>Gate.</strong> CI fails the release if a locale marked as launched is missing keys.</li>
+      </ol>
+
+      <pre><code># .github/workflows/i18n.yml
+name: i18n
+on: [pull_request]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+
+      # Extraction must be a no-op; if it isn't, someone added a key by hand
+      - run: npm run i18n:extract
+      - run: git diff --exit-code locales/en.json
+        # Fails with: "run npm run i18n:extract and commit the result"
+
+      # Every launched locale must be complete
+      - run: npm run i18n:validate -- --locales de,ja,ar --fail-on-missing</code></pre>
+
+      <div class="note">
+        <span class="label">Pick a source of truth and defend it</span>
+        <p>Either the repo owns the base file and the TMS owns translations, or the TMS owns everything. Both are workable. What isn't workable is editing translated files by hand <em>and</em> syncing from a TMS — the two overwrite each other, usually the night before a launch.</p>
+      </div>
+    </section>
+
+    <section id="testing">
+      <span class="phase-no">Phase 08</span>
+      <h2>Test and gate in CI</h2>
+      <p>Most localization bugs are visual and only appear in a locale nobody on the team reads. Automate the classes you can, and make the rest cheap to eyeball.</p>
+
+      <h4>Pseudo-localization</h4>
+      <p>The highest-value technique, and it needs no translators. Generate a fake locale that transforms the base language: accent every character, pad the string by 40%, and bracket it. Then run the app in it.</p>
+      <pre><code>"Order summary"  →  "[Ǫřδεř šůmmářγ ~~~~~~]"</code></pre>
+      <ul>
+        <li>Anything still in plain ASCII is a hardcoded string that escaped extraction.</li>
+        <li>Anything clipped or overflowing will break in German.</li>
+        <li>Missing brackets mean a string was split and concatenated.</li>
+      </ul>
+
+      <h4>What to assert automatically</h4>
+      <ul>
+        <li>Key parity across launched locales — no missing keys, no orphans.</li>
+        <li>ICU messages parse, and placeholder names match between base and translation.</li>
+        <li>Plural categories present for each target language, not copied from English.</li>
+        <li>No physical CSS properties in new stylesheets (lint rule).</li>
+        <li>Snapshot rendering of key screens in one LTR and one RTL locale.</li>
+      </ul>
+
+      <div class="note caution">
+        <span class="label">The failure that looks like success</span>
+        <p>Most i18n libraries fall back to the key or the base language when a translation is missing, so a broken build renders as readable English and passes every smoke test. Log fallbacks in development and count them in CI, or missing translations will reach production silently.</p>
+      </div>
+    </section>
+
+    <section id="pitfalls">
+      <h2>Pitfalls that survive review</h2>
+      <p>These pass code review because they're correct in English.</p>
+
+      <div class="cols">
+        <div class="card">
+          <h4>Concatenation</h4>
+          <p><code>t('deleted') + ' ' + count + ' ' + t('files')</code> hardcodes English word order. One key, one full sentence.</p>
+        </div>
+        <div class="card">
+          <h4>Runtime keys</h4>
+          <p><code>t(`error.${code}`)</code> is invisible to extraction. Map codes to literal keys explicitly.</p>
+        </div>
+        <div class="card">
+          <h4>Translated identifiers</h4>
+          <p>Never translate enum values, API fields, or anything used in a comparison. Translate the label; keep the value.</p>
+        </div>
+        <div class="card">
+          <h4>Text baked into images</h4>
+          <p>Untranslatable and unindexable. Use real text over the image, or export per locale.</p>
+        </div>
+        <div class="card">
+          <h4>Locale-dependent case</h4>
+          <p><code>'I'.toLowerCase()</code> is <code>'ı'</code> in Turkish. Never uppercase or lowercase for comparison without <code>'en-US'</code> as an explicit argument.</p>
+        </div>
+        <div class="card">
+          <h4>Fixed-size containers</h4>
+          <p>Buttons sized to the English label clip in German. Let content size the box; set a min-width, not a width.</p>
+        </div>
+        <div class="card">
+          <h4>Naive truncation</h4>
+          <p><code>slice(0, 40)</code> splits emoji and Devanagari clusters into replacement characters. Use <code>Intl.Segmenter</code>.</p>
+        </div>
+        <div class="card">
+          <h4>Assumed currency</h4>
+          <p>Locale doesn't determine currency. A user in <code>de-DE</code> may be billed in USD. Carry the currency code with the amount.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="checklist">
+      <h2>Pre-merge checklist</h2>
+      <p>For any PR touching user-facing text or layout.</p>
+      <ul class="checklist">
+        <li>No hardcoded user-facing strings; every one goes through <code>t()</code>.</li>
+        <li>No sentence built by concatenation or a ternary on count.</li>
+        <li>Keys are static literals, namespaced by feature, with a description for translators.</li>
+        <li>Counts use ICU <code>plural</code>; gendered or role-varying copy uses <code>select</code>.</li>
+        <li>Dates, numbers, currency, and lists go through <code>Intl</code>, with an explicit locale.</li>
+        <li>New CSS uses logical properties; no <code>margin-left</code>, <code>text-align: left</code>, or physical <code>inset</code>.</li>
+        <li>Directional icons mirror; media controls don't.</li>
+        <li>Interpolated user content in a bidirectional context is wrapped in <code>&lt;bdi&gt;</code>.</li>
+        <li>Extraction is a no-op — the base file is committed and current.</li>
+        <li>Checked in pseudo-locale: nothing clipped, nothing untranslated, nothing split.</li>
+        <li>Checked in one RTL locale at the affected screens.</li>
+        <li>Stored values are canonical (UTC, minor units, currency code) — not formatted strings.</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Companion to the <code>i18n-specialist</code> agent, which covers framework selection and implementation in more depth. This page is itself laid out with CSS logical properties and carries a right-to-left specimen, so its own rules can be checked against it.</p>
+  </footer>
+
+</div>
