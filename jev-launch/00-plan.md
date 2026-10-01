@@ -3,7 +3,8 @@
 Goal: first dollars this week, a repeatable Jev offer within 14 days.
 
 ## Where you stand (Upwork, read Oct 1)
-- 4 active contracts: Help4Access (cold outreach), Ben Schleifer (HubSpot), Zteam (Clay/Apollo/HubSpot), Sofya Tsiropoulos (outbound ops, started today). If they aren't logging hours, they're still your warmest buyers.
+- **One live contract: Sofya Tsiropoulos.** B2B SaaS selling to car dealerships, $55/hr, 10 hrs/week to start (about $550/week). Started Oct 1. First call slipped; she proposed **tomorrow 10am her time (NY), which is 9am Central**. Confirm it in writing.
+- 3 dormant contracts: Help4Access, Ben Schleifer, Zteam. Open on paper, no work. Treat them as past clients to reactivate, not as revenue.
 - 5 open invitations. **Patronus AI, RevOps Analyst expert reviewer:** $50–150 per task, 10–30 hrs/week, starts now. It isn't Jev work, but it's the fastest cash on the table. Apply today.
 - 214 Connects. Top Rated, $80/hr listed rate.
 - No TypeSafe account found in your inbox.
@@ -12,7 +13,8 @@ Goal: first dollars this week, a repeatable Jev offer within 14 days.
 | # | Track | First $ expected | File |
 |---|-------|------------------|------|
 | 0 | Patronus invite (cash bridge) | This week | — |
-| 1 | Pitch existing clients a Jev add-on | 3–7 days | 03-outreach.md §1 |
+| 1 | Grow Sofya from 10 hrs to 20+ by proving results; Jev scoring of dealerships as the lever | Already paying | 03-outreach.md §1 |
+| 1b | Reactivation messages to the 3 dormant clients | 1–3 weeks, low odds | 03-outreach.md §1 |
 | 2 | Upwork: Jev-positioned profile and proposals | 1–2 weeks | 02-upwork.md |
 | 3 | Clay cost-cut audit (productized) | 1–3 weeks | 01-offers.md A |
 | 4 | Per-account buyer map | 1–3 weeks | 01-offers.md C |
@@ -24,7 +26,8 @@ Goal: first dollars this week, a repeatable Jev offer within 14 days.
 **Day 1 (today)**
 - Sign up at console.typesafe.ai (early access; get in the queue).
 - Apply to the Patronus invite.
-- Send the 4 client upsell messages (03-outreach.md §1).
+- Confirm Sofya's call (9am Central tomorrow) and set two alarms. Prep with 03-outreach.md §1.
+- Send the 3 reactivation messages.
 - Update the Upwork headline and overview (02-upwork.md §1).
 
 **Day 2–3**
@@ -47,11 +50,12 @@ Goal: first dollars this week, a repeatable Jev offer within 14 days.
 - Convert one audit client into a triage retainer (offer D).
 
 ## Money math (conservative)
+- Sofya baseline: 10 hrs × $55 × 4 = $2,200 (about $4,400 if it grows to 20 hrs)
 - 2 audits × $750 (founding price) = $1,500
 - 2 buyer maps × $400 = $800
 - 1 triage retainer = $1,000/month
 - Template pack: 10 × $49 = $490
-- **About $3.8K in the first month**, before Patronus or current-contract hours.
+- **About $6K in the first month** including Sofya at 10 hrs/week, before Patronus.
 
 ## Guardrails
 - Jev's speed and cost claims come from TypeSafe's own tests. Quote your own measured numbers to clients, not theirs.
