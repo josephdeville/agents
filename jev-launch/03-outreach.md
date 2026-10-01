@@ -21,17 +21,17 @@ Nothing here has been sent.
 
 That's how 10 hrs/week becomes 20: show results, then propose adding LinkedIn signal monitoring and reply triage as their own hours.
 
-### Dormant contracts: reactivation (low odds, one message each, no follow-up spam)
+### Past clients: reactivation (low odds, one message each, no follow-up spam)
 **Zteam Inc: Clay/Apollo/HubSpot**
 > Hi, it's been a while since the Clay/Apollo/HubSpot setup. I've been building with a new decision model (Jev) that scores ICP fit and routes leads inside Clay for a fraction of what AI columns cost. Happy to run it on 200 rows of your current table for free and show you the before-and-after. If it's useful, we can pick the contract back up. If not, no worries.
 
-**Help4Access: cold outreach (Instantly/HeyReach)**
-> Hi Sasha, checking in on the outreach work. If campaigns are running, I can set up automatic reply sorting (interested / not now / never / OOO / wrong person) so only the unclear replies need a human. It costs fractions of a cent per reply. Want me to set it up on what's live?
+**Help4Access: ended Sept 30, final milestone approved.** Ask for the review first, then offer the follow-on. The RB2B and Snitcher campaigns are about to start producing replies.
+> Hi Sasha, thanks for approving the final milestone. I enjoyed building the RB2B and Snitcher campaigns. If you have a minute, a review on the contract would help me a lot. Once the campaigns start getting replies, I can set up automatic reply sorting across Instantly and HeyReach (interested / not now / never / OOO / wrong person), so your team only reads the ones that need a human. It costs fractions of a cent per reply. Happy to scope it as a small fixed milestone whenever you're ready.
 
 **Ben Schleifer: HubSpot**
 > Hi Ben, hope the HubSpot setup is holding up. One low-effort add-on if it's useful: auto-classify new contacts on creation (fit score + persona) and route them by confidence. Happy to scope it in 15 minutes.
 
-If any of the three doesn't reply within a week, decide whether to leave the contract open or ask them to close it.
+If Ben or Zteam doesn't reply within a week, decide whether to leave the contract open or ask them to close it.
 
 ## 2. Cold DMs and emails (Clay agencies, RevOps leads)
 **Target list:** Clay agency owners, "GTM Engineer" and "RevOps" titles at 50–500-person B2B SaaS companies, and people posting about Clay credit costs. I can build this list with your Clay or Vibe Prospecting connection on request (uses credits).

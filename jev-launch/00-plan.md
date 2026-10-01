@@ -4,7 +4,8 @@ Goal: first dollars this week, a repeatable Jev offer within 14 days.
 
 ## Where you stand (Upwork, read Oct 1)
 - **One live contract: Sofya Tsiropoulos.** B2B SaaS selling to car dealerships, $55/hr, 10 hrs/week to start (about $550/week). Started Oct 1. First call slipped; she proposed **tomorrow 10am her time (NY), which is 9am Central**. Confirm it in writing.
-- 3 dormant contracts: Help4Access, Ben Schleifer, Zteam. Open on paper, no work. Treat them as past clients to reactivate, not as revenue.
+- **Help4Access ended Sept 30** after Sasha approved the final milestone. That payment should be clearing in Upwork. Ask for a review and testimonial now, since the RB2B/Snitcher campaign build is your best case study.
+- 2 dormant contracts: Ben Schleifer, Zteam. Open on paper, no work. Treat them as past clients to reactivate, not as revenue.
 - 5 open invitations. **Patronus AI, RevOps Analyst expert reviewer:** $50–150 per task, 10–30 hrs/week, starts now. It isn't Jev work, but it's the fastest cash on the table. Apply today.
 - 214 Connects. Top Rated, $80/hr listed rate.
 - No TypeSafe account found in your inbox.
@@ -14,7 +15,7 @@ Goal: first dollars this week, a repeatable Jev offer within 14 days.
 |---|-------|------------------|------|
 | 0 | Patronus invite (cash bridge) | This week | — |
 | 1 | Grow Sofya from 10 hrs to 20+ by proving results; Jev scoring of dealerships as the lever | Already paying | 03-outreach.md §1 |
-| 1b | Reactivation messages to the 3 dormant clients | 1–3 weeks, low odds | 03-outreach.md §1 |
+| 1b | Help4Access review + reply-triage pitch; reactivate Ben and Zteam | 1–3 weeks, low odds | 03-outreach.md §1 |
 | 2 | Upwork: Jev-positioned profile and proposals | 1–2 weeks | 02-upwork.md |
 | 3 | Clay cost-cut audit (productized) | 1–3 weeks | 01-offers.md A |
 | 4 | Per-account buyer map | 1–3 weeks | 01-offers.md C |
@@ -27,7 +28,7 @@ Goal: first dollars this week, a repeatable Jev offer within 14 days.
 - Sign up at console.typesafe.ai (early access; get in the queue).
 - Apply to the Patronus invite.
 - Confirm Sofya's call (9am Central tomorrow) and set two alarms. Prep with 03-outreach.md §1.
-- Send the 3 reactivation messages.
+- Send Sasha the review request plus reply-triage offer, and the 2 reactivation messages.
 - Update the Upwork headline and overview (02-upwork.md §1).
 
 **Day 2–3**
