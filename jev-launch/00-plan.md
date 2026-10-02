@@ -8,7 +8,7 @@ Goal: first dollars this week, a repeatable Jev offer within 14 days.
 - 2 dormant contracts: Ben Schleifer, Zteam. Open on paper, no work. Treat them as past clients to reactivate, not as revenue.
 - 5 open invitations. **Patronus AI, RevOps Analyst expert reviewer:** $50–150 per task, 10–30 hrs/week, starts now. It isn't Jev work, but it's the fastest cash on the table. Apply today.
 - 214 Connects. Top Rated, $80/hr listed rate.
-- No TypeSafe account found in your inbox.
+- **Funded TypeSafe/Jev account already in place.** Skip signup and go straight to the measured test.
 
 ## Order of attack
 | # | Track | First $ expected | File |
@@ -25,14 +25,14 @@ Goal: first dollars this week, a repeatable Jev offer within 14 days.
 
 ## 14-day schedule
 **Day 1 (today)**
-- Sign up at console.typesafe.ai (early access; get in the queue).
+- Run the 50-row Jev test (see Day 2–3); you already have a funded account.
 - Apply to the Patronus invite.
 - Confirm Sofya's call (9am Central tomorrow) and set two alarms. Prep with 03-outreach.md §1.
 - Send Sasha the review request plus reply-triage offer, and the 2 reactivation messages.
 - Update the Upwork headline and overview (02-upwork.md §1).
 
 **Day 2–3**
-- Get the API key and run the `clay-templates/` JSON in TypeSafe's Playground on 50 rows from a table you've already built.
+- Run the `clay-templates/` JSON in TypeSafe's Playground on 50 rows from a table you've already built.
 - Hand-label 20 of those rows. Record accuracy, cost per row, and seconds per row. **That's your case study. Every offer leans on it.**
 - Publish LinkedIn post #1 (03-outreach.md §3).
 
