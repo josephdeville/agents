@@ -1,0 +1,20 @@
+{
+  "model": "jev-latest",
+  "state": "Company: {{Company Name}}. Job title: {{Job Title}}. Job description (first 1500 chars): {{Job Description}}",
+  "questions": {
+    "signal": {
+      "type": "noul",
+      "instructions": "Does this job post show the company is building or expanding [CAPABILITY OUR PRODUCT SUPPORTS]?"
+    },
+    "seniority": {
+      "type": "choice",
+      "instructions": "Seniority of the role being hired",
+      "criteria": {
+        "leader": "Head, VP, Director or above",
+        "manager": "Manager or team lead",
+        "ic": "Individual contributor",
+        "unclear": "Cannot tell"
+      }
+    }
+  }
+}
