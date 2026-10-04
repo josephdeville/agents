@@ -81,3 +81,19 @@ Prove the gate works (small, cheap, uses real drafts):
 2. After 2 weeks, compare reply rates for gate-pass vs gate-fail drafts. Send a few fails on purpose to learn.
 3. If pass and fail reply the same, the criteria are wrong. Change the criteria, not the threshold.
 4. Hermes records which failed checks predict silence, and that updates `voice.md` and `icp.md`.
+
+## 9. The rewrite step
+Code: `outreach_gate.py` (standard library, no network, `--selftest` passes). It does two things: `evaluate()` turns Jev's answers into pass or a list of failed checks, and `rewrite_prompt()` turns that list into an instruction for Claude.
+
+Flow per draft:
+1. Claude writes draft v1 from the evidence pack (facts + source URLs only).
+2. Jev scores it with `outreach_gate.json`.
+3. `evaluate()`: all six checks pass at confidence >= 0.80 -> **approve queue**.
+4. Otherwise `rewrite_prompt()` sends Claude the draft, the evidence and one fix instruction per failed check. Claude changes only what failed.
+5. Jev re-scores. Maximum 2 rewrites; then the draft goes to you or the account is dropped.
+
+Each failed check maps to one concrete instruction (open on a specific evidenced fact, delete unsupported claims, tie the offer to their situation, one small ask, plain tone). Claude must also list the evidence facts it used (`USED:`), so unsupported claims are easy to spot before you approve.
+
+Log per draft in the ledger: `rewrites, failed_checks_round1, final_pass`. Failures that repeat after rewrites point at weak evidence, not weak writing; fix the sourcing step.
+
+Known gaps: the field names for Jev's yes/no answers are not verified (`prob()` accepts several), so confirm them on the first real response before trusting the gate.
