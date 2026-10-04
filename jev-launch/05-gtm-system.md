@@ -57,3 +57,27 @@ Jev is used as a gate, not a writer:
 2. Verify the Apify account email, then run the hiring-signal job once, capped.
 3. Run 10 accounts through the full loop by hand. Fix whatever is clumsy.
 4. Only then schedule it in Clawdi.
+
+## 8. Jev as the outreach quality gate
+Template: `clay-templates/outreach_gate.json`. It reads one draft plus the verified evidence about the recipient and answers six questions in one call.
+
+Pass only if ALL hold (each at confidence >= 0.80; start strict, loosen with data):
+- `specific_reference` is yes
+- `claims_supported` is yes
+- `generic_risk` is no
+- `relevance` >= 3
+- `ask` = single_low_friction
+- `tone` = plain
+
+If any check fails, the failed field names go back to Claude with the draft for one rewrite, then Jev re-scores. Maximum 2 rewrite rounds; after that the account goes to you or is dropped. Every draft you approve is still your call.
+
+What Jev cannot do, so code and you must:
+- **Verify facts.** It only checks claims against the evidence you give it. The evidence comes from Firecrawl, Perplexity and Deepline, and each fact needs a source URL in the ledger.
+- **Predict conversion.** It scores quality against your criteria. Treat "passes the gate" as "worth sending", not "will convert".
+- **Handle long context.** Keep the evidence to the 5-10 facts that matter. More context lowers its accuracy.
+
+Prove the gate works (small, cheap, uses real drafts):
+1. Score the first 40 live drafts and add `gate_pass, failed_checks` to the ledger.
+2. After 2 weeks, compare reply rates for gate-pass vs gate-fail drafts. Send a few fails on purpose to learn.
+3. If pass and fail reply the same, the criteria are wrong. Change the criteria, not the threshold.
+4. Hermes records which failed checks predict silence, and that updates `voice.md` and `icp.md`.

@@ -1,0 +1,49 @@
+{
+  "model": "jev-latest",
+  "state": "Recipient: {{Full Name}}, {{Job Title}} at {{Company Name}}. Evidence about them (only these facts are verified): {{Evidence}}. Our offer: {{Offer One Line}}. Draft email: {{Draft Email}}",
+  "questions": {
+    "specific_reference": {
+      "type": "noul",
+      "instructions": "Does the first sentence of the draft refer to a specific fact about this person or company that appears in the evidence?"
+    },
+    "claims_supported": {
+      "type": "noul",
+      "instructions": "Is every factual claim about the recipient or their company in the draft supported by the evidence?"
+    },
+    "generic_risk": {
+      "type": "noul",
+      "instructions": "Could this draft be sent unchanged to a different company without sounding wrong?"
+    },
+    "relevance": {
+      "type": "score",
+      "instructions": "How clearly does the draft connect the recipient's evidenced situation to our offer?",
+      "criteria": [
+        "No connection",
+        "Vague connection",
+        "Clear connection",
+        "Clear connection with a concrete reason to reply now"
+      ]
+    },
+    "ask": {
+      "type": "choice",
+      "instructions": "What does the draft ask the recipient to do?",
+      "criteria": {
+        "single_low_friction": "Exactly one small ask, such as a reply or a short question",
+        "multiple_asks": "Two or more different asks",
+        "hard_pitch": "Asks for a call or purchase before any value is shown",
+        "no_ask": "No clear ask",
+        "unclear": "Cannot tell"
+      }
+    },
+    "tone": {
+      "type": "choice",
+      "instructions": "Which best describes the tone?",
+      "criteria": {
+        "plain": "Direct and specific, no hype",
+        "hype": "Superlatives or buzzwords",
+        "pushy": "Pressure or false urgency",
+        "unclear": "Cannot tell"
+      }
+    }
+  }
+}
