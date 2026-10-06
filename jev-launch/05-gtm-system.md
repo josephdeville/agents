@@ -97,3 +97,21 @@ Each failed check maps to one concrete instruction (open on a specific evidenced
 Log per draft in the ledger: `rewrites, failed_checks_round1, final_pass`. Failures that repeat after rewrites point at weak evidence, not weak writing; fix the sourcing step.
 
 Known gaps: the field names for Jev's yes/no answers are not verified (`prob()` accepts several), so confirm them on the first real response before trusting the gate.
+
+## 10. Ideas adopted from the RevSculpt/Salesforge post (read Oct 6)
+Source: https://salesforge.beehiiv.com/p/ways-to-use-jev-in-gtm. This is a vendor newsletter from an outbound agency. Its numbers are self-reported and not verified here.
+
+**What it confirms in this plan**
+- Tiering: one relevant signal = tier B, two or more = tier A. Same as `07-signal-spec.md`.
+- Inbound routing with Jev: same as `inbound_routing.json`.
+- Two rules we already follow: always include an `unclear` option, and test thresholds on hand-labeled records.
+
+**What it adds, now built**
+1. **Decide whether to personalize at all** (`clay-templates/personalize_gate.json`). Jev reads the company's job post or About text and scores relevance to our offer, and whether it holds one specific detail we can truthfully mention. Personalize only if relevance >= 3 and `usable_first_line` is yes at confidence >= 0.80; otherwise use the standard template. This stops forced, weak personalization before the draft is written, and it is cheaper than gating every draft. The post claims 530 job posts were assessed for $0.02; treat that as their number, not ours.
+2. **Learn from replies** (`clay-templates/message_labels.json`). Label every sent email by opener (person-specific / company-specific / generic), signal (recent hire / funding / job post / pain point / none) and CTA (direct meeting request / soft permission ask). Add `opener_type, signal_type, cta_type` to `ledger.csv`, then compare reply rates by category each Friday. This is the feedback loop Hermes should learn from.
+
+**Change to the calibration plan:** the post tests thresholds on 100 hand-labeled records. Start with the 20-row sanity check, but do not switch any lane to auto-send until a 100-record check agrees with your own labels.
+
+**New idea to hold for later:** feed Jev a call transcript or the current deal details and ask what should happen next (bring in an AE, share a case study, discuss pricing, book the next meeting). That fits a retainer for Sofya or a future client; the team reviews every suggestion.
+
+**Market note:** agencies already sell Jev-based outbound systems. Position on a specific measured result, not on "we use Jev".
