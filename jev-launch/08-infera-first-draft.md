@@ -1,6 +1,6 @@
 # Infera: evidence pack, first draft, gate check (Oct 6)
 
-Nothing here has been sent. You decide the channel and whether to send.
+**STATUS (Oct 7): PASS. Do not contact again.** A LinkedIn DM to Sean Blackall was sent by Joseph on Oct 7 (version not recorded). Infera is on the do-not-contact list, and it is a weak fit: about 13-15 staff, Sean posted "No AI SDR. No agency.", his tooling is already built in Clay and Attio, and the Founding SDR role may no longer be open. Do not follow up. The draft and gate check below are kept as a record only.
 
 ## Evidence pack (only these facts may be used)
 | # | Fact | Source |

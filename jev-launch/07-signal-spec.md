@@ -20,7 +20,7 @@ Every signal needs a source URL and a date. A signal with no source counts as ab
 ## What the first refined run found (Exa agent, $0.025, Oct 6)
 | Company | Staff | Signals | Verdict |
 |---|---|---|---|
-| **Infera** | 15 | A (Founding SDR, posted 2026-09-16), C (Apollo, Clay, Dripify, Attio named in post) | **Tier A candidate.** Head of GTM named: Sean Blackall. Already runs Clay: pitch Jev scoring + reply triage on the existing table. Funding unverified. |
+| **Infera** | 15 | A (Founding SDR, posted 2026-09-16), C (Apollo, Clay, Dripify, Attio named in post) | **Pass (Oct 7).** On the do-not-contact list; weak fit (tooling already built, "No AI SDR. No agency." post); the SDR role may be closed. One LinkedIn DM was sent by mistake on Oct 7. Funding was never verified. Do not follow up. |
 | Zania | 23 | A, C (Clay named) | **Dropped.** The agent called the post "within 30 days"; it was posted 2026-08-12, about 55 days before this run. |
 
 Lessons:
