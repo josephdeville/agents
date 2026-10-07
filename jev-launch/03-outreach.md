@@ -22,7 +22,7 @@ Nothing here has been sent.
 That's how 10 hrs/week becomes 20: show results, then propose adding LinkedIn signal monitoring and reply triage as their own hours.
 
 ### Past clients: reactivation (low odds, one message each, no follow-up spam)
-**Zteam Inc: Clay/Apollo/HubSpot**
+**Zteam Inc: lead research and CRM setup**
 > Hi, it's been a while since the lead research and CRM setup. I've been building a scoring layer on a new decision model (Jev) that rates ICP fit and routes leads for a fraction of what AI enrichment steps cost. Happy to run it on 200 rows of your current table for free and show you the before-and-after. If it's useful, we can pick the contract back up. If not, no worries.
 
 **Help4Access: ended Sept 30, final milestone approved.** Ask for the review first, then offer the follow-on. The RB2B and Snitcher campaigns are about to start producing replies.

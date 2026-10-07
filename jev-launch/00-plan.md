@@ -17,7 +17,7 @@ Goal: first dollars this week, a repeatable Jev offer within 14 days.
 | 1 | Grow Sofya from 10 hrs to 20+ by proving results; Jev scoring of dealerships as the lever | Already paying | 03-outreach.md §1 |
 | 1b | Help4Access review + reply-triage pitch; reactivate Ben and Zteam | 1–3 weeks, low odds | 03-outreach.md §1 |
 | 2 | Upwork: Jev-positioned profile and proposals | 1–2 weeks | 02-upwork.md |
-| 3 | Clay cost-cut audit (productized) | 1–3 weeks | 01-offers.md A |
+| 3 | Enrichment cost-cut audit (productized) | 1–3 weeks | 01-offers.md A |
 | 4 | Per-account buyer map | 1–3 weeks | 01-offers.md C |
 | 5 | Whole-TAM scoring sprint | 2–4 weeks | 01-offers.md B |
 | 6 | Managed signal triage (retainer) | 3–6 weeks | 01-offers.md D |
