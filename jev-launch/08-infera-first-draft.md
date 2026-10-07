@@ -26,14 +26,16 @@ Reading of fact 7 (an inference, not a fact to put in an email): the outbound st
 ## Contact route
 Sean Blackall, Head of GTM. **Do not use the email address in the job post for this.** It is the application address for candidates, and a sales pitch there is the wrong use. Use LinkedIn, or find his work email in Deepline, and keep it as a normal first-touch message.
 
-## Draft v2 (email or LinkedIn). Tool name removed on request: do not name Clay or any tool in outreach to Infera
+## Draft v3 (email or LinkedIn)
+Wording rules: do not name Clay or any tool in outreach to Infera; say "intent list".
+
 Subject: Account research for your first SDR
 
 Hi Sean,
 
 Your Founding SDR post says you'll handle most of the account research and contact mapping when they start, and that held, qualified meetings count, not calendar invites.
 
-I build that research layer: a ranked list of device makers scored against a written qualification rubric, with the reason each one fits. If useful, I'll run it on 20 accounts you pick, at no charge, so you can compare it with how you'd map them yourselves.
+I build that research layer: an intent list of device makers, ranked against a written qualification rubric, with the buying signal behind each one. If useful, I'll run it on 20 accounts you pick, at no charge, so you can compare it with how you'd map them yourselves.
 
 Worth a quick look?
 
@@ -48,6 +50,9 @@ Joseph
 | relevance | 3 | Connects their stated plan (SDR does research) to the offer; no strong reason-to-reply-now beyond the open hire |
 | ask | pass | One ask ("worth a quick look?"), with a free 20-account trial as the offer |
 | tone | pass | Plain; no hype |
+
+## Delivery note for the trial
+"Intent list" is a promise. Each of the 20 accounts needs a dated, sourced buying signal (open role, funding round, tool or hiring change), not just a good-fit description. If an account has no verifiable signal, leave it off the list rather than pad it.
 
 ## Open risks and decisions for you
 1. **They said they will do the research themselves.** The free 20-account trial is the only thing that makes this easy to say yes to. Decide if you're willing to give it; each account costs only a few cents of Jev plus your time.

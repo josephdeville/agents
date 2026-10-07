@@ -23,7 +23,7 @@ That's how 10 hrs/week becomes 20: show results, then propose adding LinkedIn si
 
 ### Past clients: reactivation (low odds, one message each, no follow-up spam)
 **Zteam Inc: Clay/Apollo/HubSpot**
-> Hi, it's been a while since the Clay/Apollo/HubSpot setup. I've been building with a new decision model (Jev) that scores ICP fit and routes leads inside Clay for a fraction of what AI columns cost. Happy to run it on 200 rows of your current table for free and show you the before-and-after. If it's useful, we can pick the contract back up. If not, no worries.
+> Hi, it's been a while since the lead research and CRM setup. I've been building a scoring layer on a new decision model (Jev) that rates ICP fit and routes leads for a fraction of what AI enrichment steps cost. Happy to run it on 200 rows of your current table for free and show you the before-and-after. If it's useful, we can pick the contract back up. If not, no worries.
 
 **Help4Access: ended Sept 30, final milestone approved.** Ask for the review first, then offer the follow-on. The RB2B and Snitcher campaigns are about to start producing replies.
 > Hi Sasha, thanks for approving the final milestone. I enjoyed building the RB2B and Snitcher campaigns. If you have a minute, a review on the contract would help me a lot. Once the campaigns start getting replies, I can set up automatic reply sorting across Instantly and HeyReach (interested / not now / never / OOO / wrong person), so your team only reads the ones that need a human. It costs fractions of a cent per reply. Happy to scope it as a small fixed milestone whenever you're ready.
@@ -37,10 +37,10 @@ If Ben or Zteam doesn't reply within a week, decide whether to leave the contrac
 **Target list:** Clay agency owners, "GTM Engineer" and "RevOps" titles at 50–500-person B2B SaaS companies, and people posting about Clay credit costs. I can build this list with your Clay or Vibe Prospecting connection on request (uses credits).
 
 **DM v1: cost angle**
-> Saw you're building in Clay. Curious what share of your credits goes to AI columns making yes/no calls? I've been moving those to Jev (TypeSafe's new decision model). It costs pennies per 100K rows and returns a calibrated confidence score. Happy to run it next to one of your columns on 200 rows for free so you can see the numbers.
+> Saw you're building outbound research workflows. Curious what share of your enrichment spend goes to AI steps making yes/no calls? I've been moving those to Jev (TypeSafe's new decision model). It costs pennies per 100K rows and returns a confidence score. Happy to run it next to one of your steps on 200 rows for free so you can see the numbers.
 
 **DM v2: agency angle (white-label)**
-> If you run Clay builds for clients, I can white-label Jev scoring for them: same tables, decision columns at a fraction of the cost, confidence lanes for routing. You keep the client; I do the build. Open to a quick call?
+> If you run outbound builds for clients, I can white-label Jev scoring for them: same workflows, decision steps at a fraction of the cost, confidence lanes for routing. You keep the client; I do the build. Open to a quick call?
 
 **Email: AE buyer map**
 > Subject: the people at [Account] your title search can't see

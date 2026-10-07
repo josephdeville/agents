@@ -4,8 +4,8 @@ Founding prices apply to the first 3 clients per offer, in exchange for a testim
 
 ---
 
-## A. Clay Cost-Cut Audit (lead offer)
-**One-liner:** "I move the judgment calls in your Clay tables off expensive AI columns onto a model that costs about $1 per 100K rows, then show you the before-and-after."
+## A. Enrichment Cost-Cut Audit (lead offer)
+**One-liner:** "I move the yes/no and scoring decisions in your lead-research workflows off expensive AI steps onto a model that costs about $1 per 100K rows, then show you the before-and-after."
 
 **Who buys:** teams and agencies spending $500+/month on Clay credits or OpenAI keys for classification, scoring, and routing.
 
@@ -22,7 +22,7 @@ Founding prices apply to the first 3 clients per offer, in exchange for a testim
 ---
 
 ## B. Whole-TAM Scoring Sprint
-**One-liner:** "Stop guessing which slice of your market to work. I score every company or person in it and hand back a ranked list with confidence."
+**One-liner:** "Stop guessing which slice of your market to work. I score every account in it and hand back an intent list: every account ranked, with the buying signal behind it."
 
 **Scope**
 1. Use an LLM to draft a detailed fit description from the client's call notes and closed-won accounts.
