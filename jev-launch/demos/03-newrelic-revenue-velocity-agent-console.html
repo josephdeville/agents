@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revenue Velocity Agent Console (concept demo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#00AC69; --accent:#1CE783; --text:#0A0A0A; --muted:#6B6F76; --bg:#F7F7F7; --card:#FFFFFF; --border:#E6E6E6;
+  --warn:#F5A524; --err:#E5484D; --ok:#1F9D55; --primary-soft:#E8F7F0; --warn-soft:#FEF4E0; --err-soft:#FCEBEC;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --mono:'Geist Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--sans);font-size:14px;line-height:1.45;color:var(--text);background:var(--bg);font-variant-numeric:tabular-nums;overflow-x:hidden;min-width:1280px}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.top{position:sticky;top:0;z-index:30}
+.appbar{height:56px;background:#fff;border-bottom:2px solid var(--primary);display:flex;align-items:center;padding:0 24px;gap:0}
+.logo{display:flex;align-items:center;height:26px;flex:none}
+.logo img{height:26px;display:block}
+.logo-fb{display:flex;align-items:center;gap:6px;font-weight:700;font-size:17px;letter-spacing:-.01em;color:#0A0A0A}
+.divider{width:1px;height:24px;background:var(--border);margin:0 14px;flex:none}
+.prod{font-weight:600;font-size:14px;white-space:nowrap}
+.tabs{display:flex;gap:2px;margin-left:24px;height:100%}
+.tab{background:none;border:0;border-bottom:3px solid transparent;padding:0 12px;height:100%;font-weight:500;color:var(--muted);white-space:nowrap;margin-bottom:-2px}
+.tab:hover{color:var(--text)}
+.tab[aria-selected="true"]{color:var(--text);border-bottom-color:var(--primary);font-weight:600}
+.tab .badge{display:inline-block;min-width:18px;padding:0 6px;margin-left:6px;border-radius:9px;background:var(--warn-soft);color:#8a5a00;font-size:11px;font-weight:600;line-height:18px;text-align:center}
+.right{margin-left:auto;display:flex;align-items:center;gap:14px;font-size:13px;color:var(--muted);white-space:nowrap;position:relative}
+.linkbtn{background:none;border:0;color:var(--primary);font-weight:600;padding:0;text-decoration:underline;text-underline-offset:3px;font-size:13px}
+.pop{position:absolute;right:0;top:40px;width:380px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.12);padding:16px 18px;color:var(--text);white-space:normal;font-size:13px;z-index:50}
+.pop h4{margin:0 0 6px;font-size:14px}
+.pop p{margin:0 0 8px}
+.pop[hidden]{display:none}
+.notice{background:#fff;border-bottom:1px solid var(--border);padding:7px 24px;font-size:12.5px;color:var(--muted);text-align:center;letter-spacing:.01em}
+.notice b{color:var(--text);font-weight:600}
+main{max-width:1392px;margin:0 auto;padding:16px 24px 24px}
+.screen[hidden]{display:none}
+h1{font-size:20px;margin:0 0 4px;font-weight:600}
+h2{font-size:15px;margin:0;font-weight:600}
+.sub{color:var(--muted);margin:0 0 14px;font-size:13px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px}
+.pill{display:inline-block;font-size:10px;line-height:1;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border:1px solid #CFCFCF;border-radius:999px;padding:3px 6px;font-weight:500;vertical-align:middle;white-space:nowrap}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;flex:none}
+.btn{border:1px solid var(--border);background:#fff;border-radius:8px;padding:7px 14px;font-weight:600;font-size:13px;color:var(--text)}
+.btn:hover:not(:disabled){border-color:#bdbdbd;background:#fafafa}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn.primary:hover:not(:disabled){background:#009a5d;border-color:#009a5d}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,.tab:focus-visible,.linkbtn:focus-visible,tr.row:focus-visible,.stephead:focus-visible,.seg button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.btn.sm{padding:5px 10px;font-size:12.5px}
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) 372px;gap:16px;align-items:start}
+.trace{padding:0;overflow:hidden}
+.trace-head{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--border)}
+.trace-head .who{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.trace-head .spacer{flex:1}
+.replaytag{font-size:12px;background:var(--primary-soft);color:#00704a;border-radius:6px;padding:3px 8px;font-weight:600;white-space:nowrap}
+.decision{display:grid;grid-template-columns:repeat(3,auto) 1fr;gap:6px 26px;padding:11px 18px;background:#fbfbfb;border-bottom:1px solid var(--border)}
+.decision .k{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.decision .v{font-weight:600;font-size:14px;white-space:nowrap}
+.decision .act{grid-column:1/-1;font-size:13px;display:flex;gap:8px;align-items:baseline;min-width:0}
+.decision .act .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.timeline{padding:6px 18px 10px;position:relative}
+.node{display:grid;grid-template-columns:28px minmax(0,1fr);gap:0 12px;position:relative}
+.node:not(:last-child)::before{content:"";position:absolute;left:13px;top:30px;bottom:-2px;width:2px;background:var(--border)}
+.num{width:28px;height:28px;border-radius:50%;border:2px solid var(--primary);background:#fff;color:#00704a;font-weight:600;font-size:12.5px;display:flex;align-items:center;justify-content:center;margin-top:8px;position:relative;z-index:1}
+.num.hook{border-style:dashed;border-color:#b9b9b9;color:var(--muted);font-size:11px}
+.num.err{border-color:var(--err);color:var(--err)}
+.num.hold{border-color:var(--warn);color:#8a5a00}
+.stephead{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;text-align:left;padding:9px 6px 3px 0;min-width:0}
+.stephead .nm{font-weight:600;white-space:nowrap}
+.chip{font-size:11.5px;color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:1px 7px;white-space:nowrap;background:#fff}
+.stephead .meta{margin-left:auto;display:flex;gap:14px;color:var(--muted);font-size:12px;white-space:nowrap;align-items:center}
+.stephead .chev{display:inline-block;transition:transform .15s;color:var(--muted);font-size:11px}
+.node.open .chev{transform:rotate(90deg)}
+.stepsum{margin:0 0 7px;color:#2b2d31;font-size:13px;padding-right:6px}
+.stepio{display:none;margin:0 0 10px;grid-template-columns:1fr 1fr;gap:10px}
+.node.open .stepio{display:grid}
+.io{border:1px solid var(--border);border-radius:8px;background:#fafafa;padding:8px 10px;min-width:0}
+.io .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:3px}
+.io pre{margin:0;font-family:var(--mono);font-size:12px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.tracefoot{padding:9px 18px;border-top:1px solid var(--border);font-size:12.5px;color:var(--muted);display:flex;gap:16px;align-items:center}
+.tracefoot .spacer{flex:1}
+/* stat card */
+.stat{padding:18px 20px}
+.stat h2{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.stat .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 14px}
+.big{font-size:28px;font-weight:600;letter-spacing:-.02em;line-height:1.1}
+.biglbl{font-size:12.5px;color:var(--muted);margin-top:3px}
+.cmp{margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+.cmp .row{display:flex;justify-content:space-between;align-items:baseline;margin-top:4px;gap:8px}
+.bar{height:8px;border-radius:4px;background:#EEF0F1;margin-top:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--primary)}
+.bar.g i{background:#B8BCC2}
+.corr{margin-top:16px;padding-top:14px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.corr .big{font-size:24px}
+/* table */
+.tablecard{margin-top:16px;overflow:hidden}
+.tablecard .hd{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--border)}
+.tablecard .hd .spacer{flex:1}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.seg button{background:#fff;border:0;padding:5px 12px;font-size:12.5px;font-weight:500;color:var(--muted);border-right:1px solid var(--border)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--primary-soft);color:#00704a;font-weight:600}
+table.t{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed}
+.t th{position:sticky;top:90px;background:#fff;z-index:5;text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;padding:0 12px;height:38px;border-bottom:1px solid var(--border)}
+.t td{height:48px;padding:0 12px;border-bottom:1px solid #F0F0F0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+.t tr.row{cursor:pointer}
+.t tr.row:hover td{background:#FAFCFB}
+.t tr.row.sel td{background:var(--primary-soft)}
+.t td.num-c,.t th.num-c{text-align:right}
+.t .cellflex{display:flex;align-items:center;gap:8px;min-width:0}
+.t .cellflex .tx{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.statuscell{display:flex;align-items:center}
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(10,10,10,.28);z-index:60}
+.scrim[hidden],.drawer[hidden]{display:none}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:640px;max-width:100vw;background:#fff;z-index:70;box-shadow:-8px 0 30px rgba(0,0,0,.15);display:flex;flex-direction:column}
+.drawer .dh{display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border);gap:10px}
+.drawer .dh h2{flex:1}
+.drawer .db{overflow:auto;flex:1;padding:14px 16px}
+.drawer .trace{border:1px solid var(--border);border-radius:10px}
+.drawer .stepio{grid-template-columns:1fr}
+.drawer .decision{grid-template-columns:repeat(3,auto)}
+/* review */
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.rcard{padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.rcard.done{background:#fcfdfc}
+.rhead{display:flex;align-items:flex-start;gap:10px}
+.rhead h2{flex:1;font-size:15px}
+.who2{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:13px;min-width:0}
+.who2 .tx{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sugg{background:#fafafa;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px}
+.sugg .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:2px}
+.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:2px}
+.inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select{font-family:inherit;font-size:13px;border:1px solid var(--border);border-radius:8px;padding:6px 8px;background:#fff;color:var(--text);max-width:100%}
+.resolved{display:flex;gap:8px;align-items:flex-start;font-size:13px;background:var(--primary-soft);border-radius:8px;padding:9px 12px}
+.resolved .dot{margin-top:6px;background:var(--ok)}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+/* nba */
+.reps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+.rep h2{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:baseline}
+.rep h2 span{font-weight:400;color:var(--muted);font-size:12.5px}
+.nba{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.nba:last-child{border-bottom:0}
+.nba .tt{font-weight:600;font-size:13.5px}
+.nba .why{font-size:13px;color:#2b2d31}
+.sigs{display:flex;flex-wrap:wrap;gap:6px}
+.reasons{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:14px;padding:12px 16px;align-items:center;font-size:13px}
+.reasons b{font-variant-numeric:tabular-nums}
+/* evals */
+.evgrid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;margin-top:16px}
+.evtop{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.evtop .spacer{flex:1}
+.panel{padding:18px 20px}
+.panel h2{margin-bottom:4px}
+.promo{display:flex;align-items:center;gap:12px}
+.promo .hint{font-size:12.5px;color:var(--muted);max-width:360px}
+.good{color:#00704a;font-weight:600}
+.badge2{display:inline-block;font-size:12px;border-radius:6px;padding:2px 8px;font-weight:600}
+.badge2.ok{background:var(--primary-soft);color:#00704a}
+.badge2.bad{background:var(--err-soft);color:#b3262b}
+.badge2.mid{background:#f1f2f3;color:#4a4d52}
+.replaygrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+.dec{border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px;background:#fafafa}
+.dec.new{background:var(--primary-soft);border-color:#bfe8d5}
+.dec .h{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px;font-weight:600}
+.dec p{margin:4px 0 0}
+/* settings */
+.setgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.setgrid .panel ul{margin:8px 0 0;padding-left:18px}
+.setgrid li{margin-bottom:5px}
+.ro{display:inline-flex;gap:6px;align-items:center;font-size:12px;color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:2px 8px;margin-left:10px;font-weight:500}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;margin-top:8px;font-size:13px}
+.kv div:nth-child(odd){color:var(--muted)}
+footer{max-width:1392px;margin:0 auto;padding:10px 24px 28px;text-align:center;color:var(--muted);font-size:12.5px}
+.toast{position:fixed;left:24px;bottom:24px;background:#0A0A0A;color:#fff;border-radius:8px;padding:10px 14px;font-size:13px;z-index:100;max-width:520px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.toast[hidden]{display:none}
+</style>
+<script>
+function logoFallback(){var el=document.getElementById('logo');if(!el){window.__logoFail=true;return}
+el.innerHTML='<span class="logo-fb"><svg width="22" height="24" viewBox="0 0 22 24" aria-hidden="true"><path d="M11 1l9 5.2v11.6L11 23 2 17.8V6.2z" fill="#1CE783"/></svg>New Relic</span>'}
+</script>
+</head>
+<body>
+<div class="top">
+  <header class="appbar">
+    <div class="logo" id="logo">
+      <img src="https://newrelic.com/themes/custom/erno/logo.svg" alt="New Relic" onerror="logoFallback()">
+    </div>
+    <div class="divider"></div>
+    <div class="prod">Revenue Velocity Agent Console</div>
+    <nav class="tabs" role="tablist" aria-label="Screens">
+      <button class="tab" role="tab" data-tab="runs" aria-selected="true">Live runs</button>
+      <button class="tab" role="tab" data-tab="review" aria-selected="false">Human review<span class="badge" id="reviewBadge">6</span></button>
+      <button class="tab" role="tab" data-tab="nba" aria-selected="false">Next-best actions</button>
+      <button class="tab" role="tab" data-tab="evals" aria-selected="false">Evals</button>
+      <button class="tab" role="tab" data-tab="settings" aria-selected="false">Settings snapshot</button>
+    </nav>
+    <div class="right">
+      <button class="linkbtn" id="aboutBtn" aria-expanded="false" aria-controls="aboutPop">About this demo</button>
+      <span>Viewing as: GTM AI Engineer (demo)</span>
+      <div class="pop" id="aboutPop" hidden>
+        <h4>About this demo</h4>
+        <p>A concept demo built by Joe Deville for the GTM AI Engineer role. Everything on screen is fictional sample data. The agent never sends anything; it only logs and drafts.</p>
+        <p><b>About the builder.</b> Joe Deville has 2 years as owner/admin of a Salesforce org (flows, permission sets, reports and dashboards, Data Loader migrations, dedupe) and led HubSpot-to-Salesforce migrations. About 3 years in RevOps. Previously GTM Engineer at Cortex, building agent workflows, and built LangChain agents at Ignyte for forecasting and lead qualification (30% improvement).</p>
+        <p class="muted" style="margin:0">Stack: Clay, HubSpot, Salesforce, Gong, Trigger.dev, LangChain/CrewAI, Smartlead, Neon, Vercel.</p>
+      </div>
+    </div>
+  </header>
+  <div class="notice"><b>SAMPLE DATA.</b> Every company, person and number here is fictional.</div>
+</div>
+
+<main>
+<!-- 1. LIVE RUNS -->
+<section class="screen" id="screen-runs" data-screen="runs">
+  <div class="hero">
+    <div class="card trace" id="heroTrace" aria-label="Expanded run trace"></div>
+    <div class="card stat" id="statCard">
+      <h2>Last 7 days <span class="pill">Sample</span></h2>
+      <div class="grid">
+        <div><div class="big">412</div><div class="biglbl">leads received</div></div>
+        <div><div class="big">91%</div><div class="biglbl">routed automatically</div></div>
+        <div><div class="big">37</div><div class="biglbl">sent to human review</div></div>
+        <div><div class="big">2m 40s</div><div class="biglbl">median time to owner</div></div>
+      </div>
+      <div class="cmp">
+        <div class="biglbl" style="margin:0 0 6px;color:var(--text);font-weight:500">Median time to owner: agent vs rules baseline</div>
+        <div class="row"><span>Agent</span><span class="mono">2m 40s</span></div>
+        <div class="bar"><i style="width:1.4%;min-width:4px"></i></div>
+        <div class="row"><span class="muted">Rules baseline</span><span class="mono muted">3h 10s</span></div>
+        <div class="bar g"><i style="width:100%"></i></div>
+      </div>
+      <div class="corr">
+        <div><div class="big mono" id="corrStat">12</div><div class="biglbl">Human corrections this week</div></div>
+        <button class="btn sm" data-goto="review">Open review queue</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card tablecard">
+    <div class="hd">
+      <h2>All runs today <span class="muted" style="font-weight:400">(Thu, Oct 15, 2026 · times in CT)</span></h2>
+      <div class="spacer"></div>
+      <span class="muted" style="font-size:12.5px" id="rowCount"></span>
+      <div class="seg" id="statusFilter" role="group" aria-label="Filter by status">
+        <button class="on" data-f="All">All</button><button data-f="Auto">Auto</button><button data-f="Needs review">Needs review</button><button data-f="Error">Error</button>
+      </div>
+    </div>
+    <table class="t" id="runsTable">
+      <colgroup><col style="width:92px"><col style="width:218px"><col style="width:196px"><col style="width:64px"><col style="width:100px"><col style="width:172px"><col style="width:186px"><col style="width:142px"></colgroup>
+      <thead><tr><th>Time</th><th>Lead</th><th>Company</th><th class="num-c">Score</th><th class="num-c">Confidence</th><th>Routed to</th><th>Action (draft only)</th><th>Status</th></tr></thead>
+      <tbody id="runsBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 2. REVIEW -->
+<section class="screen" id="screen-review" data-screen="review" hidden>
+  <div style="display:flex;align-items:flex-end;gap:16px;margin-bottom:6px">
+    <div style="flex:1"><h1>Human review queue</h1>
+    <p class="sub" style="margin:0">The agent held these leads for a person. Nothing is acted on until you choose. Each choice is logged on the run.</p></div>
+    <div class="card" style="padding:10px 16px;display:flex;gap:16px;align-items:center"><div><div class="big mono" id="corrReview" style="font-size:22px">12</div><div class="biglbl">Human corrections this week</div></div><div><div class="big mono" id="pendingReview" style="font-size:22px">6</div><div class="biglbl">waiting for review</div></div></div>
+  </div>
+  <div class="cards" id="reviewCards" style="margin-top:14px"></div>
+</section>
+
+<!-- 3. NBA -->
+<section class="screen" id="screen-nba" data-screen="nba" hidden>
+  <h1>Next-best actions</h1>
+  <p class="sub">Suggested follow-ups for each rep. Accepting saves a draft task in Salesforce; nothing is emailed or sent. Dismiss reasons feed the evals.</p>
+  <div class="card reasons" id="dismissSummary"></div>
+  <div class="reps" id="repCols"></div>
+</section>
+
+<!-- 4. EVALS -->
+<section class="screen" id="screen-evals" data-screen="evals" hidden>
+  <div class="evtop">
+    <div><h1>Evals <span class="pill" style="margin-left:6px">Sample</span></h1>
+    <p class="sub" style="margin:0">Agent decisions compared with a rules baseline and with labels set by people. Changes ship with evidence.</p></div>
+    <div class="spacer"></div>
+    <div class="seg" id="verToggle" role="group" aria-label="Agent version"><button data-v="v1.3">Agent v1.3</button><button data-v="v1.4" class="on">Agent v1.4</button></div>
+  </div>
+  <div class="card panel" style="padding:0;overflow:hidden">
+    <table class="t" style="table-layout:fixed">
+      <colgroup><col style="width:200px"><col style="width:130px"><col style="width:90px"><col style="width:170px"><col style="width:170px"><col style="width:150px"><col></colgroup>
+      <thead><tr><th style="top:0;position:static">Eval set</th><th class="num-c" style="position:static">Cases labeled by people</th><th style="position:static">Version</th><th class="num-c" style="position:static">Agent matches human label</th><th class="num-c" style="position:static">Rules baseline matches human label</th><th class="num-c" style="position:static">Critical regressions</th><th style="position:static;padding-left:24px">Other regressions</th></tr></thead>
+      <tbody id="evalBody"></tbody>
+    </table>
+  </div>
+  <div class="evgrid">
+    <div class="card panel">
+      <h2>Routing accuracy by version <span class="pill" style="margin-left:6px">Sample</span></h2>
+      <p class="sub" style="margin-bottom:6px">Share of 200 labeled leads sent to the same owner a person chose.</p>
+      <div id="chart1"></div>
+      <h2 style="margin-top:14px" id="chart2title"></h2>
+      <div id="chart2"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card panel">
+        <h2>Ship v1.4</h2>
+        <p class="sub" style="margin-bottom:10px">Promote stays off until there are 0 critical regressions. A critical regression is a lead that v1.3 routed correctly and v1.4 routes wrongly in a way that matters (for example, an existing customer sent to an SDR).</p>
+        <div id="regressBox" style="margin-bottom:12px"></div>
+        <div class="promo"><button class="btn primary" id="promoteBtn">Promote v1.4</button><button class="btn" id="rerunBtn">Re-run edge-case set</button></div>
+        <p class="hint muted" id="promoHint" style="font-size:12.5px;margin:10px 0 0"></p>
+      </div>
+      <div class="card panel">
+        <h2>Replay a run with v1.4</h2>
+        <p class="sub" style="margin-bottom:8px">Same lead as the Live runs hero, re-decided by the newer version. Nothing is sent.</p>
+        <button class="btn" id="replayEval">Replay run with v1.4</button>
+        <div id="replayOut"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card panel" style="margin-top:16px">
+    <h2>Edge cases set: <span id="edgeCount">40</span> cases <span class="pill" style="margin-left:6px">Sample</span></h2>
+    <p class="sub" style="margin-bottom:8px">Cases added from the Human review queue with "Mark as rule" appear here. Dismissals from Next-best actions this week: <b class="mono" id="dismissCount">0</b>, used to tune what the agent suggests.</p>
+    <table class="t" style="table-layout:fixed">
+      <colgroup><col style="width:90px"><col style="width:300px"><col style="width:220px"><col style="width:240px"><col></colgroup>
+      <thead><tr><th style="position:static">Case ID</th><th style="position:static">Situation</th><th style="position:static">Expected owner</th><th style="position:static">Source</th><th style="position:static">Added</th></tr></thead>
+      <tbody id="edgeBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 5. SETTINGS -->
+<section class="screen" id="screen-settings" data-screen="settings" hidden>
+  <h1>Settings snapshot <span class="ro">Read-only</span></h1>
+  <p class="sub">What the agent is set up to do today (all sample values). Changes are made by the GTM team, not in this console.</p>
+  <div class="setgrid">
+    <div class="card panel"><h2>Ideal customer profile (ICP)</h2>
+      <div class="kv"><div>Company types</div><div>Software, e-commerce and fintech</div><div>Company size</div><div>200 to 10,000 employees</div><div>Titles</div><div>Platform engineering, SRE, DevOps and engineering leadership</div><div>Motions</div><div>Sales-led (SLG) and product-led (PLG)</div><div>Segments</div><div>Commercial, Enterprise, Strategic</div></div>
+    </div>
+    <div class="card panel"><h2>Guardrails</h2>
+      <ul><li><b>Never email.</b> The agent only logs and drafts.</li><li><b>No action on existing customers</b> without their account manager.</li><li>Anything below 0.70 confidence goes to human review.</li><li>Student emails, competitor domains and unmapped countries always go to human review.</li><li>Every decision is logged with its reasoning and can be reversed by a person.</li></ul>
+    </div>
+    <div class="card panel"><h2>Routing rules</h2>
+      <table class="t" style="table-layout:fixed;margin-top:8px"><colgroup><col style="width:140px"><col></colgroup><tbody>
+        <tr><td>Commercial</td><td title="200 to 999 employees: Commercial SDR (Jordan Lee)">200 to 999 employees: Commercial SDR</td></tr>
+        <tr><td>Enterprise</td><td title="1,000 to 4,999 employees: Enterprise SDR (Amara Singh)">1,000 to 4,999 employees: Enterprise SDR</td></tr>
+        <tr><td>Strategic</td><td title="5,000 or more employees: Strategic SDR (Chris Duvall)">5,000 or more employees: Strategic SDR</td></tr>
+        <tr><td>Existing customer</td><td>Account manager, never an SDR</td></tr>
+        <tr><td>Two possible accounts</td><td>Human review</td></tr>
+      </tbody></table>
+    </div>
+    <div class="card panel"><h2>Data sources</h2>
+      <ul><li><b>Web form webhook</b>, received through Boomi: new lead details.</li><li><b>Clay</b> waterfall: person and company enrichment.</li><li><b>Salesforce API</b>: accounts, owners, open renewals.</li><li><b>Claude</b>: scoring, routing reasoning and draft actions.</li><li><b>Territory map</b>: which countries belong to which team.</li></ul>
+    </div>
+    <div class="card panel" style="grid-column:1/-1"><h2>Change log: prompt and rule versions</h2>
+      <table class="t" style="table-layout:fixed;margin-top:8px"><colgroup><col style="width:90px"><col style="width:130px"><col></colgroup><tbody>
+        <tr><td class="mono">v1.4</td><td>Oct 12, 2026</td><td>Added a second headcount source so company size is checked twice before choosing a segment.</td></tr>
+        <tr><td class="mono">v1.3</td><td>Sep 28, 2026</td><td>Student emails now go to human review instead of the nurture list.</td></tr>
+        <tr><td class="mono">v1.2</td><td>Sep 9, 2026</td><td>Added the rule that existing customers with an open renewal go to the account manager.</td></tr>
+        <tr><td class="mono">v1.1</td><td>Aug 20, 2026</td><td>Scoring reasoning limited to two sentences per step.</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>Independent concept demo by Joe Deville. Not affiliated with New Relic.</footer>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden role="dialog" aria-label="Run trace">
+  <div class="dh"><h2 id="drawerTitle">Run trace</h2><button class="btn sm" id="drawerClose">Close</button></div>
+  <div class="db" id="drawerBody"></div>
+</aside>
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script>
+(function(){
+'use strict';
+if(window.__logoFail)logoFallback();
+
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+var toastT;
+function toast(msg){var t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true},4200)}
+var PILL='<span class="pill">Sample</span>';
+
+/* ---------- data ---------- */
+var OWNERS=['Jordan Lee (Commercial SDR)','Amara Singh (Enterprise SDR)','Chris Duvall (Strategic SDR)','Account manager team','Territory ops queue'];
+function short(o){return o.replace(/ \(.*\)/,'')}
+// id,time,name,title,company,size,industry,country,score,conf,owner,action,status,fill,caseKey,email
+var RUNS=[
+ {id:'run_8f3a21',t:'10:41 AM',name:'Dana Okafor',title:'Platform Eng Lead',co:'Brightloop Commerce',size:'900',ind:'e-commerce',country:'United States',score:84,conf:0.82,owner:'Jordan Lee',action:'Book 15-min intro',status:'Auto',fill:11,email:'dana.okafor@brightloop.example',hero:true},
+ {id:'run_8f3a1e',t:'10:36 AM',name:'Marcus Eliot',title:'CTO',co:'Unknown (personal Gmail)',size:'?',ind:'unknown',country:'United States',score:55,conf:0.41,owner:'Held for review',action:'None until reviewed',status:'Needs review',fill:4,caseKey:'gmail',email:'marcus.eliot@gmail.example'},
+ {id:'run_8f3a1b',t:'10:29 AM',name:'Sofia Brandt',title:'SRE Manager',co:'Kestrel Payments',size:'2,300',ind:'fintech',country:'Germany',score:88,conf:0.9,owner:'Amara Singh',action:'Book 15-min intro',status:'Auto',fill:12,email:'s.brandt@kestrelpay.example'},
+ {id:'run_8f3a17',t:'10:22 AM',name:'Priya Raman',title:'VP Engineering',co:'Halvorsen Pay',size:'3,100',ind:'fintech',country:'United States',score:81,conf:0.58,owner:'Held for review',action:'None until reviewed',status:'Needs review',fill:11,caseKey:'sub',email:'priya.raman@halvorsenpay.example'},
+ {id:'run_8f3a14',t:'10:15 AM',name:'Owen Takahashi',title:'DevOps Engineer',co:'Lumen Grocers Online',size:'650',ind:'e-commerce',country:'Canada',score:64,conf:0.77,owner:'Jordan Lee',action:'Add to nurture list',status:'Auto',fill:10,email:'owen.t@lumengrocers.example'},
+ {id:'run_8f3a10',t:'10:08 AM',name:'Hannah Cole',title:'Director, Platform',co:'Northfield Logistics Software',size:'1,400',ind:'software',country:'United States',score:79,conf:0.74,owner:'Held for review',action:'None until reviewed',status:'Needs review',fill:12,caseKey:'customer',email:'hannah.cole@northfieldls.example'},
+ {id:'run_8f3a0c',t:'9:58 AM',name:'Ibrahim Yusuf',title:'Head of SRE',co:'Quillstone Markets',size:'5,400',ind:'fintech',country:'United Kingdom',score:92,conf:0.93,owner:'Chris Duvall',action:'Create call task',status:'Auto',fill:12,email:'i.yusuf@quillstone.example'},
+ {id:'run_8f3a09',t:'9:51 AM',name:'Tomas Lindgren',title:'Student',co:'Northgate University',size:'?',ind:'education',country:'Sweden',score:12,conf:0.66,owner:'Held for review',action:'None until reviewed',status:'Needs review',fill:5,caseKey:'student',email:'tomas.lindgren@northgate-univ.example'},
+ {id:'run_8f3a05',t:'9:44 AM',name:'Grace Mwangi',title:'Engineering Manager',co:'Paperkite Software',size:'380',ind:'software',country:'United States',score:71,conf:0.8,owner:'Jordan Lee',action:'Draft intro note',status:'Auto',fill:11,email:'grace@paperkite.example'},
+ {id:'run_8f3a02',t:'9:39 AM',name:'Viktor Novak',title:'Senior SRE',co:'Ledgerly',size:'1,150',ind:'fintech',country:'United States',score:73,conf:0.0,owner:'Not routed',action:'None (lookup failed)',status:'Error',fill:0,errored:true,email:'viktor.novak@ledgerly.example'},
+ {id:'run_8f39fe',t:'9:33 AM',name:'Elena Rossi',title:'Platform Architect',co:'Stackhaven',size:'7,800',ind:'software',country:'Italy',score:90,conf:0.88,owner:'Chris Duvall',action:'Create call task',status:'Auto',fill:12,email:'elena.rossi@stackhaven.example'},
+ {id:'run_8f39fb',t:'9:27 AM',name:'Lucía Fernández',title:'CTO',co:'Guaraní Retail Tech',size:'420',ind:'e-commerce',country:'Paraguay',score:70,conf:0.52,owner:'Held for review',action:'None until reviewed',status:'Needs review',fill:10,caseKey:'country',email:'lucia@guaranitech.example'},
+ {id:'run_8f39f7',t:'9:20 AM',name:'Daniel Park',title:'DevOps Lead',co:'Marlow Checkout',size:'760',ind:'e-commerce',country:'United States',score:77,conf:0.85,owner:'Jordan Lee',action:'Book 15-min intro',status:'Auto',fill:12,email:'daniel.park@marlowcheckout.example'},
+ {id:'run_8f39f3',t:'9:14 AM',name:'Aisha Bello',title:'Staff Engineer',co:'Ferrous Cloud',size:'2,050',ind:'software',country:'United States',score:83,conf:0.84,owner:'Amara Singh',action:'Draft intro note',status:'Auto',fill:11,email:'aisha.bello@ferrouscloud.example'},
+ {id:'run_8f39f0',t:'9:07 AM',name:'Noah Whitfield',title:'IT Coordinator',co:'Pinecrest Dental Group',size:'85',ind:'healthcare',country:'United States',score:18,conf:0.91,owner:'Not routed',action:'No action (outside target)',status:'Auto',fill:9,email:'n.whitfield@pinecrestdental.example'},
+ {id:'run_8f39ec',t:'9:01 AM',name:'Camille Dubois',title:'Head of Platform',co:'Verité Pay',size:'1,900',ind:'fintech',country:'France',score:86,conf:0.87,owner:'Amara Singh',action:'Book 15-min intro',status:'Auto',fill:12,email:'camille.dubois@veritepay.example'},
+ {id:'run_8f39e8',t:'8:55 AM',name:'Rahul Menon',title:'SRE',co:'Tidewater Apps',size:'540',ind:'software',country:'India',score:62,conf:0.76,owner:'Jordan Lee',action:'Add to nurture list',status:'Auto',fill:10,email:'rahul.menon@tidewaterapps.example'},
+ {id:'run_8f39e5',t:'8:49 AM',name:'Beatriz Lopes',title:'Engineering Director',co:'Cobalt Harbor Retail',size:'3,400',ind:'e-commerce',country:'Portugal',score:85,conf:0.89,owner:'Amara Singh',action:'Create call task',status:'Auto',fill:12,email:'b.lopes@cobaltharbor.example'},
+ {id:'run_8f39e1',t:'8:42 AM',name:'Samir Haddad',title:'Cloud Engineer',co:'Observa Metrics',size:'610',ind:'software',country:'United States',score:67,conf:0.62,owner:'Held for review',action:'None until reviewed',status:'Needs review',fill:11,caseKey:'competitor',email:'samir.haddad@observametrics.example'},
+ {id:'run_8f39de',t:'8:36 AM',name:'Julia Kowalski',title:'DevOps Manager',co:'Tessellate Pay',size:'1,700',ind:'fintech',country:'Poland',score:80,conf:0.83,owner:'Amara Singh',action:'Draft intro note',status:'Auto',fill:11,email:'julia.kowalski@tessellatepay.example'},
+ {id:'run_8f39da',t:'8:29 AM',name:'Ethan Brooks',title:'Marketing Analyst',co:'Wavelength Media',size:'300',ind:'media',country:'United States',score:22,conf:0.89,owner:'Not routed',action:'No action (outside target)',status:'Auto',fill:9,email:'ethan.brooks@wavelengthmedia.example'},
+ {id:'run_8f39d6',t:'8:21 AM',name:'Mei Lin Chen',title:'Platform Engineer',co:'Orchard Commerce',size:'820',ind:'e-commerce',country:'United States',score:75,conf:0.0,owner:'Not routed',action:'None (lookup failed)',status:'Error',fill:0,errored:true,email:'meilin.chen@orchardcommerce.example'},
+ {id:'run_8f39d3',t:'8:14 AM',name:'Leo Andersson',title:'VP Platform',co:'Fjordline Software',size:'4,200',ind:'software',country:'Norway',score:89,conf:0.9,owner:'Amara Singh',action:'Create call task',status:'Auto',fill:12,email:'leo.andersson@fjordline.example'},
+ {id:'run_8f39cf',t:'8:06 AM',name:'Zainab Okoye',title:'DevOps Engineer',co:'Greenmile Delivery',size:'490',ind:'e-commerce',country:'United States',score:66,conf:0.79,owner:'Jordan Lee',action:'Add to nurture list',status:'Auto',fill:10,email:'zainab.okoye@greenmile.example'}
+];
+var CASES={
+ gmail:{title:'Personal Gmail, title says CTO, company unknown',sugg:'Hold and ask the sales team to look up the company by hand.',why:'The address is a personal Gmail account, so there is no company to match. The title could be real, but the agent cannot tell which company or segment this is.',owner:'Territory ops queue',rule:'Personal email with a senior title and no company goes to the territory ops queue.'},
+ sub:{title:'Matches 2 accounts (subsidiary)',sugg:'Route to Amara Singh on the parent account, Halvorsen Group.',why:'The email domain matches two accounts: Halvorsen Pay and its parent, Halvorsen Group. Sending to the wrong one could double-assign the lead.',owner:'Amara Singh (Enterprise SDR)',rule:'When a domain matches a subsidiary and its parent, route to the parent account owner.'},
+ customer:{title:'Existing customer, open renewal: route to the account manager, not an SDR',sugg:'Send to the account manager team; do not contact from the SDR queue.',why:'Northfield Logistics Software is a current customer with a renewal open. An SDR outreach now could disrupt the renewal.',owner:'Account manager team',rule:'Existing customers with an open renewal always go to the account manager team.'},
+ student:{title:'Student email',sugg:'Do not route. Add to a low-priority learning list.',why:'The address ends in a university domain and the title says student. This is unlikely to be a buyer, but a person should confirm.',owner:'Territory ops queue',rule:'University addresses with a student title are not routed to an SDR.'},
+ competitor:{title:'Competitor domain',sugg:'Do not route to an SDR. Flag to the sales manager.',why:'The email domain belongs to a company that sells a competing product. The request may be market research rather than a buying need.',owner:'Territory ops queue',rule:'Leads from known competitor domains go to the territory ops queue, never an SDR.'},
+ country:{title:'Country not in territory map',sugg:'Hold until territory ops confirms which team covers Paraguay.',why:'Paraguay has no owner in the territory map. The company otherwise fits the target profile.',owner:'Territory ops queue',rule:'Countries missing from the territory map go to territory ops for an owner.'}
+};
+var CASEORDER=['gmail','sub','customer','student','competitor','country'];
+var state={corr:12,rules:[],dismissed:{},filter:'All',ver:'v1.4',critical:1,promoted:false,replayed:false,resolved:{},nba:{}};
+
+function byId(id){return RUNS.filter(function(r){return r.id===id})[0]}
+function runForCase(k){return RUNS.filter(function(r){return r.caseKey===k})[0]}
+function seg(size){var n=parseInt(String(size).replace(/,/g,''),10);if(isNaN(n))return 'Unknown';return n<1000?'Commercial':n<5000?'Enterprise':'Strategic'}
+
+/* ---------- trace builder ---------- */
+function decision(r,ver){
+  var d={owner:r.owner,conf:r.conf,size:r.size,action:r.action,note:''};
+  if(r.hero){
+    d.action='Book 15-min intro; reference their Kubernetes migration job post';
+    if(ver==='v1.4'){d.owner='Amara Singh';d.conf=0.91;d.size='1,800'}
+    else{d.size='900'}
+  }else if(ver==='v1.4'&&!r.errored&&r.status==='Auto'&&r.conf>0){
+    d.conf=Math.min(0.97,Math.round((r.conf+0.05)*100)/100);
+  }
+  return d;
+}
+function buildSteps(r,ver){
+  var d=decision(r,ver), hero=!!r.hero, s=seg(d.size), conf=d.conf.toFixed(2);
+  var missing=12-r.fill; var fillPct=Math.round(r.fill/12*100);
+  var held=r.status==='Needs review', cs=r.caseKey?CASES[r.caseKey]:null;
+  var fit=r.score>=75?'a strong fit':r.score>=50?'a partial fit':'a weak fit';
+  var steps=[];
+  if(r.errored){
+    steps.push({n:1,nm:'Enrich',tool:'Clay',dur:'12.0 s',cost:'$0.000',err:true,
+      sum:'Clay did not answer after 3 tries, so no details were added. The lead was left for a person instead of guessing.',
+      inp:'email: '+r.email+'\nname: '+r.name+'\ncompany (typed by lead): '+r.co,
+      out:'error: Clay lookup timed out after 3 tries\nfields filled: 0 of 12'});
+    ['Match to account','Score against ICP','Route to owner','Propose next action'].forEach(function(nm,i){
+      steps.push({n:i+2,nm:nm,tool:['Salesforce API','Claude','Claude + Salesforce API','Claude'][i],dur:'0.0 s',cost:'$0.000',skip:true,sum:'Skipped because enrichment failed. The lead is waiting in the error list for a person to retry.',inp:'(not run)',out:'(not run)'});
+    });
+    return steps;
+  }
+  steps.push({n:1,nm:'Enrich',tool:'Clay waterfall',dur:(1.4+(r.fill%4)*0.3).toFixed(1)+' s',cost:'$0.012',
+    sum:'Looked up the person and company across Clay data sources and filled '+r.fill+' of 12 fields ('+fillPct+'%).'+(missing>0?' '+missing+' field'+(missing>1?'s were':' was')+' still empty.':''),
+    inp:'email: '+r.email+'\nname: '+r.name+'\ncompany (typed by lead): '+r.co+'\nsource: web form "Request a demo"',
+    out:'title: '+r.title+'\ncompany: '+r.co+'\nemployees: '+(hero&&ver==='v1.3'?'about 900 (one source)':hero?'about 1,800 (two sources agree)':r.size==='?'?'not found':r.size)+'\nindustry: '+r.ind+'\ncountry: '+r.country+'\nfields filled: '+r.fill+' of 12 ('+fillPct+'%)'});
+  var matchSum,matchOut;
+  if(r.caseKey==='sub'){matchSum='The email domain matches two accounts: Halvorsen Pay and its parent, Halvorsen Group. The agent could not pick one safely.';matchOut='candidates: Halvorsen Pay (subsidiary), Halvorsen Group (parent)\nresult: 2 matches'}
+  else if(r.caseKey==='customer'){matchSum='Found an existing customer account with an open renewal. No lead duplicate was created.';matchOut='account: Northfield Logistics Software (customer)\nopen renewal: yes\nresult: 1 match'}
+  else if(r.size==='?'||r.caseKey==='gmail'){matchSum='No company could be found for this person, so there is nothing to match.';matchOut='result: 0 matches'}
+  else if(r.score<30){matchSum='No existing account found. A new account would be proposed as a draft only.';matchOut='result: 0 matches\nproposed: new account draft (not created)'}
+  else{matchSum='Matched the lead to the company account by email domain and checked for duplicates. None found.';matchOut='account: '+r.co+'\nduplicate leads: 0\nresult: 1 match'}
+  steps.push({n:2,nm:'Match to account',tool:'Salesforce API',dur:'0.6 s',cost:'$0.001',sum:matchSum,inp:'domain: '+r.email.split('@')[1]+'\ncompany name: '+r.co,out:matchOut});
+  var sc1=(hero&&ver==='v1.4')?'Platform engineering lead at an e-commerce company of about 1,800 people, which fits our target profile.':r.title+' at '+(r.size==='?'?'an unknown company':'a company of about '+r.size+' people')+' in '+r.ind+', which is '+fit+' for our target profile.';
+  var sc2=hero?(ver==='v1.4'?'A second headcount source puts Brightloop in Enterprise, and a Kubernetes migration job post points to a live project.':'A Kubernetes migration job post suggests a live project, so the score is high.'):(r.score>=75?'The title matches the people we sell to.':r.score>=50?'The title or company details are only partly clear.':'Neither the title nor the company matches who we sell to.');
+  steps.push({n:3,nm:'Score against ICP',tool:'Claude',dur:'2.1 s',cost:'$0.006',sum:sc1+' '+sc2,
+    inp:'title: '+r.title+'\nemployees: '+d.size+'\nindustry: '+r.ind+'\nICP: software, e-commerce, fintech; 200 to 10,000 employees',
+    out:'score: '+r.score+' of 100\nreasoning: '+sc1+' '+sc2});
+  var human=state.resolved[r.id];
+  var rs,ro;
+  if(held&&!human){rs='Held for a person: '+(cs?cs.why.split('. ')[0]+'.':'confidence is below the bar.')+' Confidence was '+conf+', and nothing was assigned.';ro='decision: hold for human review\nsuggested owner: '+(cs?cs.owner:'none')+'\nconfidence: '+conf}
+  else if(human){rs=human.text;ro='decision: '+human.out+'\nconfidence (agent): '+conf+'\nlogged by: a person, '+human.when}
+  else if(r.owner==='Not routed'){rs='Outside the target profile, so no owner was assigned. Confidence '+conf+' that this is the right call.';ro='decision: no owner\nconfidence: '+conf}
+  else{rs=(hero&&ver==='v1.4'?'Company size of about 1,800 puts this in Enterprise, so the lead belongs to '+d.owner+'. ':'Company size and country put this lead in '+s+', so it belongs to '+d.owner+'. ')+'Confidence is '+conf+', above the 0.70 bar for automatic routing.';ro='segment: '+s+'\nowner: '+d.owner+'\nconfidence: '+conf+'\nrule: auto-route at 0.70 or higher'}
+  steps.push({n:4,nm:'Route to owner',tool:'Claude + Salesforce API',dur:'1.3 s',cost:'$0.005',hold:held&&!human,sum:rs,inp:'score: '+r.score+'\nsegment: '+s+'\ncountry: '+r.country+'\naccount match: see step 2',out:ro});
+  var as,ao;
+  if(held&&!human){as='No action drafted until a person reviews this lead.';ao='draft: none'}
+  else if(human&&human.out.indexOf('Approved')===-1&&human.out.indexOf('Owner changed')===-1){as='Rule saved. Future leads like this follow the new rule.';ao='draft: none'}
+  else if(d.action.indexOf('No action')===0){as='No follow-up drafted because the lead is outside the target profile.';ao='draft: none'}
+  else{as='Drafted: '+d.action+'. Nothing was sent; the draft is saved as a task on the Salesforce lead for '+short(human&&human.owner?human.owner:d.owner)+'.';ao='draft: '+d.action+'\nsaved to: Salesforce task (draft)\nsent: no'}
+  steps.push({n:5,nm:'Propose next action',tool:'Claude',dur:'1.9 s',cost:'$0.005',sum:as,inp:'owner: '+(human&&human.owner?human.owner:d.owner)+'\nscore: '+r.score+'\nsignals: '+(hero?'job post mentions Kubernetes migration':'form details only'),out:ao});
+  return steps;
+}
+function traceHTML(r,ver,opts){
+  opts=opts||{};
+  var d=decision(r,ver), steps=buildSteps(r,ver);
+  var human=state.resolved[r.id];
+  var total=steps.reduce(function(a,s){return a+parseFloat(s.dur)},0).toFixed(1);
+  var cost=steps.reduce(function(a,s){return a+parseFloat(s.cost.slice(1))},0).toFixed(3);
+  var statusTxt=statusLabel(r);
+  var h='<div class="trace-head"><span class="who" title="'+esc(r.name+', '+r.title+', '+r.co)+'">'+esc(r.name)+', '+esc(r.title)+', '+esc(r.co)+'</span>'+PILL+(ver==='v1.4'&&r.hero&&state.replayed?'<span class="replaytag">Replayed with v1.4</span>':'')+'<span class="spacer"></span><span class="mono muted" style="font-size:12px">'+r.id+'</span>'+statusChip(r)+'</div>';
+  h+='<div class="decision"><div><div class="k">Confidence</div><div class="v mono">'+(r.errored?'n/a':d.conf.toFixed(2))+'</div></div><div><div class="k">Routed owner</div><div class="v">'+esc(human&&human.owner?short(human.owner):d.owner)+'</div></div><div><div class="k">Score</div><div class="v mono">'+r.score+' / 100</div></div><div></div>';
+  h+='<div class="act"><span class="k" style="flex:none">Proposed action (draft only)</span><span class="t" title="'+esc(d.action)+'">'+esc(held&&!human?'None until a person reviews':d.action)+'</span></div></div>';
+  h+='<div class="timeline"><div class="node"><div class="num hook">API</div><div><div class="stephead" style="cursor:default"><span class="nm">Webhook received</span><span class="chip">Boomi flow</span><span class="meta"><span class="mono">'+r.t+' CT</span></span></div><p class="stepsum" style="margin-bottom:2px">A "Request a demo" form submission arrived and started the run.</p></div></div>';
+  steps.forEach(function(s,i){
+    var open=(opts.open===undefined?2:opts.open)===i;
+    h+='<div class="node'+(open?' open':'')+'"><div class="num'+(s.err?' err':'')+(s.hold?' hold':'')+'">'+s.n+'</div><div>'+
+    '<button class="stephead" aria-expanded="'+open+'"><span class="chev">&#9654;</span><span class="nm">'+s.nm+'</span><span class="chip">'+esc(s.tool)+'</span><span class="meta"><span class="mono">'+s.dur+'</span><span class="mono">'+s.cost+'</span></span></button>'+
+    '<p class="stepsum">'+esc(s.sum)+'</p>'+
+    '<div class="stepio"><div class="io"><div class="lbl">What went in</div><pre>'+esc(s.inp)+'</pre></div><div class="io"><div class="lbl">What came out</div><pre>'+esc(s.out)+'</pre></div></div></div></div>';
+  });
+  h+='</div>';
+  h+='<div class="tracefoot"><span>Total <span class="mono">'+total+' s</span> · estimated cost <span class="mono">$'+cost+'</span></span><span class="spacer"></span>';
+  if(!r.errored)h+='<button class="btn sm" data-replay="'+r.id+'">'+(ver==='v1.4'?'Show original (v1.3)':'Replay run with v1.4')+'</button>';
+  h+='</div>';
+  return h;
+}
+function statusLabel(r){return r.status}
+function statusChip(r){
+  var c=r.status==='Auto'?'var(--ok)':r.status==='Error'?'var(--err)':'var(--warn)';
+  var t=r.status+(r.note?' ('+r.note+')':'');
+  return '<span class="statuscell" title="'+esc(t)+'"><span class="dot" style="background:'+c+'"></span>'+esc(r.status)+'</span>';
+}
+function wireTrace(root){
+  $$('.stephead[aria-expanded]',root).forEach(function(b){b.addEventListener('click',function(){
+    var n=b.closest('.node'),o=n.classList.toggle('open');b.setAttribute('aria-expanded',o)})});
+}
+var viewVer={}; // per-run replay version
+function renderHero(){
+  var r=RUNS[0],v=viewVer[r.id]||'v1.3';
+  var el=$('#heroTrace');el.innerHTML=traceHTML(r,v);wireTrace(el);
+}
+function renderDrawer(id){
+  var r=byId(id),v=viewVer[id]||'v1.3';
+  var b=$('#drawerBody');b.innerHTML='<div class="card trace">'+traceHTML(r,v)+'</div>';wireTrace(b);
+  $('#drawerTitle').textContent='Run trace · '+r.id;
+}
+var openRun=null;
+function openDrawer(id){openRun=id;renderDrawer(id);$('#scrim').hidden=false;$('#drawer').hidden=false;$('#drawerClose').focus()}
+function closeDrawer(){openRun=null;$('#scrim').hidden=true;$('#drawer').hidden=true}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-replay]');
+  if(!b)return;
+  var id=b.getAttribute('data-replay');
+  var nv=(viewVer[id]==='v1.4')?'v1.3':'v1.4';
+  viewVer[id]=nv;
+  if(id===RUNS[0].id)state.replayed=(nv==='v1.4');
+  renderHero(); if(openRun===id)renderDrawer(id);
+  if(id===RUNS[0].id)renderReplayEval();
+  toast(nv==='v1.4'?'Replayed with v1.4. The decision changed; nothing was sent.':'Showing the original v1.3 decision.');
+});
+
+/* ---------- runs table ---------- */
+function renderRuns(){
+  var rows=RUNS.filter(function(r){return state.filter==='All'||r.status===state.filter});
+  $('#rowCount').textContent=rows.length+' of '+RUNS.length+' runs';
+  $('#runsBody').innerHTML=rows.map(function(r){
+    var human=state.resolved[r.id];
+    var owner=human&&human.owner?short(human.owner):r.owner;
+    var conf=r.errored?'n/a':r.conf.toFixed(2);
+    return '<tr class="row" tabindex="0" data-id="'+r.id+'" title="Open trace for '+esc(r.name)+'">'+
+    '<td class="mono muted">'+r.t+'</td>'+
+    '<td><div class="cellflex"><span class="tx" title="'+esc(r.name+', '+r.title)+'">'+esc(r.name)+'</span>'+PILL+'</div></td>'+
+    '<td title="'+esc(r.co)+'">'+esc(r.co)+'</td>'+
+    '<td class="num-c mono">'+r.score+'</td><td class="num-c mono">'+conf+'</td>'+
+    '<td title="'+esc(owner)+'">'+esc(owner)+'</td>'+
+    '<td title="'+esc(r.action)+'">'+esc(r.action)+'</td>'+
+    '<td>'+statusChip(r)+'</td></tr>';
+  }).join('');
+  $$('#runsBody tr').forEach(function(tr){
+    tr.addEventListener('click',function(){openDrawer(tr.dataset.id)});
+    tr.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openDrawer(tr.dataset.id)}});
+  });
+}
+$('#statusFilter').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;
+  state.filter=b.dataset.f;$$('#statusFilter button').forEach(function(x){x.classList.toggle('on',x===b)});renderRuns();
+});
+
+/* ---------- review ---------- */
+function setCorr(){
+  ['#corrStat','#corrReview'].forEach(function(s){$(s).textContent=state.corr});
+  var pending=CASEORDER.filter(function(k){return !state.resolved[runForCase(k).id]}).length;
+  $('#pendingReview').textContent=pending;$('#reviewBadge').textContent=pending;$('#reviewBadge').style.display=pending?'':'none';
+}
+function nowCT(){return 'Thu Oct 15, 2026'}
+function renderReview(){
+  $('#reviewCards').innerHTML=CASEORDER.map(function(k){
+    var c=CASES[k],r=runForCase(k),res=state.resolved[r.id];
+    var h='<div class="card rcard'+(res?' done':'')+'" data-case="'+k+'"><div class="rhead"><h2>'+esc(c.title)+'</h2>'+PILL+'</div>'+
+    '<div class="who2"><span class="tx" title="'+esc(r.name+', '+r.title+', '+r.co)+'">'+esc(r.name)+', '+esc(r.title)+', '+esc(r.co)+'</span><span class="mono" style="font-size:12px">'+r.id+'</span></div>'+
+    '<div class="sugg"><div class="lbl">Agent suggestion · confidence '+r.conf.toFixed(2)+'</div><b>'+esc(c.sugg)+'</b><div style="margin-top:4px;color:#2b2d31">'+esc(c.why)+'</div></div>';
+    if(res){h+='<div class="resolved"><span class="dot"></span><span>'+esc(res.text)+'</span></div>'}
+    else{h+='<div class="actions"><button class="btn primary sm" data-act="approve" data-k="'+k+'">Approve</button><button class="btn sm" data-act="change" data-k="'+k+'">Change owner</button><button class="btn sm" data-act="rule" data-k="'+k+'">Mark as rule</button></div><div class="inline" data-slot="'+k+'"></div>';}
+    return h+'</div>';
+  }).join('');
+  setCorr();
+}
+function resolve(k,type,owner){
+  var c=CASES[k],r=runForCase(k);
+  var when='Oct 15, 2026';
+  var text,out;
+  if(type==='approve'){owner=c.owner;out='Approved the agent suggestion';text='Approved: '+short(owner)+' owns this lead. Status on the run changed to Auto. Nothing was sent.';r.status='Auto';r.note='approved by a person';r.owner=short(owner);r.action=(k==='sub'?'Draft intro note':k==='customer'?'Hand off to account manager':'Add to review list');}
+  else if(type==='change'){out='Owner changed to '+owner;text='Owner changed to '+short(owner)+'. Status on the run changed to Auto. Nothing was sent.';r.status='Auto';r.note='owner changed by a person';r.owner=short(owner);r.action='Draft intro note';}
+  else{out='Saved as a rule';text='Marked as a rule: "'+c.rule+'" Added to Evals as a new edge case.';r.status='Auto';r.note='rule created';r.owner=short(c.owner);r.action='Add to review list';
+    state.rules.push({id:'EC-'+(40+state.rules.length+1),sit:c.title,owner:short(c.owner),rule:c.rule});}
+  if(type==='approve'&&out.indexOf('Approved')===0)out='Approved';
+  state.resolved[r.id]={text:text,out:type==='approve'?'Approved':type==='change'?'Owner changed to '+short(owner):'Saved as a rule',owner:owner,when:when};
+  state.corr++;
+  renderReview();renderRuns();renderHero();renderEvals();
+  if(openRun)renderDrawer(openRun);
+  toast(type==='rule'?'Rule saved and added to Evals > Edge cases. Corrections this week: '+state.corr:'Done. Run '+r.id+' updated. Corrections this week: '+state.corr);
+}
+$('#reviewCards').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-act]');
+  if(b){
+    var k=b.dataset.k,act=b.dataset.act;
+    if(act==='approve')return resolve(k,'approve');
+    if(act==='rule')return resolve(k,'rule');
+    var slot=$('[data-slot="'+k+'"]');
+    slot.innerHTML='<select aria-label="New owner">'+OWNERS.map(function(o){return '<option>'+esc(o)+'</option>'}).join('')+'</select><button class="btn primary sm" data-act="confirm" data-k="'+k+'">Confirm owner</button><button class="btn sm" data-act="cancel" data-k="'+k+'">Cancel</button>';
+    $('select',slot).focus();return;
+  }
+});
+$('#reviewCards').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-act]');if(!b)return;
+  var k=b.dataset.k;
+  if(b.dataset.act==='confirm'){var sel=$('[data-slot="'+k+'"] select');resolve(k,'change',sel.value)}
+  if(b.dataset.act==='cancel'){$('[data-slot="'+k+'"]').innerHTML=''}
+});
+
+/* ---------- NBA ---------- */
+var REPS=[
+ {name:'Jordan Lee',role:'Commercial SDR',items:[
+  {id:'n1',tt:'Follow up: prospect viewed pricing page 3x in 48h',co:'Cobalt Harbor Retail',why:'Two people from the same company opened the pricing page three times in two days, and the last draft got no reply.',sig:['Pricing page: 3 views in 48h','Last touch: 6 days ago','2 visitors']},
+  {id:'n2',tt:'New engineering hire: introduce monitoring for the new platform team',co:'Paperkite Software',why:'A new Head of Platform joined 3 weeks ago and the account has had no contact since.',sig:['Job change: 3 weeks ago','No contact in 90 days']},
+  {id:'n3',tt:'Re-engage: demo requested, then went quiet',co:'Marlow Checkout',why:'The lead asked for a demo 12 days ago but never picked a time.',sig:['Demo form: 12 days ago','0 replies']}]},
+ {name:'Amara Singh',role:'Enterprise SDR',items:[
+  {id:'n4',tt:'Stalled 21 days in Evaluation: suggest exec sponsor email',co:'Tessellate Pay',why:'The deal has not moved stage in 21 days and only one contact is involved. A senior sponsor could unblock it.',sig:['Stage age: 21 days','1 contact on deal','Next meeting: none']},
+  {id:'n5',tt:'Champion left the company: find a new contact',co:'Verité Pay',why:'Our main contact\'s email bounced and her profile shows a new employer.',sig:['Email bounced: Oct 13','Profile updated']},
+  {id:'n6',tt:'Prepare follow-up after pricing call',co:'Fjordline Software',why:'The pricing call was 4 days ago and no summary or next step is recorded yet.',sig:['Call: Oct 11','No next step logged']}]},
+ {name:'Chris Duvall',role:'Strategic SDR',items:[
+  {id:'n7',tt:'Renewal in 60 days, usage down 18% (sample)',co:'Northfield Logistics Software',why:'Product use fell 18% over 30 days while the renewal is 60 days away. Pass to the account manager before contact.',sig:['Usage: down 18% (30 days)','Renewal: Dec 14, 2026','Customer account']},
+  {id:'n8',tt:'Multi-thread: only one contact at a large target account',co:'Quillstone Markets',why:'The account scored 92 but we only know one person there. More contacts would reduce risk.',sig:['1 known contact','Score: 92']},
+  {id:'n9',tt:'Send case-study draft to SRE lead',co:'Stackhaven',why:'The SRE lead opened the last two emails and clicked the reliability guide.',sig:['2 email opens','1 guide click']}]}
+];
+var REASONS=['Already handled','Not relevant now','Wrong person or account','Bad timing','Data looks wrong'];
+function nbaCard(it,rep){
+  var st=state.nba[it.id];
+  var h='<div class="nba" data-nba="'+it.id+'"><div style="display:flex;gap:8px;align-items:flex-start"><div class="tt" style="flex:1" title="'+esc(it.tt)+'">'+esc(it.tt)+'</div>'+PILL+'</div>'+
+  '<div class="muted" style="font-size:12.5px">'+esc(it.co)+'</div><div class="why"><b>Why:</b> '+esc(it.why)+'</div>'+
+  '<div class="sigs">'+it.sig.map(function(s){return '<span class="chip">'+esc(s)+'</span>'}).join('')+'</div>';
+  if(st&&st.type==='accept')h+='<div class="resolved"><span class="dot"></span><span>Accepted. A draft task was saved in Salesforce for '+rep.name+'. Nothing was sent.</span></div>';
+  else if(st&&st.type==='dismiss')h+='<div class="resolved" style="background:#f3f3f3"><span class="dot" style="background:#9a9ea5"></span><span>Dismissed: '+esc(st.reason)+'. Logged for evals.</span></div>';
+  else if(st&&st.type==='asking')h+='<div class="inline"><select aria-label="Reason for dismissing">'+REASONS.map(function(x){return '<option>'+x+'</option>'}).join('')+'</select><button class="btn primary sm" data-nact="confirm" data-i="'+it.id+'">Dismiss</button><button class="btn sm" data-nact="cancel" data-i="'+it.id+'">Cancel</button></div>';
+  else h+='<div class="actions"><button class="btn primary sm" data-nact="accept" data-i="'+it.id+'">Accept</button><button class="btn sm" data-nact="ask" data-i="'+it.id+'">Dismiss (with reason)</button></div>';
+  return h+'</div>';
+}
+function renderNBA(){
+  $('#repCols').innerHTML=REPS.map(function(rep){
+    var open=rep.items.filter(function(i){return !state.nba[i.id]||state.nba[i.id].type==='asking'}).length;
+    return '<div class="card rep"><h2>'+rep.name+' <span>'+rep.role+' · <span class="mono">'+open+'</span> open</span></h2>'+rep.items.map(function(i){return nbaCard(i,rep)}).join('')+'</div>';
+  }).join('');
+  var tot=0,parts=[];REASONS.forEach(function(x){var n=state.dismissed[x]||0;tot+=n;parts.push('<span>'+x+': <b class="mono">'+n+'</b></span>')});
+  $('#dismissSummary').innerHTML='<b>Dismissed this week: <span class="mono">'+tot+'</span></b>'+parts.join('')+PILL;
+  $('#dismissCount').textContent=tot;
+}
+$('#repCols').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-nact]');if(!b)return;
+  var id=b.dataset.i,a=b.dataset.nact,card=b.closest('.nba');
+  if(a==='accept'){state.nba[id]={type:'accept'};toast('Accepted. Draft task saved in Salesforce. Nothing was sent.')}
+  if(a==='ask')state.nba[id]={type:'asking'};
+  if(a==='cancel')delete state.nba[id];
+  if(a==='confirm'){var r=$('select',card).value;state.nba[id]={type:'dismiss',reason:r};state.dismissed[r]=(state.dismissed[r]||0)+1;toast('Dismissed with reason "'+r+'". Logged for evals.')}
+  renderNBA();renderEvals();
+});
+
+/* ---------- evals ---------- */
+var EV={
+ 'v1.3':[['Routing',200,86,71,0,3],['Scoring',150,81,64,0,2],['Edge cases',40,68,45,0,4]],
+ 'v1.4':[['Routing',200,93,71,0,2],['Scoring',150,84,64,0,1],['Edge cases',40,78,45,'crit',2]]
+};
+function bars(items,max,w,h,fmt){
+  // items: [{label,val,kind}] kind: base|cur|other
+  var pad={l:8,r:8,t:22,b:34},iw=w-pad.l-pad.r,ih=h-pad.t-pad.b,bw=Math.min(78,iw/items.length*0.55),gap=iw/items.length;
+  var s='<svg viewBox="0 0 '+w+' '+h+'" width="100%" role="img" aria-label="Bar chart" style="display:block">';
+  [0,50,100].forEach(function(g){var y=pad.t+ih-ih*g/max;s+='<line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+y+'" y2="'+y+'" stroke="#EEE"/><text x="'+(w-pad.r)+'" y="'+(y-3)+'" text-anchor="end" font-size="10" fill="#6B6F76">'+g+'%</text>'});
+  items.forEach(function(it,i){
+    var x=pad.l+gap*i+(gap-bw)/2,bh=ih*it.val/max,y=pad.t+ih-bh;
+    var fill=it.kind==='base'?'#B8BCC2':it.kind==='cur'?'#00AC69':'#CDEFE0';
+    s+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" rx="3" fill="'+fill+'"><title>'+it.label+': '+it.val+'% (sample)</title></rect>';
+    s+='<text x="'+(x+bw/2)+'" y="'+(y-5)+'" text-anchor="middle" font-size="12" font-weight="600" fill="#0A0A0A" font-family="Geist Mono, monospace">'+it.val+'%</text>';
+    s+='<text x="'+(x+bw/2)+'" y="'+(h-14)+'" text-anchor="middle" font-size="11.5" fill="#6B6F76">'+it.label+'</text>';
+  });
+  return s+'</svg>';
+}
+function renderEvals(){
+  var v=state.ver;
+  $$('#verToggle button').forEach(function(b){b.classList.toggle('on',b.dataset.v===v)});
+  var rows=EV[v].map(function(r){
+    var crit=r[4]==='crit'?state.critical:r[4];
+    var cases=r[0]==='Edge cases'?r[1]+state.rules.length:r[1];
+    var acc=r[2];if(v==='v1.4'&&r[0]==='Edge cases'&&state.critical===0)acc=80;
+    r=r.slice();r[2]=acc;
+    return '<tr><td>'+r[0]+' '+PILL+'</td><td class="num-c mono">'+cases+'</td><td class="mono">'+v+'</td><td class="num-c mono good">'+acc+'%</td><td class="num-c mono">'+r[3]+'%</td><td class="num-c">'+(crit>0?'<span class="badge2 bad">'+crit+' critical</span>':'<span class="badge2 ok">0</span>')+'</td><td style="padding-left:24px"><span class="badge2 mid mono">'+r[5]+'</span> <span class="muted" style="font-size:12.5px">minor</span></td></tr>';
+  }).join('');
+  $('#evalBody').innerHTML=rows;
+  $('#chart1').innerHTML=bars([{label:'Rules baseline',val:71,kind:'base'},{label:'Agent v1.3',val:86,kind:v==='v1.3'?'cur':'other'},{label:'Agent v1.4',val:93,kind:v==='v1.4'?'cur':'other'}],100,560,200);
+  $('#chart2title').innerHTML='Agreement with human labels, agent '+v+' vs rules baseline';
+  var e=EV[v],ed=(v==='v1.4'&&state.critical===0)?80:e[2][2];
+  var items=[];[[e[0][0],e[0][3],e[0][2]],[e[1][0],e[1][3],e[1][2]],['Edge cases',e[2][3],ed]].forEach(function(x){items.push({label:x[0]+' · rules',val:x[1],kind:'base'});items.push({label:x[0]+' · agent',val:x[2],kind:'cur'})});
+  $('#chart2').innerHTML=bars(items,100,560,170);
+  // promote
+  var crit=state.critical;
+  $('#regressBox').innerHTML=crit>0?'<span class="badge2 bad">'+crit+' critical regression</span> <span style="font-size:13px">In v1.4, an existing customer with an open renewal was sent to an SDR in 1 of 40 edge cases (sample).</span>':'<span class="badge2 ok">0 critical regressions</span> <span style="font-size:13px">v1.4 no longer sends existing customers to an SDR.</span>';
+  var pb=$('#promoteBtn');pb.disabled=crit>0||state.promoted;pb.textContent=state.promoted?'v1.4 promoted':'Promote v1.4';
+  $('#rerunBtn').disabled=crit===0;
+  $('#promoHint').textContent=state.promoted?'v1.4 is now the active version in this demo. Nothing changed in any real system.':crit>0?'Promote is off until there are 0 critical regressions. Use "Mark as rule" on a Human review case, then re-run the edge-case set.':'Ready: 0 critical regressions. Promoting only changes the active version in this demo.';
+  // edge list
+  $('#edgeCount').textContent=40+state.rules.length;
+  $('#edgeBody').innerHTML=state.rules.length?state.rules.map(function(r){return '<tr><td class="mono">'+r.id+'</td><td title="'+esc(r.sit)+'">'+esc(r.sit)+'</td><td title="'+esc(r.owner)+'">'+esc(r.owner)+'</td><td>Review queue · Mark as rule '+PILL+'</td><td class="mono muted">Oct 15, 2026</td></tr>'}).join(''):'<tr><td colspan="5" class="muted" style="text-align:center">No new cases yet. The original 40 are labeled by people. Use "Mark as rule" in the Human review queue to add one.</td></tr>';
+  var dc=0;Object.keys(state.dismissed).forEach(function(k){dc+=state.dismissed[k]});$('#dismissCount').textContent=dc;
+}
+$('#verToggle').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;state.ver=b.dataset.v;renderEvals()});
+$('#rerunBtn').addEventListener('click',function(){
+  if(!state.rules.length){toast('Still 1 critical regression: no new rule yet. Mark a Human review case as a rule first.');return}
+  state.critical=0;renderEvals();toast('Edge-case set re-run with the new rules: 0 critical regressions.');
+});
+$('#promoteBtn').addEventListener('click',function(){state.promoted=true;renderEvals();toast('v1.4 promoted (demo only). Nothing was sent or changed.')});
+function renderReplayEval(){
+  var out=$('#replayOut');
+  if(!state.replayed){out.innerHTML='';return}
+  var a=decision(RUNS[0],'v1.3'),b=decision(RUNS[0],'v1.4');
+  out.innerHTML='<div class="replaygrid"><div class="dec"><div class="h">v1.3 (original)</div><b>Routed to '+a.owner+'</b> · confidence <span class="mono">'+a.conf.toFixed(2)+'</span><p>Read the company as about 900 people from one source, so it landed in Commercial.</p></div>'+
+  '<div class="dec new"><div class="h">v1.4 (replay)</div><b>Routed to '+b.owner+'</b> · confidence <span class="mono">'+b.conf.toFixed(2)+'</span><p>Two sources agree on about 1,800 people, so it belongs in Enterprise.</p></div></div><p class="muted" style="font-size:12.5px;margin:10px 0 0">The Live runs trace now shows the v1.4 decision. Nothing was sent.</p>';
+}
+$('#replayEval').addEventListener('click',function(){
+  var id=RUNS[0].id;viewVer[id]='v1.4';state.replayed=true;renderHero();renderReplayEval();if(openRun===id)renderDrawer(id);toast('Replayed with v1.4. The decision changed; nothing was sent.');
+});
+
+/* ---------- tabs / chrome ---------- */
+function showTab(t){
+  $$('.tab').forEach(function(b){b.setAttribute('aria-selected',b.dataset.tab===t)});
+  $$('.screen').forEach(function(s){s.hidden=s.dataset.screen!==t});
+  window.scrollTo(0,0);
+}
+$$('.tab').forEach(function(b){b.addEventListener('click',function(){showTab(b.dataset.tab)})});
+document.addEventListener('click',function(e){var g=e.target.closest('[data-goto]');if(g)showTab(g.dataset.goto)});
+$('#scrim').addEventListener('click',closeDrawer);$('#drawerClose').addEventListener('click',closeDrawer);
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeDrawer();$('#aboutPop').hidden=true;$('#aboutBtn').setAttribute('aria-expanded','false')}});
+$('#aboutBtn').addEventListener('click',function(e){e.stopPropagation();var p=$('#aboutPop');p.hidden=!p.hidden;this.setAttribute('aria-expanded',!p.hidden)});
+document.addEventListener('click',function(e){if(!e.target.closest('#aboutPop')&&e.target.id!=='aboutBtn'){$('#aboutPop').hidden=true;$('#aboutBtn').setAttribute('aria-expanded','false')}});
+
+renderHero();renderRuns();renderReview();renderNBA();renderEvals();renderReplayEval();
+})();
+</script>
+</body>
+</html>

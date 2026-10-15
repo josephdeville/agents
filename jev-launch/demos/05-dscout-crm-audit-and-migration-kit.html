@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<!--
+  Dscout Week-1 CRM Audit & Migration Plan: interactive concept prototype
+  Independent concept demo by Joe Deville. Not affiliated with Dscout. All data is fictional (SAMPLE).
+  CHECK AGAINST LIVE POSTING: no Dscout job description was on file. This spec is based on similar GTM Systems
+  and Salesforce admin postings (MNTN, SAI Systems Health, GitLab) plus Joe's real HubSpot-to-Salesforce migration
+  and Salesforce admin work. Check it against the live Dscout posting before sending.
+  Vanilla HTML/CSS/JS. No build step. Charts/diagrams are inline SVG.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dscout Week-1 CRM Audit and Migration Plan (SAMPLE)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#2D62FF; --pink:#DD23BB; --lblue:#D9E5FF; --navy:#080331; --text:#0A0A0A; --muted:#6B6F76;
+  --bg:#F7F7F7; --card:#FFFFFF; --border:#E6E6E6; --warn:#F5A524; --err:#E5484D; --ok:#1F9D55;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Circular","Circular Std",Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:14px;line-height:1.45;color:var(--text);background:var(--bg);font-variant-numeric:tabular-nums;overflow-x:hidden}
+h1,h2,h3{color:var(--navy);margin:0;font-weight:600;letter-spacing:-.01em}
+h1{font-size:24px;line-height:1.2}
+h2{font-size:16px}
+h3{font-size:14px}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:var(--blue)}
+.muted{color:var(--muted)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+[hidden]{display:none!important}
+
+/* app bar */
+.appbar{position:sticky;top:0;z-index:30;height:58px;background:#fff;border-bottom:2px solid var(--blue);display:flex;align-items:center;padding:0 24px;gap:16px}
+.brand{display:flex;align-items:center;gap:14px;flex:none}
+.brand img{height:26px;width:auto;display:block}
+.wordmark{font-weight:700;color:var(--navy);font-size:22px;letter-spacing:-.03em;text-transform:lowercase}
+.divider{width:1px;height:24px;background:var(--border)}
+.prodname{font-weight:600;color:var(--navy);font-size:14px;white-space:nowrap}
+.tabs{display:flex;gap:2px;margin-left:8px;min-width:0}
+.tab{border:0;background:none;padding:8px 12px;border-radius:8px;font-size:13.5px;font-weight:500;color:var(--text);white-space:nowrap}
+.tab:hover{background:#f1f3f8}
+.tab[aria-selected="true"]{background:var(--lblue);color:var(--blue);font-weight:600}
+.appright{margin-left:auto;display:flex;align-items:center;gap:12px;flex:none;position:relative}
+.viewing{font-size:12.5px;color:var(--muted);white-space:nowrap}
+.linkbtn{border:1px solid var(--border);background:#fff;border-radius:8px;padding:6px 10px;font-size:12.5px;color:var(--navy);font-weight:500}
+.linkbtn:hover{border-color:var(--blue);color:var(--blue)}
+.pop{position:absolute;right:0;top:44px;width:380px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 28px rgba(8,3,49,.14);padding:16px 18px;z-index:40;font-size:13px}
+.pop h3{margin-bottom:6px}
+.pop ul{margin:6px 0 8px;padding-left:18px}
+.pop li{margin:3px 0}
+
+.notice{background:var(--lblue);color:var(--navy);font-size:12.5px;font-weight:500;text-align:center;padding:7px 16px;border-bottom:1px solid #c5d6ff;min-height:32px}
+
+main{padding:24px 32px 12px;max-width:1440px;margin:0 auto}
+.pagehead{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:16px}
+.pagehead p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.titlerow{display:flex;align-items:center;gap:10px}
+
+.sample{display:inline-block;font-size:10px;line-height:1;letter-spacing:.06em;text-transform:uppercase;font-weight:600;color:var(--muted);border:1px solid #bfc2c8;border-radius:999px;padding:3px 6px;vertical-align:middle;flex:none;white-space:nowrap;background:#fff}
+
+.btn{border:1px solid var(--blue);background:var(--blue);color:#fff;border-radius:8px;padding:9px 16px;font-weight:600;font-size:13.5px;white-space:nowrap}
+.btn:hover{background:#1f4fe0}
+.btn.ghost{background:#fff;color:var(--blue)}
+.btn.ghost:hover{background:var(--lblue)}
+.btn.small{padding:5px 10px;font-size:12.5px}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.grid6{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.tile{text-align:left;background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:6px;position:relative;min-height:148px}
+.tile:hover{border-color:var(--blue);box-shadow:0 2px 10px rgba(45,98,255,.12)}
+.tile .top{display:flex;justify-content:space-between;align-items:center}
+.tile .area{font-size:12.5px;font-weight:600;color:var(--navy)}
+.tile .grade{font-size:34px;font-weight:700;color:var(--navy);line-height:1;display:flex;align-items:center;gap:8px;margin-top:2px}
+.tile .line{font-size:12.5px;color:var(--text);line-height:1.35}
+.tile .meta{font-size:11.5px;color:var(--muted);margin-top:auto}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none}
+.dot.ok{background:var(--ok)}.dot.warn{background:var(--warn)}.dot.err{background:var(--err)}.dot.low{background:#9aa0a8}
+
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:12px 0}
+.stat{padding:14px 18px}
+.stat .n{font-size:22px;font-weight:700;color:var(--navy);line-height:1.1}
+.stat .l{font-size:12.5px;color:var(--text)}
+.stat .s{font-size:12px;color:var(--muted)}
+.statlabel{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin:16px 0 8px;font-weight:500}
+
+.two{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+.fixrow{display:grid;grid-template-columns:28px minmax(0,1fr) auto auto;gap:12px;align-items:center;min-height:48px;border-top:1px solid var(--border);width:100%;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left;padding:0 4px}
+.fixrow:hover{background:#fafbff}
+.fixrow .num{width:24px;height:24px;border-radius:50%;background:var(--lblue);color:var(--blue);font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.fixrow .t{min-width:0}
+.fixrow .t b{display:block;font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fixrow .t span{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plancard{display:flex;flex-direction:column;gap:8px}
+.bignum{font-size:40px;font-weight:700;color:var(--navy);line-height:1}
+.risk{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;white-space:nowrap}
+
+/* tables */
+table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;background:#fff}
+.tablewrap{border:1px solid var(--border);border-radius:12px;background:#fff}
+th{position:sticky;top:58px;z-index:5;background:#fff;text-align:left;font-size:12px;font-weight:600;color:var(--muted);height:44px;padding:0 12px;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+td{height:48px;padding:0 12px;border-bottom:1px solid var(--border);font-size:13px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tr.sel td{background:var(--lblue)}
+tr.clickable{cursor:pointer}
+tr.clickable:hover td{background:#fafbff}
+tr.clickable.sel:hover td{background:var(--lblue)}
+td .cellflex{display:flex;align-items:center;gap:8px;min-width:0}
+td .cellflex .tx{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.chk{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;cursor:pointer}
+input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue);margin:0;cursor:pointer}
+input[type=checkbox]:disabled{cursor:not-allowed}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px;align-items:center}
+.chip{border:1px solid var(--border);background:#fff;border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:500}
+.chip:hover{border-color:var(--blue)}
+.chip[aria-pressed="true"]{background:var(--lblue);border-color:var(--blue);color:var(--blue);font-weight:600}
+.status{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;white-space:nowrap}
+.status.need{background:var(--pink);color:#fff;border-radius:999px;padding:3px 10px;font-weight:600}
+.status.nomig{color:var(--muted)}
+
+.areatabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.areatab{background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-weight:500;font-size:13px;display:flex;gap:8px;align-items:center}
+.areatab[aria-selected="true"]{border-color:var(--blue);background:var(--lblue);color:var(--blue);font-weight:600}
+.areatab .g{font-weight:700;color:var(--navy)}
+.detail{margin-top:12px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.detail h3{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:4px}
+.detail p{margin:0;font-size:13px}
+.legend{font-size:12px;color:var(--muted);margin-top:10px}
+
+/* mapping */
+.recon{display:flex;align-items:center;gap:20px;padding:16px 20px;margin-bottom:12px}
+.bar{display:flex;height:10px;border-radius:999px;overflow:hidden;background:#eceef2;flex:1}
+.bar i{display:block;height:100%}
+.qrow td{height:auto;padding:12px 12px 14px 44px;background:#fff7fd;white-space:normal;border-bottom:1px solid var(--border)}
+.qrow .q{font-weight:500;color:var(--navy);margin-bottom:8px}
+.qrow .opts{display:flex;gap:8px;flex-wrap:wrap}
+
+/* cutover */
+.progress{padding:16px 20px;margin-bottom:12px;display:flex;align-items:center;gap:20px}
+.pbar{height:10px;border-radius:999px;background:#eceef2;flex:1;overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--blue);transition:width .25s}
+.alert{border:1px solid var(--err);border-left-width:4px;background:#fff;border-radius:12px;padding:14px 18px;margin-bottom:12px;display:flex;gap:12px}
+.alert h3{color:var(--err)}
+.phase{margin-bottom:12px;padding:0;overflow:hidden}
+.phase>header{padding:14px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+.phase>header .cnt{margin-left:auto;font-size:12.5px;color:var(--muted)}
+.phase.rb.fail{border-color:var(--err);box-shadow:0 0 0 2px rgba(229,72,77,.18)}
+.step{display:grid;grid-template-columns:28px minmax(0,1fr) 190px 90px;gap:12px;align-items:center;min-height:48px;padding:0 20px;border-bottom:1px solid var(--border)}
+.step:last-child{border-bottom:0}
+.step.vstep{grid-template-columns:28px minmax(0,1fr) 90px 110px 120px 190px}
+.step .tx{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step.done .tx{color:var(--muted);text-decoration:line-through}
+.numin{width:96px;font:inherit;padding:5px 8px;border:1px solid var(--border);border-radius:6px;text-align:right}
+.callout{padding:14px 20px;background:#fafafa;border-top:1px solid var(--border);font-size:13px}
+.phase.rb.fail .callout{background:#fff3f3}
+
+/* plan */
+.weeks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.week{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;min-height:300px;display:flex;flex-direction:column;gap:8px}
+.week.over{border-color:var(--blue);background:#f4f7ff}
+.week header{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.week header b{color:var(--navy)}
+.week header span{font-size:12px;color:var(--muted)}
+.pcard{border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:#fff;cursor:grab;display:flex;flex-direction:column;gap:6px}
+.pcard:hover{border-color:var(--blue)}
+.pcard.drag{opacity:.45}
+.pcard .t{font-weight:600;color:var(--navy);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard .m{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.pcard .acts{display:flex;gap:6px;align-items:center}
+.pcard select{font:inherit;font-size:12px;border:1px solid var(--border);border-radius:6px;padding:2px 4px;background:#fff}
+.tag{font-size:11.5px;border:1px solid var(--border);border-radius:6px;padding:1px 6px;color:var(--text);background:#fafafa}
+.tag.appr{border-color:var(--blue);color:var(--blue);background:#fff}
+.empty{font-size:12.5px;color:var(--muted);border:1px dashed var(--border);border-radius:10px;padding:14px;text-align:center}
+.lower{display:grid;grid-template-columns:1fr 2fr;gap:12px}
+.log{list-style:none;margin:8px 0 0;padding:0;max-height:330px;overflow:auto}
+.log li{padding:8px 0;border-top:1px solid var(--border);font-size:12.5px;display:flex;flex-direction:column;gap:2px}
+.log time{color:var(--muted);font-size:11.5px}
+.doctabs{display:flex;gap:8px;margin:10px 0 12px;align-items:center;flex-wrap:wrap}
+.docbody{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.docbody table th{position:static}
+.docnote{font-size:12px;color:var(--muted);margin-top:8px}
+svg text{font-family:inherit}
+
+footer.foot{padding:20px 32px 28px;text-align:center;color:var(--muted);font-size:12.5px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;z-index:60;box-shadow:0 6px 20px rgba(8,3,49,.3);max-width:80vw}
+
+/* print sheet (hidden on screen) */
+#printSheet{display:none}
+@page{size:Letter;margin:.4in}
+@media print{
+  html,body{background:#fff!important;overflow:visible!important}
+  .app-ui,.toast,.pop{display:none!important}
+  #printSheet{display:block;color:#0A0A0A;font-size:9.5pt;line-height:1.3}
+  #printSheet .pbanner{background:#D9E5FF;color:#080331;font-weight:600;text-align:center;padding:4pt 8pt;border:1pt solid #2D62FF;font-size:9pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printSheet h1{font-size:17pt;margin:10pt 0 2pt}
+  #printSheet h2{font-size:11pt;margin:10pt 0 4pt;border-bottom:1pt solid #2D62FF;padding-bottom:2pt}
+  #printSheet .sub{color:#6B6F76;font-size:9pt;margin:0}
+  #printSheet .ptiles{display:grid;grid-template-columns:repeat(3,1fr);gap:6pt}
+  #printSheet .ptile{border:1pt solid #E6E6E6;border-radius:6pt;padding:6pt 8pt}
+  #printSheet .ptile .g{font-size:18pt;font-weight:700;color:#080331;line-height:1}
+  #printSheet .ptile .a{font-weight:600;color:#080331;font-size:9.5pt}
+  #printSheet .ptile .l{font-size:8.5pt}
+  #printSheet .pstats{display:grid;grid-template-columns:repeat(4,1fr);gap:6pt;margin-top:6pt;font-size:8.5pt;color:#333}
+  #printSheet .pstats b{display:block;font-size:12pt;color:#080331}
+  #printSheet ol{margin:0;padding-left:16pt}
+  #printSheet ol li{margin:2pt 0}
+  #printSheet .pweeks{display:grid;grid-template-columns:repeat(4,1fr);gap:6pt}
+  #printSheet .pweek{border:1pt solid #E6E6E6;border-radius:6pt;padding:5pt 6pt;font-size:8.5pt}
+  #printSheet .pweek b{color:#080331;display:block;margin-bottom:3pt;font-size:9pt}
+  #printSheet .pweek div{margin:2pt 0}
+  #printSheet .pfoot{margin-top:10pt;border-top:1pt solid #E6E6E6;padding-top:5pt;text-align:center;color:#6B6F76;font-size:8.5pt}
+  .sample{border-color:#999!important}
+}
+</style>
+</head>
+<body>
+<div class="app-ui" id="ui">
+  <header class="appbar" role="banner">
+    <div class="brand">
+      <img id="logoImg" src="https://cdn.prod.website-files.com/6740a730413debfacf115060/6829d334379497ff57e23607_logoContainer.svg" alt="dscout" onerror="logoFallback(this)">
+      <span class="divider" aria-hidden="true"></span>
+      <span class="prodname">Week-1 CRM Audit &amp; Migration Plan</span>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Screens" id="tabs"></nav>
+    <div class="appright">
+      <span class="viewing">Viewing as: GTM Systems Admin (demo)</span>
+      <button class="linkbtn" id="aboutBtn" aria-expanded="false" aria-controls="aboutPop">About this demo</button>
+      <div class="pop" id="aboutPop" role="dialog" aria-label="About this demo" hidden>
+        <h3>About this demo</h3>
+        <p style="margin:0 0 6px">A concept demo by Joe Deville showing what he would deliver in the first week as GTM Systems Admin. Every number and record is fictional.</p>
+        <ul>
+          <li>2 years as owner/admin of a Salesforce org: flows, permission sets, reports and dashboards, Data Loader migrations, dedupe.</li>
+          <li>Led HubSpot-to-Salesforce migrations.</li>
+          <li>About 3 years in RevOps. Previously GTM Engineer at Cortex, building agent workflows.</li>
+          <li>Built LangChain agents at Ignyte for forecasting and lead qualification (30% improvement).</li>
+        </ul>
+        <p class="muted" style="margin:0">Stack: Clay, HubSpot, Salesforce, Gong, Trigger.dev, LangChain/CrewAI, Smartlead, Neon, Vercel.</p>
+      </div>
+    </div>
+  </header>
+  <div class="notice" role="note">SAMPLE DATA. Every company, person and number here is fictional.</div>
+
+  <main>
+    <!-- 1 Audit summary -->
+    <section id="s-summary" aria-labelledby="h-summary">
+      <div class="pagehead">
+        <div>
+          <div class="titlerow"><h1 id="h-summary">Week-1 audit of an inherited Salesforce org</h1><span class="sample">Sample</span></div>
+          <p>Prepared Thursday, Oct 15, 2026 (times in CT). Click a grade to see what is behind it.</p>
+        </div>
+        <button class="btn" data-print>Export PDF one-pager</button>
+      </div>
+      <div class="grid6" id="tiles"></div>
+      <div class="statlabel"><span>Sample org at a glance</span><span class="sample">Sample</span></div>
+      <div class="stats" id="orgstats"></div>
+      <div class="two">
+        <div class="card" style="padding:16px 20px 8px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><h2>Top 3 fixes for week 1</h2><span class="sample">Sample</span></div>
+          <div id="top3"></div>
+        </div>
+        <div class="card plancard">
+          <div style="display:flex;align-items:center;gap:10px"><h2>30-day plan</h2><span class="sample">Sample</span></div>
+          <div class="bignum" id="planBig">14</div>
+          <div id="planSub" style="font-size:14px"></div>
+          <div class="muted" style="font-size:12.5px">Fixes placed in Week 1 to Week 4. You can drag them to a different week.</div>
+          <div style="display:flex;gap:8px;margin-top:auto"><button class="btn small" data-go="plan">View 30-day plan</button><button class="btn small ghost" data-print>Export PDF one-pager</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 Area details -->
+    <section id="s-areas" hidden aria-labelledby="h-areas">
+      <div class="pagehead">
+        <div><div class="titlerow"><h1 id="h-areas">Area details</h1><span class="sample">Sample</span></div>
+        <p>Each finding shows the evidence, how risky it is, how big the fix is, and who should own it.</p></div>
+      </div>
+      <div class="areatabs" role="tablist" aria-label="Audit areas" id="areatabs"></div>
+      <div class="chips" id="riskchips" role="group" aria-label="Filter by risk"></div>
+      <div class="tablewrap">
+        <table>
+          <colgroup><col style="width:130px"><col style="width:21%"><col style="width:25%"><col style="width:80px"><col style="width:70px"><col><col style="width:150px"></colgroup>
+          <thead><tr><th>In 30-day plan</th><th>Finding</th><th>Evidence</th><th>Risk</th><th>Effort</th><th>Fix</th><th>Owner role</th></tr></thead>
+          <tbody id="ftbody"></tbody>
+        </table>
+      </div>
+      <div class="legend">Effort: S = under 1 day, M = 1 to 3 days, L = more than 3 days. Hover a truncated cell to read it all, or click a row for the full text.</div>
+      <div class="card detail" id="fdetail" style="margin-top:12px"></div>
+    </section>
+
+    <!-- 3 Migration -->
+    <section id="s-map" hidden aria-labelledby="h-map">
+      <div class="pagehead">
+        <div><div class="titlerow"><h1 id="h-map">Migration mapping: HubSpot to Salesforce</h1><span class="sample">Sample</span></div>
+        <p>Every HubSpot field is either mapped, waiting on a business decision, or deliberately left behind.</p></div>
+      </div>
+      <div class="card recon" id="recon"></div>
+      <div class="chips" id="mapchips" role="group" aria-label="Filter by status"></div>
+      <div class="tablewrap">
+        <table>
+          <colgroup><col style="width:22%"><col style="width:90px"><col style="width:22%"><col style="width:100px"><col><col style="width:150px"></colgroup>
+          <thead><tr><th>HubSpot object / property</th><th>Type</th><th>Salesforce object / field</th><th>Type</th><th>What changes on the way</th><th>Status</th></tr></thead>
+          <tbody id="mtbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 4 Cutover -->
+    <section id="s-cut" hidden aria-labelledby="h-cut">
+      <div class="pagehead">
+        <div><div class="titlerow"><h1 id="h-cut">Cutover plan</h1><span class="sample">Sample</span></div>
+        <p>Planned: freeze Friday, Nov 6 at 6:00 PM CT, go live Saturday, Nov 7 at 8:00 AM CT. Try "Simulate mismatch" on a count to see the rollback step.</p></div>
+      </div>
+      <div class="card progress" id="cutprog"></div>
+      <div id="cutalert"></div>
+      <div id="phases"></div>
+    </section>
+
+    <!-- 5 Plan & docs -->
+    <section id="s-plan" hidden aria-labelledby="h-plan">
+      <div class="pagehead">
+        <div><div class="titlerow"><h1 id="h-plan">30-day plan &amp; docs</h1><span class="sample">Sample</span></div>
+        <p id="plansubhead">Drag a fix to another week to reschedule it. Weeks start today, Thursday, Oct 15.</p></div>
+        <button class="btn" data-print>Export PDF one-pager</button>
+      </div>
+      <div class="weeks" id="weeks"></div>
+      <div class="lower">
+        <div class="card"><h2>Change log</h2><ul class="log" id="log"></ul></div>
+        <div class="card"><h2>Generated docs</h2>
+          <div class="doctabs" id="doctabs" role="tablist" aria-label="Generated docs"></div>
+          <div class="docbody" id="docbody"></div>
+          <div class="docnote" id="docnote"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">Independent concept demo by Joe Deville. Not affiliated with Dscout.</footer>
+</div>
+
+<div id="printSheet" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+function logoFallback(img){
+  var s=document.createElement('span');s.className='wordmark';s.textContent='dscout';s.setAttribute('aria-label','dscout');
+  img.replaceWith(s);
+}
+(function(){
+'use strict';
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+var PILL='<span class="sample">Sample</span>';
+function n(x){return Number(x).toLocaleString('en-US')}
+
+/* ---------- data ---------- */
+var TABS=[['summary','Audit summary'],['areas','Area details'],['map','Migration mapping'],['cut','Cutover plan'],['plan','30-day plan & docs']];
+var AREAS=[
+ {id:'data',name:'Data quality',grade:'C',dot:'warn',line:'Duplicates and leads with no active owner are the biggest drag.'},
+ {id:'auto',name:'Automation',grade:'B−',dot:'ok',line:'Overlapping flows and old workflow rules still run side by side.'},
+ {id:'sec',name:'Security & access',grade:'C+',dot:'warn',line:'Too many people can change or delete everything.'},
+ {id:'cust',name:'Customization debt',grade:'C',dot:'warn',line:'Many Lead fields sit empty and clutter the page.'},
+ {id:'rep',name:'Reporting',grade:'B',dot:'ok',line:'Mostly healthy, but some dashboards are broken.'},
+ {id:'int',name:'Integrations',grade:'B',dot:'ok',line:'The HubSpot sync works but overwrites contact owners.'}
+];
+var WEEKS=[{n:1,r:'Oct 15 to 21'},{n:2,r:'Oct 22 to 28'},{n:3,r:'Oct 29 to Nov 4'},{n:4,r:'Nov 5 to 11'}];
+var F=[
+ {id:'D1',area:'data',short:'Turn on duplicate rule, then merge',title:'Duplicate leads are not being caught',ev:'6.4% duplicate leads by email (about 950 of 14,820). 3 matching rules, 0 duplicate rules active.',risk:'High',eff:'M',fix:'Enable a duplicate rule (alert, do not block), then merge in batches with a Data Loader backup first.',owner:'Salesforce Admin',appr:true,wk:1},
+ {id:'D2',area:'data',short:'Reassign leads with inactive owners',title:'Leads whose owner is no longer active',ev:'412 leads owned by deactivated users. Example view: Leads / Stale owners.',risk:'Med',eff:'S',fix:'Reassign to a round-robin queue and add a rule that blocks deactivating a user who still owns leads.',owner:'Sales Ops lead',appr:false,wk:2},
+ {id:'D3',area:'data',short:'Standardize phone formats',title:'Phone numbers in 5 different formats',ev:'3,100 leads with phone numbers that do not match one format. Example: (312) 555-0100 vs 312.555.0100.',risk:'Low',eff:'S',fix:'Standardize with a one-time Data Loader update, then add a validation rule for new records.',owner:'Salesforce Admin',appr:false,wk:0},
+ {id:'A1',area:'auto',short:'Merge Lead Status automations into one flow',title:'Three automations fight over Lead Status',ev:'Two flows and a legacy workflow rule all update Lead Status on create, so the order is unpredictable.',risk:'High',eff:'M',fix:'Consolidate into one record-triggered flow, test in sandbox, then switch off the other two.',owner:'Salesforce Admin',appr:false,wk:1},
+ {id:'A2',area:'auto',short:'Retire legacy workflow rules and Process Builders',title:'Old automation tools still running',ev:'9 legacy workflow rules and 6 Process Builders are active. No retirement date is set.',risk:'Med',eff:'L',fix:'Retire in order of risk: rebuild each as a flow, run both in sandbox, then switch the old one off.',owner:'Salesforce Admin',appr:false,wk:4},
+ {id:'A3',area:'auto',short:'Add error alerts to flows',title:'Flows fail without telling anyone',ev:'14 of 47 active flows have no error handling. Failures are only visible in the debug log.',risk:'Low',eff:'M',fix:'Add a fault path that emails the admin group, starting with the flows that touch Leads and Opportunities.',owner:'Salesforce Admin',appr:false,wk:2},
+ {id:'S1',area:'sec',short:'Move Modify All Data to permission sets',title:'Too many users can change any record',ev:'11 users have Modify All Data through their profile. Path: Setup / Profiles / Modify All Data.',risk:'High',eff:'M',fix:'Move the access to permission sets and give each person the least access they need.',owner:'Salesforce Admin + IT',appr:true,wk:2},
+ {id:'S2',area:'sec',short:'Archive unused profiles',title:'Profiles nobody uses',ev:'38 profiles but 15 have no active users. 22 permission sets, 6 with no assignments.',risk:'Med',eff:'S',fix:'Document and archive the unused profiles and permission sets so new hires are not given the wrong one.',owner:'Salesforce Admin',appr:false,wk:2},
+ {id:'S3',area:'sec',short:'Give each integration its own user',title:'Integrations share one admin login',ev:'3 integrations connect through the same admin user. A password change would stop all three.',risk:'Med',eff:'M',fix:'Create one dedicated integration user per tool with only the access that tool needs.',owner:'Salesforce Admin + IT',appr:false,wk:3},
+ {id:'C1',area:'cust',short:'Deprecate unused Lead fields',title:'Lead fields that are empty or retired',ev:'61 Lead fields empty for more than 90 days. 9 of them are used only by a retired report.',risk:'Med',eff:'M',fix:'Build a deprecation list, check field history, hide the fields for 30 days, then delete.',owner:'GTM Systems Admin',appr:true,wk:3},
+ {id:'C2',area:'cust',short:'Merge near-identical fields',title:'Near-duplicate field names',ev:'17 pairs of Lead fields look the same, such as Lead Source and Lead Source 2.',risk:'Low',eff:'L',fix:'Pick one field per pair, move the data over, then retire the other.',owner:'GTM Systems Admin',appr:false,wk:0},
+ {id:'C3',area:'cust',short:'Clean up free-text picklists',title:'Picklists that have grown out of control',ev:'Industry has 68 values, many near-duplicates. 4 picklists accept typed-in values.',risk:'Med',eff:'S',fix:'Cut to a short approved list, map old values to new ones, and make the list restricted.',owner:'Sales Ops lead',appr:false,wk:3},
+ {id:'R1',area:'rep',short:'Rebuild broken dashboards',title:'Dashboards running on a deleted report type',ev:'18 dashboards, 7 running on a deleted report type. They show blank tiles.',risk:'Med',eff:'M',fix:'Archive the ones nobody opens and rebuild the rest on a current report type.',owner:'RevOps analyst',appr:false,wk:3},
+ {id:'R2',area:'rep',short:'Archive reports nobody opens',title:'Reports not opened in a year',ev:'64 reports not opened in 12 months, 21 of them in personal folders.',risk:'Low',eff:'S',fix:'Move to an Archive folder and delete after 60 days if nobody asks for them.',owner:'RevOps analyst',appr:false,wk:4},
+ {id:'R3',area:'rep',short:'Align pipeline stage names',title:'Two stage definitions in pipeline reports',ev:'The pipeline dashboard and the forecast report count stages differently (Proposal vs Negotiation).',risk:'Low',eff:'M',fix:'Use one stage list: Discovery, Demo, Proposal, Negotiation, Closed Won, Closed Lost.',owner:'RevOps analyst',appr:false,wk:0},
+ {id:'I1',area:'int',short:'Stop sync from overwriting Contact Owner',title:'HubSpot sync overwrites Contact Owner',ev:'Every sync resets Contact Owner to the HubSpot value. 1,260 owner changes in the last 7 days.',risk:'High',eff:'S',fix:'Change the sync mapping so Salesforce owns Contact Owner and HubSpot can only read it.',owner:'Salesforce Admin',appr:false,wk:1},
+ {id:'I2',area:'int',short:'Alert on sync errors',title:'Sync errors nobody sees',ev:'230 records failed to sync in the last 7 days. No alert goes to anyone.',risk:'Med',eff:'S',fix:'Send a daily error summary to the admin channel and review it every Monday.',owner:'GTM Systems Admin',appr:false,wk:1},
+ {id:'I3',area:'int',short:'Automate Research Project loads',title:'Research Project records loaded by hand',ev:'About 40 Research Project rows are loaded from a monthly CSV by hand.',risk:'Low',eff:'M',fix:'Replace the CSV with a scheduled load and a check that counts rows before and after.',owner:'GTM Systems Admin',appr:false,wk:0}
+];
+var FBYID={};F.forEach(function(f){FBYID[f.id]=f});
+var TOP3=['I1','A1','D1'];
+
+var MAP=[
+ {id:1,hp:'Company / Company name',ht:'Text',sf:'Account / Name',st:'Text',tr:'Trim extra spaces',s:'Mapped'},
+ {id:2,hp:'Company / Domain name',ht:'Text',sf:'Account / Website',st:'URL',tr:'Add https:// when missing',s:'Mapped'},
+ {id:3,hp:'Company / Company size range',ht:'Picklist',sf:'Account / Employee Range',st:'Picklist',tr:'Match HubSpot size ranges to Salesforce ranges',s:'Needs decision',q:'HubSpot has "201-500" and "501-1000", but the Salesforce range list stops at "500+". Which ranges do we keep?',o:[['Collapse both into 500+','Both ranges become "500+"'],['Add a "501-1000" value','New "501-1000" value added to the list'],['Do not migrate size','__NOMIG__']]},
+ {id:4,hp:'Company / Industry',ht:'Picklist',sf:'Account / Industry',st:'Picklist',tr:'Map 41 HubSpot values to the approved list',s:'Mapped'},
+ {id:5,hp:'Company / Company owner',ht:'User',sf:'Account / Owner',st:'Lookup',tr:'Match the owner by work email',s:'Mapped'},
+ {id:6,hp:'Contact / First name',ht:'Text',sf:'Contact / First Name',st:'Text',tr:'None',s:'Mapped'},
+ {id:7,hp:'Contact / Last name',ht:'Text',sf:'Contact / Last Name',st:'Text',tr:'None',s:'Mapped'},
+ {id:8,hp:'Contact / Email',ht:'Email',sf:'Contact / Email',st:'Email',tr:'Lowercase; skip bad addresses and list them',s:'Mapped'},
+ {id:9,hp:'Contact / Phone number',ht:'Text',sf:'Contact / Phone',st:'Phone',tr:'Standardize to one international format',s:'Mapped'},
+ {id:10,hp:'Contact / Job title',ht:'Text',sf:'Contact / Title',st:'Text',tr:'None',s:'Mapped'},
+ {id:11,hp:'Contact / Lifecycle stage',ht:'Picklist',sf:'Lead / Status + Opportunity / Stage',st:'Picklist',tr:'Split: early stages go to Lead Status, later stages go to Opportunity stage',s:'Needs decision',q:'Where should "Marketing qualified" and "Sales qualified" land? Salesforce Lead Status only has Open, Working, Qualified, Unqualified.',o:[['Marketing qualified = Open, Sales qualified = Qualified','MQL to Open, SQL to Qualified'],['Marketing qualified = Working, Sales qualified = Qualified','MQL to Working, SQL to Qualified'],['Keep the old stage in a new field','Old stage kept in "Lifecycle (old)" field']]},
+ {id:12,hp:'Contact / Lead status',ht:'Picklist',sf:'Lead / Status',st:'Picklist',tr:'Map 7 values to 4',s:'Mapped'},
+ {id:13,hp:'Contact / Original source',ht:'Picklist',sf:'Lead / Lead Source',st:'Picklist',tr:'Map to the approved source list',s:'Mapped'},
+ {id:14,hp:'Contact / Analytics source data 1',ht:'Text',sf:'(none)',st:'None',tr:'Empty on 92% of records',s:'Not migrating'},
+ {id:15,hp:'Contact / Contact owner',ht:'User',sf:'Contact / Owner',st:'Lookup',tr:'Match by work email; owner may be a former employee',s:'Needs decision',q:'438 contacts belong to people who left. Who should own them?',o:[['Give them to the account owner','Reassigned to the account owner'],['Put them in a round-robin queue','Reassigned to the round-robin queue'],['Leave them with no owner for review','Left unowned and listed for review']]},
+ {id:16,hp:'Contact / Last contacted',ht:'Date',sf:'(calculated by Salesforce)',st:'None',tr:'Salesforce works this out from activities',s:'Not migrating'},
+ {id:17,hp:'Contact / Marketing contact status',ht:'Picklist',sf:'Contact / Marketing Status',st:'Picklist',tr:'New custom field',s:'Mapped'},
+ {id:18,hp:'Contact / Email opt-out',ht:'Checkbox',sf:'Contact / Email Opt Out',st:'Checkbox',tr:'Load first so nobody is emailed by mistake',s:'Mapped'},
+ {id:19,hp:'Deal / Deal name',ht:'Text',sf:'Opportunity / Name',st:'Text',tr:'None',s:'Mapped'},
+ {id:20,hp:'Deal / Amount',ht:'Number',sf:'Opportunity / Amount',st:'Currency',tr:'Set currency to USD',s:'Mapped'},
+ {id:21,hp:'Deal / Close date',ht:'Date',sf:'Opportunity / Close Date',st:'Date',tr:'Convert to Central Time date',s:'Mapped'},
+ {id:22,hp:'Deal / Pipeline + Deal stage',ht:'Picklist',sf:'Opportunity / Record Type + Stage',st:'Record type',tr:'Each HubSpot pipeline becomes a record type; stages map to Discovery through Closed Lost',s:'Needs decision',q:'HubSpot has 3 pipelines (New business, Expansion, Renewal). One record type each, or fold Renewal into Expansion?',o:[['Three record types','3 record types, one per pipeline'],['Two record types','2 record types; Renewal joins Expansion'],['One record type with a type field','1 record type plus a "Deal type" field']]},
+ {id:23,hp:'Association / Contact to Company',ht:'Link',sf:'Contact / Account',st:'Lookup',tr:'Use the primary company',s:'Mapped'},
+ {id:24,hp:'Association / Contact to Deal',ht:'Link',sf:'Opportunity / Contact Roles',st:'Related list',tr:'Each linked contact becomes a contact role',s:'Needs decision',q:'HubSpot deal links have no role. What role should loaded contacts get?',o:[['Decision Maker for the primary contact, Other for the rest','Primary = Decision Maker, others = Other'],['Everyone gets "Other" for now','All contacts set to Other'],['Do not migrate deal links','__NOMIG__']]},
+ {id:25,hp:'Activity / Calls, emails, meetings',ht:'Activity',sf:'Task / Event',st:'Activity',tr:'Load after Opportunities so they attach',s:'Needs decision',q:'How much activity history should we load? More history means a longer load window.',o:[['Last 12 months','Last 12 months of activity'],['Last 24 months','Last 24 months of activity'],['Everything','All activity']]},
+ {id:26,hp:'Custom object / Research project',ht:'Object',sf:'Research Project (custom object)',st:'Object',tr:'Create the object first, then load',s:'Mapped'}
+];
+
+var CUT=[
+ {id:'P1',name:'Freeze & backup',items:[
+  ['1a','Announce the freeze window to all users','Sales Ops lead',true],
+  ['1b','Full export of every HubSpot object to CSV','GTM Systems Admin',true],
+  ['1c','Data Loader backup of Salesforce Accounts, Contacts and Leads','Salesforce Admin',false],
+  ['1d','Pause the HubSpot to Salesforce sync during the load','Salesforce Admin',false]]},
+ {id:'P2',name:'Load order',items:[
+  ['2a','Load Accounts','Salesforce Admin',false],
+  ['2b','Load Contacts (opt-outs first)','Salesforce Admin',false],
+  ['2c','Load Opportunities and Contact Roles','Salesforce Admin',false],
+  ['2d','Load Activities','Salesforce Admin',false]]},
+ {id:'P3',name:'Validation counts',vals:true,items:[
+  ['3a','Accounts loaded','Salesforce Admin',false,3240],
+  ['3b','Contacts loaded','Salesforce Admin',false,9615],
+  ['3c','Opportunities loaded','RevOps analyst',false,1128],
+  ['3d','Activities loaded','RevOps analyst',false,41300]]},
+ {id:'P4',name:'User acceptance',items:[
+  ['4a','Sales rep checks their accounts and open deals','Sales rep (tester)',false],
+  ['4b','Sales manager checks the team pipeline report','Sales manager (tester)',false],
+  ['4c','Marketing ops checks lead status and sources','Marketing ops (tester)',false],
+  ['4d','Customer success manager checks contact roles','CS manager (tester)',false],
+  ['4e','Finance analyst checks closed-won amounts','Finance analyst (tester)',false]]},
+ {id:'P5',name:'Go-live',items:[
+  ['5a','Make Salesforce the system of record','GTM Systems Admin',false],
+  ['5b','Turn the sync back on, one direction only','Salesforce Admin',false],
+  ['5c','Send the "we are live" note and the one-page user guide','Sales Ops lead',false]]},
+ {id:'P6',name:'Rollback criteria',rb:true,items:[
+  ['6a','Rollback rule signed off: any count off by more than 0.5% means stop','Sales Ops lead',false],
+  ['6b','Rollback rehearsed once in sandbox using the backups','GTM Systems Admin',false]]}
+];
+var ROLLBACK='Stop the load. Restore the Data Loader backups taken in Freeze & backup, turn the HubSpot sync back on, keep HubSpot as the system of record, and tell testers in the cutover channel.';
+
+/* ---------- state ---------- */
+var S={tab:'summary',area:'data',risk:'All',sel:'D1',mapFilter:'All',doc:'dict',docTime:'9:40 AM',
+  plan:[],weeks:{},map:{},cutDone:{},cutActual:{},log:[],clock:42};
+F.filter(function(f){return f.wk}).sort(function(a,b){return a.wk-b.wk}).forEach(function(f){S.plan.push(f.id);S.weeks[f.id]=f.wk});
+MAP.forEach(function(m){S.map[m.id]={s:m.s,choice:null}});
+CUT.forEach(function(p){p.items.forEach(function(i){S.cutDone[i[0]]=i[3];if(i[4]!=null)S.cutActual[i[0]]=i[4]})});
+S.log=[{t:'9:36 AM CT',x:'Audit started on the sample org. 18 findings recorded.'},{t:'9:38 AM CT',x:'14 findings placed in the 30-day plan; 3 marked as needing approval.'},{t:'9:41 AM CT',x:'Field dictionary, permission matrix and data-flow diagram generated.'}].reverse();
+
+function stamp(){S.clock+=1;var m=S.clock;var h=9+Math.floor(m/60);var mm=m%60;return h+':'+(mm<10?'0':'')+mm+' AM CT'}
+function addLog(x){S.log.unshift({t:stamp(),x:x})}
+var toastT;
+function toast(msg){var t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true},2600)}
+function riskDot(r){return '<span class="risk"><span class="dot '+(r==='High'?'err':r==='Med'?'warn':'low')+'"></span>'+r+'</span>'}
+function areaOf(id){return AREAS.filter(function(a){return a.id===id})[0]}
+function inPlan(id){return S.plan.indexOf(id)>-1}
+function approvalCount(){return S.plan.filter(function(id){return FBYID[id].appr}).length}
+function lowestWeek(){var c=[0,0,0,0,0];S.plan.forEach(function(id){c[S.weeks[id]]++});var b=1;for(var w=2;w<=4;w++){if(c[w]<c[b])b=w}return b}
+
+/* ---------- navigation ---------- */
+function go(tab,opts){
+  opts=opts||{};
+  S.tab=tab;
+  if(opts.area){S.area=opts.area;S.risk='All'}
+  if(opts.sel){S.sel=opts.sel}
+  render();window.scrollTo(0,0);
+}
+function renderTabs(){
+  $('#tabs').innerHTML=TABS.map(function(t){return '<button class="tab" role="tab" data-go="'+t[0]+'" aria-selected="'+(S.tab===t[0])+'">'+esc(t[1])+'</button>'}).join('');
+  ['summary','areas','map','cut','plan'].forEach(function(id){$('#s-'+id).hidden=S.tab!==id});
+}
+
+/* ---------- 1 summary ---------- */
+function renderSummary(){
+  $('#tiles').innerHTML=AREAS.map(function(a){
+    var fs=F.filter(function(f){return f.area===a.id});var hi=fs.filter(function(f){return f.risk==='High'}).length;
+    return '<button class="tile" data-area="'+a.id+'" title="Open '+esc(a.name)+' findings"><div class="top"><span class="area">'+esc(a.name)+'</span>'+PILL+'</div>'+
+      '<div class="grade"><span class="dot '+a.dot+'" aria-hidden="true"></span>'+a.grade+'</div><div class="line">'+esc(a.line)+'</div>'+
+      '<div class="meta">'+fs.length+' findings, '+hi+' high risk</div></button>';
+  }).join('');
+  $('#orgstats').innerHTML=[
+    ['212','custom fields on Lead','61 have been empty for more than 90 days'],
+    ['62','automations running','47 flows, 9 legacy workflow rules, 6 Process Builders'],
+    ['38 / 22','profiles / permission sets','Who can see and change what'],
+    ['14,820','leads in the org','6.4% are duplicates (about 950)']
+  ].map(function(s){return '<div class="card stat"><div class="n">'+s[0]+'</div><div class="l">'+s[1]+'</div><div class="s">'+s[2]+'</div></div>'}).join('');
+  $('#top3').innerHTML=TOP3.map(function(id,i){var f=FBYID[id];var a=areaOf(f.area);
+    return '<button class="fixrow" data-open="'+id+'" title="'+esc(f.title+': '+f.fix)+'"><span class="num">'+(i+1)+'</span><span class="t"><b>'+esc(f.short)+'</b><span>'+esc(a.name)+' / '+esc(f.owner)+' / effort '+f.eff+'</span></span>'+riskDot(f.risk)+PILL+'</button>';
+  }).join('');
+  var c=S.plan.length,ap=approvalCount();
+  $('#planBig').textContent=c;
+  $('#planSub').innerHTML='<b>30-day plan: '+c+' fixes, '+ap+' need approval</b>';
+}
+
+/* ---------- 2 areas ---------- */
+function renderAreas(){
+  $('#areatabs').innerHTML=AREAS.map(function(a){return '<button class="areatab" role="tab" data-area="'+a.id+'" aria-selected="'+(S.area===a.id)+'"><span class="g">'+a.grade+'</span>'+esc(a.name)+'</button>'}).join('');
+  var all=F.filter(function(f){return f.area===S.area});
+  var cnt={All:all.length,High:0,Med:0,Low:0};all.forEach(function(f){cnt[f.risk]++});
+  $('#riskchips').innerHTML='<span class="muted" style="font-size:12.5px">Show risk:</span>'+['All','High','Med','Low'].map(function(r){return '<button class="chip" data-risk="'+r+'" aria-pressed="'+(S.risk===r)+'">'+(r==='All'?'All risks':r)+' ('+cnt[r]+')</button>'}).join('');
+  var rows=all.filter(function(f){return S.risk==='All'||f.risk===S.risk});
+  if(rows.length&&!rows.some(function(f){return f.id===S.sel}))S.sel=rows[0].id;
+  $('#ftbody').innerHTML=rows.length?rows.map(function(f){
+    var on=inPlan(f.id);
+    return '<tr class="clickable'+(f.id===S.sel?' sel':'')+'" data-sel="'+f.id+'" tabindex="0">'+
+     '<td><label class="chk" title="Add this fix to the 30-day plan"><input type="checkbox" data-k="plan-'+f.id+'" data-plan="'+f.id+'"'+(on?' checked':'')+' aria-label="Add to plan: '+esc(f.short)+'"><span>'+(on?'Wk '+S.weeks[f.id]:'Add to plan')+'</span></label></td>'+
+     '<td title="'+esc(f.title)+'"><div class="cellflex">'+PILL+'<span class="tx">'+esc(f.title)+'</span></div></td>'+
+     '<td title="'+esc(f.ev)+'">'+esc(f.ev)+'</td><td>'+riskDot(f.risk)+'</td><td title="'+(f.eff==='S'?'Under 1 day':f.eff==='M'?'1 to 3 days':'More than 3 days')+'">'+f.eff+'</td>'+
+     '<td title="'+esc(f.fix)+'">'+esc(f.fix)+'</td><td title="'+esc(f.owner)+'">'+esc(f.owner)+'</td></tr>';
+  }).join(''):'<tr><td colspan="7" style="text-align:center;color:var(--muted)">No findings at this risk level in this area.</td></tr>';
+  var f=FBYID[S.sel];
+  $('#fdetail').hidden=!f||!rows.length;
+  if(f&&rows.length)$('#fdetail').innerHTML=
+    '<div style="grid-column:1/-1;display:flex;gap:10px;align-items:center"><h2>'+esc(f.title)+'</h2>'+PILL+riskDot(f.risk)+'<span class="muted">Effort '+f.eff+(f.appr?' / needs approval':'')+'</span></div>'+
+    '<div><h3>Evidence</h3><p>'+esc(f.ev)+'</p></div><div><h3>Fix</h3><p>'+esc(f.fix)+'</p></div><div><h3>Owner role</h3><p>'+esc(f.owner)+'</p></div>'+
+    '<div><h3>30-day plan</h3><p>'+(inPlan(f.id)?'In Week '+S.weeks[f.id]+(f.appr?', waiting for approval':''):'Not in the plan yet')+'</p></div>';
+}
+
+/* ---------- 3 mapping ---------- */
+function mapCounts(){var c={Mapped:0,'Needs decision':0,'Not migrating':0};MAP.forEach(function(m){c[S.map[m.id].s]++});return c}
+function renderMap(){
+  var c=mapCounts(),tot=MAP.length;
+  $('#recon').innerHTML='<div><div style="font-size:12.5px;color:var(--muted)">Reconciliation</div><div style="font-size:15px;color:var(--navy);font-weight:600" id="reconText"><span id="cM">'+c.Mapped+'</span> mapped + <span id="cN">'+c['Needs decision']+'</span> need a decision + <span id="cX">'+c['Not migrating']+'</span> not migrating = <span id="cT">'+(c.Mapped+c['Needs decision']+c['Not migrating'])+'</span> of '+tot+' fields</div></div>'+
+   '<div class="bar" aria-hidden="true"><i style="width:'+(c.Mapped/tot*100)+'%;background:var(--ok)"></i><i style="width:'+(c['Needs decision']/tot*100)+'%;background:var(--pink)"></i><i style="width:'+(c['Not migrating']/tot*100)+'%;background:#9aa0a8"></i></div>'+PILL;
+  var opts=['All','Mapped','Needs decision','Not migrating'];
+  $('#mapchips').innerHTML='<span class="muted" style="font-size:12.5px">Show:</span>'+opts.map(function(o){return '<button class="chip" data-mf="'+o+'" aria-pressed="'+(S.mapFilter===o)+'">'+o+' ('+(o==='All'?tot:c[o])+')</button>'}).join('');
+  var h='';
+  MAP.forEach(function(m){
+    var st=S.map[m.id];
+    if(S.mapFilter!=='All'&&st.s!==S.mapFilter)return;
+    var tr=m.tr;if(st.choice!==null&&m.o)tr='Decision: '+(m.o[st.choice][1]==='__NOMIG__'?'not migrating this field':m.o[st.choice][1]);
+    var chip=st.s==='Needs decision'?'<span class="status need">Needs decision</span>':st.s==='Mapped'?'<span class="status"><span class="dot ok"></span>Mapped'+(st.choice!==null?' <button class="chip" style="padding:1px 8px;font-size:11.5px;margin-left:4px" data-reopen="'+m.id+'" data-k="re-'+m.id+'">Change</button>':'')+'</span>':'<span class="status nomig"><span class="dot low"></span>Not migrating'+(st.choice!==null?' <button class="chip" style="padding:1px 8px;font-size:11.5px;margin-left:4px" data-reopen="'+m.id+'" data-k="re-'+m.id+'">Change</button>':'')+'</span>';
+    h+='<tr><td title="'+esc(m.hp)+'"><div class="cellflex">'+PILL+'<span class="tx">'+esc(m.hp)+'</span></div></td><td>'+m.ht+'</td><td title="'+esc(m.sf)+'">'+esc(m.sf)+'</td><td>'+m.st+'</td><td title="'+esc(tr)+'">'+esc(tr)+'</td><td style="overflow:visible">'+chip+'</td></tr>';
+    if(st.s==='Needs decision'){
+      h+='<tr class="qrow"><td colspan="6"><div class="q">Question for the business: '+esc(m.q)+'</div><div class="opts">'+m.o.map(function(o,i){return '<button class="btn small ghost" data-dec="'+m.id+':'+i+'" data-k="dec-'+m.id+'-'+i+'">'+esc(o[0])+'</button>'}).join('')+'</div></td></tr>';
+    }
+  });
+  $('#mtbody').innerHTML=h||'<tr><td colspan="6" style="text-align:center;color:var(--muted)">No fields with this status.</td></tr>';
+}
+
+/* ---------- 4 cutover ---------- */
+function valFail(id){var p=CUT[2].items.filter(function(i){return i[0]===id})[0];return S.cutActual[id]!==p[4]}
+function anyFail(){return CUT[2].items.some(function(i){return valFail(i[0])})}
+function renderCut(){
+  var total=0,done=0;
+  CUT.forEach(function(p){p.items.forEach(function(i){total++;if(S.cutDone[i[0]])done++})});
+  var fail=anyFail();
+  $('#cutprog').innerHTML='<div><div style="font-size:12.5px;color:var(--muted)">Cutover progress</div><div style="font-size:15px;color:var(--navy);font-weight:600"><span id="cutDone">'+done+'</span> of '+total+' steps done ('+Math.round(done/total*100)+'%)</div></div><div class="pbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(done/total*100)+'" aria-label="Cutover progress"><i style="width:'+(done/total*100)+'%"></i></div>'+PILL;
+  $('#cutalert').innerHTML=fail?'<div class="alert" role="alert"><span class="dot err" style="margin-top:6px"></span><div><h3>A validation count does not match. Stop and follow the rollback step.</h3><div style="font-size:13px;margin-top:4px">'+esc(ROLLBACK)+'</div></div></div>':'';
+  $('#phases').innerHTML=CUT.map(function(p,pi){
+    var pd=p.items.filter(function(i){return S.cutDone[i[0]]}).length;
+    var body=p.items.map(function(i){
+      var id=i[0],d=S.cutDone[id];
+      if(p.vals){
+        var f=valFail(id),a=S.cutActual[id],diff=i[4]-a;
+        return '<div class="step vstep'+(d?' done':'')+'"><input type="checkbox" data-k="cut-'+id+'" data-cut="'+id+'"'+(d?' checked':'')+(f?' disabled':'')+' aria-label="Done: '+esc(i[1])+'"><span class="tx" title="'+esc(i[1])+'">'+PILL+' '+esc(i[1])+'</span>'+
+          '<span class="muted">Expected '+n(i[4])+'</span><span>Actual <input class="numin" type="number" min="0" data-act="'+id+'" data-k="act-'+id+'" value="'+a+'" aria-label="Actual count for '+esc(i[1])+'"></span>'+
+          '<span class="risk">'+(f?'<span class="dot err"></span>Short by '+n(diff):'<span class="dot ok"></span>Match')+'</span>'+
+          '<span style="display:flex;gap:6px;align-items:center;justify-content:flex-end"><button class="chip" data-sim="'+id+'" data-k="sim-'+id+'" style="font-size:12px">'+(f?'Fix count':'Simulate mismatch')+'</button></span></div>';
+      }
+      return '<div class="step'+(d?' done':'')+'"><input type="checkbox" data-k="cut-'+id+'" data-cut="'+id+'"'+(d?' checked':'')+' aria-label="Done: '+esc(i[1])+'"><span class="tx" title="'+esc(i[1])+'">'+PILL+' '+esc(i[1])+'</span><span class="muted tx" title="Owner role">'+esc(i[2])+'</span><span class="muted">'+(d?'Done':'To do')+'</span></div>';
+    }).join('');
+    var extra=p.rb?'<div class="callout"><b>Rollback step'+(fail?' (run it now)':' (only if a check fails)')+':</b> '+esc(ROLLBACK)+'</div>':'';
+    return '<section class="card phase'+(p.rb?' rb':'')+(p.rb&&fail?' fail':'')+'"><header><h2>'+(pi+1)+'. '+esc(p.name)+'</h2>'+(p.vals?'<span class="muted" style="font-size:12.5px">Owner role: Salesforce Admin and RevOps analyst</span>':'')+'<span class="cnt">'+pd+' of '+p.items.length+' done</span></header>'+body+extra+'</section>';
+  }).join('');
+}
+
+/* ---------- 5 plan & docs ---------- */
+function renderPlan(){
+  $('#weeks').innerHTML=WEEKS.map(function(w){
+    var ids=S.plan.filter(function(id){return S.weeks[id]===w.n});
+    return '<div class="week" data-week="'+w.n+'"><header><b>Week '+w.n+'</b><span>'+w.r+' / '+ids.length+' fixes</span></header>'+
+     (ids.length?ids.map(function(id){var f=FBYID[id];
+      return '<div class="pcard" draggable="true" data-card="'+id+'"><div class="t" title="'+esc(f.short)+'">'+esc(f.short)+'</div><div class="m">'+PILL+riskDot(f.risk)+'<span>Effort '+f.eff+'</span>'+(f.appr?'<span class="tag appr">Needs approval</span>':'')+'</div>'+
+        '<div class="m"><span class="tag">'+esc(areaOf(f.area).name)+'</span><span class="acts" style="margin-left:auto"><label class="muted">Week <select data-wk="'+id+'" data-k="wk-'+id+'">'+[1,2,3,4].map(function(k){return '<option value="'+k+'"'+(k===w.n?' selected':'')+'>'+k+'</option>'}).join('')+'</select></label><button class="chip" style="padding:1px 8px;font-size:11.5px" data-rm="'+id+'" data-k="rm-'+id+'" title="Take this fix out of the plan">Remove</button></span></div></div>';
+     }).join(''):'<div class="empty">Nothing planned. Drop a fix here.</div>')+'</div>';
+  }).join('');
+  $('#log').innerHTML=S.log.map(function(l){return '<li><time>'+esc(l.t)+' '+PILL+'</time><span>'+esc(l.x)+'</span></li>'}).join('');
+  var docs=[['dict','Field dictionary'],['perm','Permission matrix'],['flow','Data-flow diagram']];
+  $('#doctabs').innerHTML=docs.map(function(d){return '<button class="areatab" role="tab" data-doc="'+d[0]+'" aria-selected="'+(S.doc===d[0])+'">'+d[1]+'</button>'}).join('')+'<button class="btn small ghost" data-regen style="margin-left:auto">Regenerate</button>';
+  $('#docbody').innerHTML=docHTML();
+  $('#docnote').innerHTML='Generated Thursday, Oct 15, 2026, '+S.docTime+' CT from the sample org. '+PILL;
+}
+function docHTML(){
+  if(S.doc==='dict'){
+    var rows=[['Lead Source','Picklist','Where the lead came from','4 reports','Keep'],['Lifecycle Stage','Picklist','How far along the lead is','9 reports','Keep, simplify values'],['Employee Range','Picklist','Size of the company','2 reports','Keep'],['Legacy Score 2','Number','Old scoring model','0 reports; empty 14 months','Deprecate'],['Region (old)','Text','Typed-in region','1 retired report','Deprecate'],['Partner Referral Code','Text','Code from a closed program','0 reports; empty 11 months','Deprecate'],['Phone','Phone','Main phone number','6 reports','Keep, fix formats']];
+    return '<table><colgroup><col style="width:20%"><col style="width:12%"><col style="width:26%"><col style="width:24%"><col></colgroup><thead><tr><th>Field</th><th>Type</th><th>What it means</th><th>Where it is used</th><th>Recommendation</th></tr></thead><tbody>'+rows.map(function(r){return '<tr><td title="'+r[0]+'"><div class="cellflex">'+PILL+'<span class="tx">'+r[0]+'</span></div></td><td>'+r[1]+'</td><td title="'+r[2]+'">'+r[2]+'</td><td title="'+r[3]+'">'+r[3]+'</td><td title="'+r[4]+'">'+r[4]+'</td></tr>'}).join('')+'</tbody></table>';
+  }
+  if(S.doc==='perm'){
+    var cols=['See all leads','Edit leads','Delete records','Export reports','Modify All Data'];
+    var rows2=[['Sales rep',[1,1,0,0,0]],['Sales manager',[1,1,0,1,0]],['Marketing ops',[1,1,0,1,0]],['Integration user (one per tool)',[1,1,0,0,0]],['Salesforce Admin',[1,1,1,1,1]]];
+    return '<table><colgroup><col style="width:30%"></colgroup><thead><tr><th>Proposed access</th>'+cols.map(function(c){return '<th>'+c+'</th>'}).join('')+'</tr></thead><tbody>'+rows2.map(function(r){return '<tr><td><div class="cellflex">'+PILL+'<span class="tx">'+r[0]+'</span></div></td>'+r[1].map(function(v){return '<td>'+(v?'<span class="risk"><span class="dot ok"></span>Yes</span>':'<span class="muted">No</span>')+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table><div class="docnote" style="padding:0 12px 10px">Today, 11 users have Modify All Data through their profile. In the proposal only the admin role has it.</div>';
+  }
+  var bx=function(x,y,w,t1,t2,hi){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="64" rx="10" fill="'+(hi?'#D9E5FF':'#fff')+'" stroke="'+(hi?'#2D62FF':'#cfd2d8')+'"/><text x="'+(x+w/2)+'" y="'+(y+27)+'" text-anchor="middle" font-size="13" font-weight="600" fill="#080331">'+t1+'</text><text x="'+(x+w/2)+'" y="'+(y+46)+'" text-anchor="middle" font-size="11" fill="#6B6F76">'+t2+'</text>'};
+  var ar=function(x1,x2,y){return '<line x1="'+x1+'" y1="'+y+'" x2="'+(x2-6)+'" y2="'+y+'" stroke="#6B6F76" stroke-width="1.5"/><path d="M'+(x2-6)+' '+(y-5)+' L'+x2+' '+y+' L'+(x2-6)+' '+(y+5)+' Z" fill="#6B6F76"/>'};
+  return '<svg viewBox="0 0 960 190" width="100%" role="img" aria-label="Data flow from web form through HubSpot and sync into Salesforce, one lead flow, then reports"><rect width="960" height="190" fill="#fff"/>'+
+   bx(20,20,150,'Web form','Visitor fills it in')+ar(170,210,52)+bx(210,20,150,'HubSpot','Marketing contacts')+ar(360,400,52)+bx(400,20,160,'Sync','Every 15 min, owner kept')+ar(560,600,52)+bx(600,20,160,'Salesforce Lead','Status set once',1)+ar(760,800,52)+bx(800,20,140,'Lead intake flow','One record-triggered flow',1)+
+   '<path d="M870 84 V118 H680" fill="none" stroke="#6B6F76" stroke-width="1.5"/><path d="M686 113 L680 118 L686 123 Z" fill="#6B6F76"/>'+
+   bx(520,100,160,'Contact + Account','Created on convert')+ar(520,480,132)+bx(300,100,180,'Opportunity','Stages Discovery to Closed')+ar(300,260,132)+bx(80,100,180,'Reports & dashboards','Rebuilt on current types')+
+   '<text x="20" y="182" font-size="11" fill="#6B6F76">Sample diagram. Blue boxes are the parts changed by the week-1 fixes.</text></svg>';
+}
+
+/* ---------- print sheet ---------- */
+function renderPrint(){
+  var c=S.plan.length,ap=approvalCount();
+  var top=TOP3.map(function(id){var f=FBYID[id];return '<li><b>'+esc(f.short)+'</b> ('+esc(areaOf(f.area).name)+', '+f.risk+' risk, effort '+f.eff+', owner: '+esc(f.owner)+')</li>'}).join('');
+  var tiles=AREAS.map(function(a){var fs=F.filter(function(f){return f.area===a.id});return '<div class="ptile"><div class="a">'+esc(a.name)+'</div><div class="g">'+a.grade+'</div><div class="l">'+esc(a.line)+'</div></div>'}).join('');
+  var wk=WEEKS.map(function(w){var ids=S.plan.filter(function(id){return S.weeks[id]===w.n});return '<div class="pweek"><b>Week '+w.n+' ('+w.r+')</b>'+(ids.map(function(id){var f=FBYID[id];return '<div>&bull; '+esc(f.short)+(f.appr?' <i>(needs approval)</i>':'')+'</div>'}).join('')||'<div>Nothing planned</div>')+'</div>'}).join('');
+  $('#printSheet').innerHTML='<div class="pbanner">SAMPLE DATA. Every company, person and number here is fictional.</div>'+
+   '<h1>Week-1 CRM audit &amp; migration plan <span class="sample">Sample</span></h1><p class="sub">Inherited Salesforce org (fictional). Prepared Thursday, Oct 15, 2026. Times in CT.</p>'+
+   '<h2>Health scorecard</h2><div class="ptiles">'+tiles+'</div>'+
+   '<div class="pstats"><div><b>212</b>custom fields on Lead (61 empty over 90 days)</div><div><b>62</b>automations (47 flows, 9 workflow rules, 6 Process Builders)</div><div><b>38 / 22</b>profiles / permission sets</div><div><b>14,820</b>leads, 6.4% duplicates</div></div>'+
+   '<h2>Top 3 fixes for week 1</h2><ol>'+top+'</ol>'+
+   '<h2>30-day plan: '+c+' fixes, '+ap+' need approval</h2><div class="pweeks">'+wk+'</div>'+
+   '<div class="pfoot">Independent concept demo by Joe Deville. Not affiliated with Dscout.</div>';
+}
+
+/* ---------- render all with focus restore ---------- */
+function render(){
+  var ae=document.activeElement,k=ae&&ae.dataset?ae.dataset.k:null;
+  renderTabs();renderSummary();renderAreas();renderMap();renderCut();renderPlan();renderPrint();
+  if(k){var e=document.querySelector('[data-k="'+k+'"]');if(e&&!e.disabled)e.focus()}
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',function(e){
+  var t=e.target;
+  var el=t.closest('[data-go]');if(el){go(el.dataset.go);return}
+  el=t.closest('[data-print]');if(el){renderPrint();window.print();return}
+  el=t.closest('#aboutBtn');if(el){var p=$('#aboutPop');p.hidden=!p.hidden;el.setAttribute('aria-expanded',String(!p.hidden));return}
+  if(!t.closest('#aboutPop')){var pp=$('#aboutPop');if(!pp.hidden){pp.hidden=true;$('#aboutBtn').setAttribute('aria-expanded','false')}}
+  el=t.closest('.tile[data-area]');if(el){go('areas',{area:el.dataset.area});return}
+  el=t.closest('.areatab[data-area]');if(el){S.area=el.dataset.area;S.risk='All';render();return}
+  el=t.closest('[data-open]');if(el){var f=FBYID[el.dataset.open];go('areas',{area:f.area,sel:f.id});return}
+  el=t.closest('[data-risk]');if(el){S.risk=el.dataset.risk;render();return}
+  el=t.closest('[data-mf]');if(el){S.mapFilter=el.dataset.mf;render();return}
+  el=t.closest('[data-dec]');if(el){var pr=el.dataset.dec.split(':');var m=MAP.filter(function(x){return x.id==pr[0]})[0];var o=m.o[+pr[1]];
+    S.map[m.id]={s:o[1]==='__NOMIG__'?'Not migrating':'Mapped',choice:+pr[1]};
+    addLog('Decision on "'+m.hp+'": '+(o[1]==='__NOMIG__'?'not migrating':o[0])+'.');
+    toast(o[1]==='__NOMIG__'?'Marked as not migrating.':'Decision saved. Field is now mapped.');render();return}
+  el=t.closest('[data-reopen]');if(el){var id=+el.dataset.reopen;S.map[id]={s:'Needs decision',choice:null};render();return}
+  el=t.closest('[data-sim]');if(el){var id2=el.dataset.sim;var it=CUT[2].items.filter(function(i){return i[0]===id2})[0];
+    if(valFail(id2)){S.cutActual[id2]=it[4];toast('Count fixed. Match restored.')}else{S.cutActual[id2]=it[4]-37;S.cutDone[id2]=false;toast('Count mismatch. Rollback step is now showing.')}
+    render();return}
+  el=t.closest('[data-rm]');if(el){var rid=el.dataset.rm;S.plan=S.plan.filter(function(x){return x!==rid});addLog('Removed "'+FBYID[rid].short+'" from the plan.');toast('Removed from plan.');render();return}
+  el=t.closest('[data-doc]');if(el){S.doc=el.dataset.doc;render();return}
+  el=t.closest('[data-regen]');if(el){S.docTime=stamp().replace(' CT','');addLog('Docs regenerated from the sample org.');toast('Docs regenerated.');render();return}
+  el=t.closest('tr[data-sel]');if(el&&!t.closest('label')&&!t.closest('input')){S.sel=el.dataset.sel;render();return}
+});
+document.addEventListener('change',function(e){
+  var t=e.target;
+  if(t.dataset.plan){var id=t.dataset.plan,f=FBYID[id];
+    if(t.checked){var w=lowestWeek();S.plan.push(id);S.weeks[id]=w;addLog('Added "'+f.short+'" to Week '+w+'.');toast('Added to Week '+w+'. Drag it on the 30-day plan to reschedule.')}
+    else{S.plan=S.plan.filter(function(x){return x!==id});addLog('Removed "'+f.short+'" from the plan.');toast('Removed from plan.')}
+    render();return}
+  if(t.dataset.cut){S.cutDone[t.dataset.cut]=t.checked;render();return}
+  if(t.dataset.act){var id3=t.dataset.act;var v=parseInt(t.value,10);S.cutActual[id3]=isNaN(v)?0:v;if(valFail(id3))S.cutDone[id3]=false;render();return}
+  if(t.dataset.wk){moveTo(t.dataset.wk,+t.value);return}
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){var p=$('#aboutPop');if(!p.hidden){p.hidden=true;$('#aboutBtn').setAttribute('aria-expanded','false');$('#aboutBtn').focus()}}
+  if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('tr[data-sel]')){e.preventDefault();S.sel=e.target.dataset.sel;render()}
+});
+function moveTo(id,w,before){
+  var old=S.weeks[id];S.plan=S.plan.filter(function(x){return x!==id});
+  var idx=before?S.plan.indexOf(before):-1;
+  if(idx>-1)S.plan.splice(idx,0,id);else S.plan.push(id);
+  S.weeks[id]=w;
+  if(old!==w){addLog('Moved "'+FBYID[id].short+'" from Week '+old+' to Week '+w+'.');toast('Moved to Week '+w+'.')}
+  render();
+}
+/* drag and drop */
+var dragId=null;
+document.addEventListener('dragstart',function(e){var c=e.target.closest&&e.target.closest('.pcard');if(!c)return;dragId=c.dataset.card;c.classList.add('drag');try{e.dataTransfer.setData('text/plain',dragId);e.dataTransfer.effectAllowed='move'}catch(x){}});
+document.addEventListener('dragend',function(){dragId=null;$$('.pcard.drag').forEach(function(c){c.classList.remove('drag')});$$('.week.over').forEach(function(c){c.classList.remove('over')})});
+document.addEventListener('dragover',function(e){var w=e.target.closest&&e.target.closest('.week');if(w&&dragId){e.preventDefault();$$('.week.over').forEach(function(c){c.classList.remove('over')});w.classList.add('over')}});
+document.addEventListener('drop',function(e){var w=e.target.closest&&e.target.closest('.week');if(!w||!dragId)return;e.preventDefault();
+  var card=e.target.closest('.pcard');var before=card&&card.dataset.card!==dragId?card.dataset.card:null;
+  var id=dragId;dragId=null;moveTo(id,+w.dataset.week,before)});
+window.addEventListener('beforeprint',renderPrint);
+
+render();
+})();
+</script>
+</body>
+</html>

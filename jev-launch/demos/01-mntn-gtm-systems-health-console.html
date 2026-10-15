@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GTM Systems Health Console (concept demo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --primary:#0E44BF; --accent:#1AC9AA; --text:#191E28; --muted:#6B6F76; --bg:#F6F6F6; --card:#fff; --border:#E6E6E6;
+  --warn:#F5A524; --err:#E5484D; --ok:#1F9D55; --primary-soft:#EAF0FC;
+  --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--font);color:var(--text);background:var(--bg);font-size:14px;line-height:1.4;font-variant-numeric:tabular-nums;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+button{font-family:inherit;font-size:13px;cursor:pointer}
+.num,td,th,.kpi .v{font-variant-numeric:tabular-nums}
+/* app bar */
+.appbar{height:56px;background:#fff;border-bottom:2px solid var(--primary);display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:30;gap:0}
+.logo{display:flex;align-items:center;height:26px}
+.logo img{height:26px;display:block}
+.logo .wm{font-weight:700;font-size:22px;letter-spacing:.14em;color:#191E28;font-family:'Inter','Montserrat',system-ui,sans-serif}
+.divider{width:1px;height:24px;background:var(--border);margin:0 14px}
+.prod{font-weight:600;font-size:14px;white-space:nowrap}
+.tabs{display:flex;gap:2px;margin-left:28px;height:100%}
+.tab{background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-2px;padding:0 14px;height:100%;color:var(--muted);font-weight:500;font-size:14px}
+.tab:hover{color:var(--text)}
+.tab.on{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+.appr{margin-left:auto;display:flex;align-items:center;gap:14px;color:var(--muted);font-size:13px;white-space:nowrap}
+.appr b{color:var(--text);font-weight:600}
+.linkbtn{background:none;border:0;color:var(--primary);font-weight:500;padding:4px 0}
+.linkbtn:hover{text-decoration:underline}
+.notice{background:#FFF6E0;border-bottom:1px solid #F3DFA8;color:#5A4308;font-size:12px;font-weight:500;text-align:center;height:28px;line-height:28px;letter-spacing:.01em}
+/* layout */
+.wrap{width:100%;max-width:1440px;margin:0 auto;padding:18px 32px 24px;flex:1}
+h1{font-size:20px;margin:0 0 2px;font-weight:700}
+.sub{color:var(--muted);margin:0 0 14px;font-size:13px}
+h2{font-size:15px;margin:0;font-weight:600}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px}
+.pill{display:inline-block;font-size:10px;text-transform:uppercase;letter-spacing:.06em;border:1px solid #BDBFC3;color:#80848B;border-radius:999px;padding:0 6px;line-height:15px;font-weight:600;white-space:nowrap;vertical-align:middle;background:#fff}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;border-radius:999px;padding:1px 9px;background:#F1F1F2;white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%;background:#9A9DA3;display:inline-block;flex:none}
+.dot.warn{background:var(--warn)}.dot.err{background:var(--err)}.dot.ok{background:var(--ok)}.dot.pri{background:var(--primary)}.dot.acc{background:var(--accent)}
+.trunc{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;min-width:0}
+.btn{border-radius:8px;padding:7px 14px;border:1px solid var(--border);background:#fff;color:var(--text);font-weight:500}
+.btn:hover{border-color:#C9CACD;background:#FAFAFA}
+.btn.p{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn.p:hover{background:#0B3799}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sm{padding:4px 10px;font-size:12px}
+/* kpi */
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px}
+.kpi{padding:12px 14px;position:relative}
+.kpi .l{font-size:12px;color:var(--muted);padding-right:52px}
+.kpi .pill{position:absolute;top:12px;right:12px}
+.kpi .v{font-size:26px;font-weight:700;margin-top:4px;letter-spacing:-.01em}
+.kpi .v small{font-size:13px;font-weight:500;color:var(--muted);letter-spacing:0}
+.kpi .s{font-size:12px;color:var(--muted);margin-top:2px;min-height:18px;display:flex;align-items:center;gap:6px}
+.grid2{display:grid;grid-template-columns:1fr 440px;gap:16px;align-items:start}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;padding:14px 18px 6px}
+.sec-h p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+/* cause rows */
+.cause{display:grid;grid-template-columns:28px minmax(0,1fr) 112px 132px 18px;gap:12px;align-items:center;padding:0 18px;height:84px;border-top:1px solid var(--border);cursor:pointer;background:#fff;width:100%;text-align:left;border-left:0;border-right:0;border-bottom:0;font:inherit;color:inherit}
+.cause:hover{background:#F9FAFD}
+.cause .n{width:24px;height:24px;border-radius:50%;background:var(--primary-soft);color:var(--primary);font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center}
+.cause .t{font-weight:600;font-size:14px}
+.cause .w{font-size:12px;color:var(--muted);margin-top:2px}
+.cause .ct{font-weight:700;font-size:15px}
+.cause .ct span{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+.cause .st{display:flex;flex-direction:column;gap:3px;align-items:flex-start}
+.cause .st b{font-size:12px;font-weight:600}
+.fixed{background:#E6F5EC;color:#14693A}
+.chev{color:#9A9DA3;font-size:18px}
+/* mini board */
+.mini{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;padding:6px 18px 14px}
+.mini button{background:#F6F6F6;border:1px solid var(--border);border-radius:8px;padding:8px 4px;text-align:center}
+.mini button:hover{border-color:var(--primary)}
+.mini .c{font-size:22px;font-weight:700;display:block}
+.mini .nm{font-size:11px;color:var(--muted);display:block}
+.queue{margin:0 18px 16px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;display:flex;justify-content:space-between;align-items:center;font-size:13px}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);padding:0 18px 14px;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+/* tables */
+table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed}
+th{position:sticky;top:56px;background:#FAFAFA;text-align:left;font-size:12px;color:var(--muted);font-weight:600;padding:0 12px;height:40px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);z-index:2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+td{height:48px;padding:0 12px;border-bottom:1px solid var(--border);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr.click{cursor:pointer}
+tr.click:hover td{background:#F9FAFD}
+.tw{overflow:hidden;border-radius:10px}
+/* subtabs */
+.sub-tabs{display:flex;gap:6px;margin-bottom:14px}
+.stab{border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 14px;font-weight:500;color:var(--muted)}
+.stab.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+/* issue cards */
+.icard{padding:18px 20px;margin-bottom:14px;transition:box-shadow .3s}
+.icard.hl{box-shadow:0 0 0 2px var(--primary)}
+.icard .top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.icard h3{margin:0;font-size:15px;font-weight:600}
+.path{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;background:#F3F4F6;border-radius:6px;padding:3px 8px;display:inline-block;margin:8px 0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:top}
+.facts{display:flex;gap:28px;margin:6px 0 14px;font-size:13px}
+.facts div span{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.facts b{font-size:15px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.expand{margin-top:14px}
+/* sync */
+.statusbar{display:flex;align-items:center;gap:10px;padding:12px 18px;margin-bottom:14px;font-weight:500}
+.g4{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:18px}
+.g4 .icard{margin:0}
+/* lane */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.metrics .kpi .v{font-size:22px}
+.cap{padding:14px 18px;margin-bottom:14px}
+.bar{height:16px;border-radius:8px;background:#EDEEF0;position:relative;display:flex;overflow:visible;margin:10px 0 8px}
+.bar .seg{height:100%}
+.bar .seg:first-child{border-radius:8px 0 0 8px}
+.bar .mark{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text)}
+.lane-wrap{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px;align-items:start}
+.board{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.col{background:#EFEFF0;border-radius:10px;padding:8px;min-height:420px}
+.col.over{outline:2px dashed var(--primary);background:#E8EEFB}
+.col h4{margin:2px 4px 8px;font-size:12px;font-weight:600;display:flex;justify-content:space-between;color:var(--text)}
+.lc{background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:8px;cursor:grab;font-size:12px}
+.lc:hover{border-color:var(--primary)}
+.lc.drag{opacity:.4}
+.lc .r1{display:flex;justify-content:space-between;align-items:center;gap:4px;margin-bottom:4px}
+.lc .id{font-weight:700;font-size:12px}
+.lc .tt{font-weight:500;font-size:12px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:5px;min-height:31px}
+.lc .m{color:var(--muted);font-size:11px;line-height:1.35}
+.lc .tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;align-items:center}
+.tc{font-size:10px;font-weight:600;border-radius:4px;padding:1px 5px;border:1px solid var(--border);background:#F6F6F6}
+.tc.Urgent{background:#FDECEC;color:#A62A2F;border-color:#F6CBCD}
+.tc.Service{background:#EAF0FC;color:#0B3799;border-color:#CBD9F6}
+.tc.Planned{background:#F1F1F2;color:#4A4E56}
+.tc.warn{background:#FFF3DC;color:#7A5200;border-color:#F3DFA8}
+.rec{padding:14px 16px}
+.rec .it{border-top:1px solid var(--border);padding:12px 0;font-size:13px}
+.rec .it:first-of-type{border-top:0}
+/* toast, modal, drawer */
+#toasts{position:fixed;left:50%;bottom:56px;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast{background:#191E28;color:#fff;border-radius:10px;padding:11px 16px;max-width:620px;display:flex;gap:14px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.2);font-size:13px}
+.toast button{background:#fff;color:#191E28;border:0;border-radius:6px;padding:5px 10px;font-weight:600;white-space:nowrap}
+.toast button.ghost{background:transparent;color:#C9CBD0;border:1px solid #4A4F5A}
+.ov{position:fixed;inset:0;background:rgba(25,30,40,.45);z-index:60;display:flex;align-items:center;justify-content:center}
+.modal{background:#fff;border-radius:12px;width:600px;max-width:calc(100vw - 48px);max-height:calc(100vh - 60px);overflow:auto;padding:22px 24px}
+.modal h3{margin:0 0 4px;font-size:17px}
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.ba div{border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px}
+.ba div span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:3px}
+.ba div.af{background:#F1FAF5;border-color:#CDE9D8}
+.kv{margin:10px 0;font-size:13px}.kv span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:520px;max-width:100vw;background:#fff;z-index:70;box-shadow:-8px 0 30px rgba(0,0,0,.15);padding:24px;overflow:auto}
+.drawer .x{position:absolute;top:14px;right:16px;background:none;border:0;font-size:22px;color:var(--muted)}
+.msg{background:#F6F6F6;border-radius:8px;padding:10px 12px;font-size:13px;border-left:3px solid var(--primary)}
+.chk{margin:8px 0;padding:0;list-style:none;font-size:13px}.chk li{padding:2px 0}
+.pop{position:absolute;top:50px;right:32px;width:380px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.15);padding:16px 18px;z-index:50;font-size:13px;white-space:normal;color:var(--text)}
+.pop h4{margin:0 0 6px}
+footer{border-top:1px solid var(--border);background:#fff;text-align:center;color:var(--muted);font-size:12px;height:36px;line-height:36px}
+.legendb{display:flex;gap:16px;font-size:12px;color:var(--muted)}
+.legendb i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+</style>
+</head>
+<body>
+<header class="appbar">
+  <div class="logo"><img id="logoimg" src="https://brands.mntn.com/mntn-logo-light.svg" alt="MNTN" onerror="logoFallback(this)"></div>
+  <div class="divider"></div>
+  <div class="prod">GTM Systems Health Console</div>
+  <nav class="tabs" id="tabs"></nav>
+  <div class="appr"><button class="linkbtn" data-a="about">About this demo</button><span>Viewing as: <b>GTM Systems (demo)</b></span></div>
+  <div id="pop"></div>
+</header>
+<div class="notice">SAMPLE DATA. Every company, person and number here is fictional.</div>
+<main class="wrap" id="main"></main>
+<footer>Independent concept demo by Joe Deville. Not affiliated with MNTN.</footer>
+<div id="toasts"></div>
+<div id="layer"></div>
+
+<script>
+/* ---------- variables (re-skin here) ---------- */
+const V={COMPANY:'MNTN',ROLE:'Senior Manager, GTM Systems Delivery',CRM1:'Salesforce',CRM2:'HubSpot',POD1:'SMB Direct, East',POD2:'Agency & Brand',CYCLE:'2026-C21',CAP:40};
+function logoFallback(img){var s=document.createElement('span');s.className='wm';s.textContent='MNTN';img.replaceWith(s);}
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const tr=t=>`<span class="trunc" title="${esc(t)}">${esc(t)}</span>`;
+const SAMPLE='<span class="pill">Sample</span>';
+const PTS={S:2,M:4,L:8};
+const COLS=[['intake','Intake'],['scoped','Scoped'],['build','In build'],['uat','UAT'],['released','Released'],['stabilized','Stabilized']];
+const colName=k=>COLS.find(c=>c[0]===k)[1];
+
+/* ---------- data ---------- */
+const POOL=['Carver & Lin Dental','Elm Ridge Public Library','Northgate Freight Co.','Bayview Pediatrics','Bluepeak IT Services','Summit Tech Partners','Harbor Light Realty','Oakline Veterinary','Pinecrest Roofing','Maple Street Bakery','Redwood Legal Group','Juniper Yoga Studio','Cobalt Auto Repair','Lakeside Accounting','Westfield Plumbing','Granite Peak Outfitters','Tidewater Marine Supply','Brightpath Tutoring','Ironwood Fitness','Silverline Logistics','Fernhill Florists','Meadowbrook Dental','Quarry Hill Brewing'];
+const EMP=[24,41,86,18,132,57,12,33,9,15,44,8,21,38,27,64,49,19,72,145,6,31,53];
+function recs(n,off,type,seg,states,owners,dates){return Array.from({length:n},(_,i)=>{const k=(off+i)%POOL.length;return{type:type[i%type.length],name:POOL[k],seg,emp:EMP[k],state:states[i%states.length],owner:owners[i%owners.length],date:dates[i%dates.length]}})}
+const D=['Oct 2','Oct 5','Oct 6','Oct 8','Oct 9','Oct 12','Oct 13','Oct 14','Oct 14'];
+const issues=[
+ {id:'c1',screen:'routing',tab:'inactive',label:'',title:'Inactive rep still in the SMB Direct, East round robin',count:9,unit:'records',path:'Round robin › SMB Direct, East › members',plain:'Three reps who left on Oct 1 still receive new leads, so those leads wait with nobody working them.',first:'Oct 2',fix:'Remove Dana Webb, Eli Sato and Kyle Morgan from the member list, then reassign their open records.',before:'Members: Dana Webb, Eli Sato, Kyle Morgan (inactive since Oct 1)',after:'Members: active reps only. Inactive users can no longer be added.',plan:'Sandbox: send 10 test leads through the rule. All 10 must land with active reps.',area:'Routing',what:'Remove inactive reps from the SMB Direct, East round robin',change:'CL-147',card:'CL-147',recs:recs(9,0,['Lead','Account','Lead'],'SMB',['NY','NJ','MA','PA','CT'],['Dana Webb','Eli Sato','Kyle Morgan'],D),reassignTo:'Agency & Brand reps (temporary cover)'},
+ {id:'c2',screen:'sync',label:'G1',title:'Company size text→number mapping',count:9,unit:'sync errors',path:'HubSpot Company size › Salesforce Number of Employees',plain:'HubSpot sends size ranges like "51-200" as text, but Salesforce expects a single number, so the record is rejected.',first:'Oct 13',fix:'Map each range to a number, or keep the range in a separate text field.',before:'Company size (text) → Number of Employees (number)',after:'Company size range → midpoint number; original range kept in a text field',plan:'Sandbox: sync 20 test companies across all 6 size ranges. 0 errors allowed.',area:'Sync',what:'Map Company size from text to number',change:'CL-146',card:'CL-146',recs:recs(9,3,['Account'],'SMB',['NY','NJ','TX','OH'],['Ben Reyes','Carla Mendes','Alicia Torres'],D),explain:'HubSpot stores company size as a text range such as "51-200". Salesforce has a number field for employees and refuses text. Until the mapping converts the range to a number, these 9 companies stay out of Salesforce.'},
+ {id:'c3',screen:'routing',tab:'mismatch',label:'',title:'Partner-type answer arrives after assignment runs',count:5,unit:'records',path:'Lead assignment › Partner type › run order',plain:'Leads are assigned before the Partner type answer is saved, so partner leads go to the wrong pod.',first:'Oct 6',fix:'Hold assignment until Partner type is saved (or 2 minutes pass), then re-run it once.',before:'Assignment runs the moment a lead is created',after:'Assignment runs after Partner type is filled, or after 2 minutes',plan:'Sandbox: 10 partner leads and 10 direct leads. Partner leads must reach Agency & Brand.',area:'Routing',what:'Hold lead assignment until Partner type is saved',change:'DL-12',card:'DL-12',recs:recs(5,6,['Lead'],'Mid-Market',['IL','WI','MN'],['Farah Khan','Grant Lowe'],D.slice(2))},
+ {id:'c4',screen:'sync',label:'G2',title:'Industry picklist value missing in Salesforce',count:6,unit:'sync errors',path:'HubSpot Industry › Salesforce Industry picklist',plain:'HubSpot allows "Veterinary" but the Salesforce list does not, so the record is rejected.',first:'Oct 9',fix:'Add the missing value to the Salesforce Industry list and to the mapping table.',before:'Salesforce Industry list: 38 values, no "Veterinary"',after:'Salesforce Industry list: 39 values, "Veterinary" mapped',plan:'Sandbox: sync the 6 failed records. All 6 must arrive with the right Industry.',area:'Sync',what:'Add missing Industry value to the Salesforce picklist',change:'CL-149',card:'CL-149',recs:recs(6,7,['Account'],'SMB',['CA','OR','WA'],['Alicia Torres','Ben Reyes'],D.slice(3)),explain:'HubSpot lets teams pick "Veterinary" as an industry. The matching Salesforce list was never updated, so Salesforce says the value is not allowed. Adding the value once fixes all 6 records and any future ones.'},
+ {id:'c5',screen:'sync',label:'G3',title:'Required Lead Source blank from chat',count:4,unit:'sync errors',path:'Salesforce Lead › Lead Source (required)',plain:'Chat leads arrive without a Lead Source, and Salesforce requires one.',first:'Oct 14',fix:'Fill Lead Source with "Chat" when the chat tool leaves it blank.',before:'Lead Source: copied as-is (blank for chat leads)',after:'Lead Source: "Chat" when blank',plan:'Sandbox: 10 chat leads, 10 of 10 saved with Lead Source "Chat".',area:'Sync',what:'Default Lead Source to Chat when blank',change:'CL-148',card:'CL-148',recs:recs(4,11,['Lead'],'SMB',['FL','GA'],['Carla Mendes','Alicia Torres'],D.slice(6)),explain:'Salesforce will not save a lead without a Lead Source. Leads from the website chat tool do not send one. A default value for blank chat leads lets all 4 through.'},
+ {id:'c6',screen:'sync',label:'G4',title:'Free-email exclusion silently skipping customer admins',count:4,unit:'sync errors',path:'Sync filter › Exclude free email domains',plain:'The filter that blocks personal email addresses also blocks admins at customer companies who use them.',first:'Oct 12',fix:'Skip free email only when no customer account matches the contact.',before:'Skip every contact with a free email domain',after:'Skip free email only if no existing customer account matches',plan:'Sandbox: 5 free-email customer admins and 5 true prospects. Admins sync, prospects skip.',area:'Sync',what:'Limit free-email exclusion to contacts with no customer match',change:'CL-145',card:null,recs:recs(4,15,['Contact'],'Mid-Market',['TX','OK'],['Farah Khan','Grant Lowe'],D.slice(5)),explain:'A rule meant to keep out personal email addresses is also skipping real customer admins. Nothing shows as an error because the sync skips them without a message. Narrowing the rule so it checks for a matching customer account stops the silent skips.'},
+ {id:'c7',screen:'routing',tab:'inactive',label:'',title:'Deactivated reps still own open accounts',count:5,unit:'records',path:'Offboarding checklist › Reassign owned accounts',plain:'When a rep leaves, the account owner is not changed, so the owner is no longer active and nobody follows up.',first:'Sep 24',fix:'Add a reassign step to the offboarding checklist and run it for these 5 accounts.',before:'Offboarding checklist has no reassign step',after:'Offboarding checklist blocks deactivation until owned accounts are reassigned',plan:'Sandbox: deactivate a test rep who owns 5 accounts. All 5 must move to the manager.',area:'Routing',what:'Add reassign step to the offboarding checklist',change:null,card:null,recs:recs(5,12,['Account'],'Mid-Market',['MA','NY','VT'],['Kyle Morgan','Dana Webb','Eli Sato'],D.slice(0,5)),reassignTo:'their manager (Agency & Brand)'},
+ {id:'c8',screen:'routing',tab:'mismatch',label:'',title:'State names do not match the territory table',count:4,unit:'records',path:'Territory rules › State mapping',plain:'Some leads carry a spelled-out state like "Tex." that the territory table cannot read, so they fall to the default owner.',first:'Oct 8',fix:'Standardise state values to two-letter codes before territory rules run.',before:'Territory table reads two-letter codes only',after:'State values are cleaned to two-letter codes first',plan:'Sandbox: 12 leads with mixed state spellings. 12 of 12 reach the right territory.',area:'Routing',what:'Standardise state values before territory rules run',change:null,card:null,recs:recs(4,18,['Lead'],'SMB',['TX','FL'],['Alicia Torres','Ben Reyes'],D.slice(4)),reassignTo:'the correct territory owner'}
+];
+issues.forEach(i=>{i.fixed=false;i.sent=false;i.retried=false;i.reassigned=false});
+const IS=id=>issues.find(i=>i.id===id);
+
+const changes=[
+ {id:'CL-149',when:'Oct 15, 9:05 AM CT',area:'Sync',what:'Add missing Industry value to the Salesforce picklist',why:'6 records fail to sync with an Industry error',req:'Marketing Ops Manager',appr:'Not yet',test:'Not started',status:'Intake',before:'Salesforce Industry list: 38 values',after:'39 values, "Veterinary" mapped',recs:'6 sync errors',evid:'Not started. Plan: sync the 6 failed records in sandbox.',backup:'Picklist export saved before change',rb:'Remove the value; records return to the error queue',msg:'We are adding "Veterinary" to the Industry list so 6 companies can reach Salesforce. No action needed from you.'},
+ {id:'CL-148',when:'Oct 14, 3:40 PM CT',area:'Sync',what:'Default Lead Source to Chat when blank',why:'Chat leads fail because Lead Source is required',req:'SDR Manager',appr:'Not yet',test:'Not started',status:'Scoped',before:'Lead Source copied as-is',after:'Lead Source = "Chat" when blank',recs:'4 sync errors',evid:'Not started. Plan: 10 sandbox chat leads.',backup:'Not needed (no existing records change)',rb:'Remove the default; chat leads return to the error queue',msg:'Chat leads will now carry Lead Source "Chat" automatically. Your reports will show them under that source.'},
+ {id:'CL-147',when:'Oct 14, 11:15 AM CT',area:'Routing',what:'Remove inactive reps from the SMB Direct, East round robin',why:'Leads were going to 3 reps who left on Oct 1',req:'Sales Ops Manager',appr:'Awaiting approval',test:'Sandbox: 10 of 10',status:'UAT',before:'Members: Dana Webb, Eli Sato, Kyle Morgan',after:'Members: active reps only',recs:'9 records',evid:'Sandbox: 10 test leads, 10 of 10 to active reps.',backup:'owners-backup-2026-10-14.csv (9 records)',rb:'Restore the previous member list from the saved export (about 5 minutes)',msg:'New SMB Direct, East leads now go only to active reps. 9 older leads will be reassigned. You may see them under new owners tomorrow.'},
+ {id:'CL-146',when:'Oct 13, 2:20 PM CT',area:'Sync',what:'Map Company size from text to number',why:'9 companies rejected because size arrives as text',req:'Sales Ops Manager',appr:'RevOps Lead',test:'Sandbox: 18 of 20 so far',status:'In build',before:'Company size (text) → Employees (number)',after:'Range → midpoint number, range kept in text field',recs:'9 sync errors',evid:'Sandbox: 18 of 20 test companies synced. 2 odd ranges still being handled.',backup:'Mapping export saved',rb:'Switch the mapping back to the old version',msg:'Company size will show as a number in Salesforce. The original range stays in a separate field.'},
+ {id:'CL-145',when:'Oct 12, 4:00 PM CT',area:'Sync',what:'Turned on free-email exclusion for lead sync',why:'Cut junk leads reaching Salesforce',req:'Marketing Ops Manager',appr:'RevOps Lead',test:'Sandbox: 10 of 10',status:'Rolled back',before:'No email filter',after:'Skip free email domains',recs:'4 customer admins skipped',evid:'Sandbox: 10 of 10 junk leads blocked. Test did not include customer admins.',backup:'Not needed',rb:'Done Oct 13: filter turned off',reason:'Rolled back Oct 13: the filter was silently skipping customer admins who use personal email.',msg:'We switched the free-email filter off again. Customer admins with personal email will sync as before.'},
+ {id:'CL-144',when:'Oct 9, 1:30 PM CT',area:'Permissions',what:'Gave Partner Managers read access to Partner type',why:'They could not see which partner a lead came from',req:'Partnerships Lead',appr:'RevOps Lead',test:'Sandbox: 4 of 4 users',status:'Done',before:'Partner type hidden for Partner Managers',after:'Partner type visible, read only',recs:'0 records changed',evid:'Sandbox: 4 test users confirmed they can see but not edit the field.',backup:'Permission set exported',rb:'Remove the field from the permission set',msg:'Partner Managers can now see Partner type on leads. They cannot edit it.'},
+ {id:'CL-143',when:'Oct 8, 10:10 AM CT',area:'Routing',what:'Deactivated 3 reps in the CRM',why:'Reps left on Oct 1',req:'Sales Director',appr:'RevOps Lead',test:'Checklist run',status:'Done; missed step (see CL-147)',before:'3 active users',after:'3 inactive users',recs:'14 records now have an inactive owner',evid:'Checklist run. It did not include removing reps from the round robin or reassigning their records.',backup:'User export saved',rb:'Reactivate the users',msg:'Three reps were deactivated. Their leads should have moved to active reps; follow-up is in CL-147.'},
+ {id:'CL-142',when:'Oct 7, 3:45 PM CT',area:'Reports',what:'Rebuilt weekly pipeline dashboard filters',why:'Filters showed closed deals as open',req:'Sales Director',appr:'RevOps Lead',test:'Compared 25 deals by hand',status:'Done',before:'Filter used Created date',after:'Filter uses Close date',recs:'0 records changed',evid:'25 deals checked by hand against the old report. All matched.',backup:'Old dashboard cloned',rb:'Restore the cloned dashboard',msg:'The weekly pipeline dashboard now filters by close date. Totals may shift slightly.'},
+ {id:'CL-141',when:'Oct 6, 9:20 AM CT',area:'Sync',what:'Shortened sync retry wait from 30 to 15 minutes',why:'Failed records waited too long for a retry',req:'GTM Systems',appr:'RevOps Lead',test:'Sandbox: 3 cycles',status:'Done',before:'Retry every 30 minutes',after:'Retry every 15 minutes',recs:'0 records changed',evid:'Sandbox: 3 full retry cycles, no duplicates created.',backup:'Settings screenshot saved',rb:'Set the wait back to 30 minutes',msg:'Failed syncs now retry every 15 minutes. You do not need to do anything.'},
+ {id:'CL-140',when:'Oct 5, 11:00 AM CT',area:'Lead form',what:'Added Employee count to the chat form',why:'Sales needed company size before routing',req:'Sales Ops Manager',appr:'RevOps Lead',test:'Sandbox: 12 test chats',status:'Done',before:'Chat form asks name and email',after:'Chat form also asks employee count',recs:'0 records changed',evid:'Sandbox: 12 test chats, 12 of 12 captured employee count.',backup:'Form export saved',rb:'Remove the question from the form',msg:'The chat form now asks for employee count so leads can be routed by size.'}
+];
+
+const cards=[
+ {id:'CL-149',t:'Add missing Industry value to Salesforce picklist',req:'Marketing Ops Manager',size:'S',type:'Service',owner:'GTM Systems Admin',due:'Oct 20',dod:[0,5],col:'intake'},
+ {id:'CL-148',t:'Default Lead Source to Chat when blank',req:'SDR Manager',size:'S',type:'Service',owner:'GTM Systems Admin',due:'Oct 21',dod:[0,5],col:'intake'},
+ {id:'DL-13',t:'Alert on-call rep within 5 minutes of a chat lead',req:'Sales Ops Manager',size:'L',type:'Urgent',owner:'GTM Systems Lead',due:'Oct 23',dod:[0,5],col:'intake'},
+ {id:'DL-14',t:'Show Partner Manager view on the lead page',req:'Partnerships Lead',size:'M',type:'Service',owner:'GTM Systems Admin',due:'Oct 19',dod:[0,5],col:'intake',sla:true},
+ {id:'DL-15',t:'Deactivation checklist automation',req:'RevOps Lead',size:'M',type:'Planned',owner:'GTM Systems Lead',due:'Oct 30',dod:[0,5],col:'intake'},
+ {id:'DL-16',t:'Quarterly territory table refresh',req:'RevOps Lead',size:'M',type:'Planned',owner:'GTM Systems Admin',due:'Oct 30',dod:[0,5],col:'intake'},
+ {id:'DL-17',t:'Report: lead response time by pod',req:'Sales Director',size:'S',type:'Planned',owner:'GTM Systems Admin',due:'Oct 30',dod:[0,5],col:'intake'},
+ {id:'DL-12',t:'Hold assignment until Partner type is saved',req:'Partnerships Lead',size:'M',type:'Service',owner:'GTM Systems Admin',due:'Oct 22',dod:[2,5],col:'scoped'},
+ {id:'DL-09',t:'Clean up lead scoring fields',req:'Marketing Ops Manager',size:'L',type:'Planned',owner:'GTM Systems Lead',due:'Oct 29',dod:[1,5],col:'scoped',aged:16},
+ {id:'CL-146',t:'Map Company size from text to number',req:'Sales Ops Manager',size:'M',type:'Urgent',owner:'GTM Systems Admin',due:'Oct 16',dod:[3,5],col:'build'},
+ {id:'DL-08',t:'Opportunity stage history report',req:'Sales Director',size:'M',type:'Planned',owner:'GTM Systems Lead',due:'Oct 27',dod:[3,5],col:'build',aged:15},
+ {id:'DL-11',t:'Add Agency & Brand choice to lead form',req:'Marketing Ops Manager',size:'M',type:'Service',owner:'GTM Systems Admin',due:'Oct 21',dod:[2,5],col:'build'},
+ {id:'CL-147',t:'Remove inactive reps from round robin',req:'Sales Ops Manager',size:'M',type:'Urgent',owner:'GTM Systems Admin',due:'Oct 16',dod:[4,5],col:'uat'},
+ {id:'DL-07',t:'Meeting-booked alert to the rep',req:'SDR Manager',size:'M',type:'Planned',owner:'GTM Systems Lead',due:'Oct 14',dod:[5,5],col:'released'},
+ {id:'DL-10',t:'Fix duplicate rule for free email',req:'Sales Ops Manager',size:'S',type:'Service',owner:'GTM Systems Admin',due:'Oct 9',dod:[5,5],col:'stabilized'}
+];
+const DOD=['Outcome and scope written down','Dependencies named','Tested in sandbox','Approved by RevOps lead','Message to Sales sent'];
+
+const S={screen:'overview',tab:'inactive',open:{},hl:null,expanded:{},dragId:null,seq:150,rrFixDone:false};
+
+/* ---------- derived ---------- */
+const pts=c=>PTS[c.size];
+const committed=()=>cards.filter(c=>c.col!=='intake'&&!c.next);
+const capData=()=>{const o={Urgent:0,Service:0,Planned:0};committed().forEach(c=>o[c.type]+=pts(c));return o};
+const capTotal=()=>{const o=capData();return o.Urgent+o.Service+o.Planned};
+const causeCard=i=>i.card?cards.find(c=>c.id===i.card):null;
+const causeStatus=i=>{const c=causeCard(i);return c?colName(c.col):(i.change?changes.find(x=>x.id===i.change).status:'Not started')};
+const openErrors=()=>issues.filter(i=>i.screen==='sync'&&!i.retried).reduce((a,i)=>a+i.count,0);
+const openGroups=()=>issues.filter(i=>i.screen==='sync'&&!i.retried).length;
+const inactiveCount=()=>issues.filter(i=>i.tab==='inactive'&&!i.reassigned).reduce((a,i)=>a+i.count,0);
+const mismatchCount=()=>issues.filter(i=>i.tab==='mismatch'&&!i.reassigned).reduce((a,i)=>a+i.count,0);
+
+/* ---------- toast / layer ---------- */
+function toast(msg,btns,ms){const t=document.createElement('div');t.className='toast';t.innerHTML=`<span>${esc(msg)}</span>`;(btns||[]).forEach(b=>{const x=document.createElement('button');x.textContent=b[0];x.className=b[2]||'';x.onclick=()=>{t.remove();b[1]&&b[1]()};t.appendChild(x)});$('#toasts').appendChild(t);setTimeout(()=>t.remove(),ms||(btns&&btns.length?12000:5000))}
+function closeLayer(){$('#layer').innerHTML=''}
+function modal(html){$('#layer').innerHTML=`<div class="ov" data-a="ovclose"><div class="modal" role="dialog" aria-modal="true">${html}</div></div>`}
+function drawer(html){$('#layer').innerHTML=`<div class="ov" data-a="ovclose" style="background:rgba(25,30,40,.25);justify-content:flex-end;align-items:stretch"></div><aside class="drawer" role="dialog"><button class="x" data-a="close" aria-label="Close">×</button>${html}</aside>`}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeLayer();$('#pop').innerHTML=''}});
+
+/* ---------- screens ---------- */
+const SCREENS=[['overview','Overview'],['routing','Routing audit'],['sync','Sync errors'],['lane','Delivery lane'],['log','Change log']];
+function renderTabs(){$('#tabs').innerHTML=SCREENS.map(s=>`<button class="tab ${S.screen===s[0]?'on':''}" data-a="go" data-s="${s[0]}">${s[1]}</button>`).join('')}
+function go(s,o){S.screen=s;if(o&&o.tab)S.tab=o.tab;S.hl=o&&o.open||null;if(S.hl)S.expanded[S.hl]=true;render();window.scrollTo(0,0);if(S.hl){setTimeout(()=>{const e=document.getElementById('ic-'+S.hl);if(e)e.scrollIntoView({block:'center',behavior:'smooth'})},50)}}
+function render(){renderTabs();const f={overview,routing,sync,lane,log}[S.screen];$('#main').innerHTML=f()}
+
+function lanePill(i){const f=i.fixed;return f?`<span class="chip fixed"><span class="dot ok"></span>Fixed</span>`:`<span class="chip"><span class="dot ${causeStatus(i)==='UAT'?'warn':'pri'}"></span>${esc(causeStatus(i))}</span>`}
+
+function overview(){
+  const c=capData(),n=name=>cards.filter(x=>x.col===name).length;
+  const intake=cards.filter(x=>x.col==='intake'),sla=intake.filter(x=>x.sla).length;
+  const err=openErrors(),grp=openGroups();
+  const k=(l,v,s)=>`<div class="card kpi"><div class="l">${l}</div>${SAMPLE}<div class="v">${v}</div><div class="s">${s||''}</div></div>`;
+  const ov=['c1','c2','c3','c4'].map((id,ix)=>{const i=IS(id);const sync=i.screen==='sync';
+    const cnt=i.screen==='sync'?(i.retried?0:i.count):(i.reassigned?0:i.count);
+    return `<button class="cause" data-a="cause" data-id="${id}"><span class="n">${ix+1}</span>
+    <span style="min-width:0">${tr(i.title)}<span class="w trunc" title="${esc(i.path)}">${SAMPLE} Where: ${esc(i.path)}</span></span>
+    <span class="ct">${cnt} ${i.unit}<span>${sync?'Sync errors':'Cannot be worked'}</span></span>
+    <span class="st"><b>${esc(i.change||'')}</b>${lanePill(i)}</span><span class="chev">›</span></button>`}).join('');
+  return `<h1>Is the plumbing healthy, what broke, why, and is the fix shipped?</h1>
+  <p class="sub">Monday view for ${V.CRM2} → ${V.CRM1}. Problems are grouped by cause first, so fixes happen once in configuration, not record by record.</p>
+  <div class="kpis">
+   ${k('Records synced, last 24 hours','1,284','Healthy volume')}
+   ${k('Open sync errors',`${err} <small>in ${grp} groups</small>`,err?'<span class="chip" style="background:#FFF3DC"><span class="dot warn"></span>Degraded</span>':'<span class="chip fixed"><span class="dot ok"></span>Healthy</span>')}
+   ${k('Records whose owner is no longer active',inactiveCount(),'Need a new owner')}
+   ${k('Routing mismatches',mismatchCount(),'Sent to the wrong pod')}
+   ${k('Median cycle time','11 <small>days</small>','Target 14 days or less')}
+   ${k('Deployment success, last 30 days','19 <small>of 20</small>','1 rolled back (CL-145)')}
+  </div>
+  <div class="grid2">
+   <section class="card"><div class="sec-h"><div><h2>What's broken and why</h2><p>Four causes behind most of the open problems. Click one to open its fix.</p></div></div>${ov}</section>
+   <section class="card"><div class="sec-h"><div><h2>Delivery lane this cycle</h2><p>Cycle ${V.CYCLE} (Oct 12 to Oct 30). Click a column to open the board.</p></div></div>
+     <div class="mini">${COLS.map(x=>`<button data-a="go" data-s="lane"><span class="c">${n(x[0])}</span><span class="nm">${x[1]}</span></button>`).join('')}</div>
+     <div class="queue"><span><b>Intake queue:</b> ${intake.length} open, ${sla} past SLA</span><button class="btn sm" data-a="go" data-s="lane">Open lane</button></div>
+     <div class="legend"><span><i style="background:var(--primary)"></i>Urgent ${c.Urgent} pts</span><span><i style="background:#6F93E0"></i>Service ${c.Service} pts</span><span><i style="background:#BCCDF2"></i>Planned ${c.Planned} pts</span><span>${capTotal()} of ${V.CAP} pts committed</span></div>
+   </section>
+  </div>`}
+
+function recTable(i){
+  const rows=i.recs.map(r=>`<tr><td>${tr(r.type)}</td><td>${tr(r.name)}</td><td>${tr(r.seg)}</td><td>${r.emp}</td><td>${r.state}</td><td>${tr(i.reassigned?'Ben Reyes (temporary cover)':r.owner)}</td><td>${r.date}</td><td>${SAMPLE}</td></tr>`).join('');
+  return `<div class="tw card" style="margin-top:12px"><table><colgroup><col style="width:9%"><col style="width:25%"><col style="width:12%"><col style="width:10%"><col style="width:8%"><col style="width:20%"><col style="width:10%"><col style="width:6%"></colgroup><thead><tr><th>Type</th><th>Record</th><th>Segment</th><th>Employees</th><th>State</th><th>Current owner</th><th>Assigned on</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`}
+
+function issueCard(i,mode){
+  const exp=S.expanded[i.id];const cnt=(i.screen==='sync'?i.retried:i.reassigned)?0:i.count;
+  const routing=mode==='routing';
+  const fixLbl=routing?'Fix the rule':'Fix mapping/rule';
+  const fixBtn=`<button class="btn p" data-a="fix" data-id="${i.id}" ${i.sent?'disabled':''}>${i.sent?(i.fixed?'Fix approved':'Sent for approval'):fixLbl}</button>`;
+  const acts=routing?`${fixBtn}<button class="btn" data-a="reassign" data-id="${i.id}" ${i.reassigned?'disabled':''}>${i.reassigned?'Records reassigned':'Reassign records (backs up owners first)'}</button><button class="btn" data-a="toggle" data-id="${i.id}">${exp?'Hide records':'View records'}</button>`
+    :`${fixBtn}<button class="btn" data-a="retry" data-id="${i.id}" ${(!i.fixed||i.retried)?'disabled':''} title="${i.fixed?'':'Enabled once the fix is approved'}">${i.retried?'Retried, 0 left':'Retry after fix'}</button><button class="btn" data-a="explain" data-id="${i.id}">Explain</button><button class="btn" data-a="toggle" data-id="${i.id}">${exp?'Hide records':'View records'}</button>`;
+  return `<article class="card icard ${S.hl===i.id?'hl':''}" id="ic-${i.id}">
+   <div class="top"><div style="min-width:0">${i.label?`<span class="chip" style="margin-right:6px">${i.label}</span>`:''}<h3 style="display:inline">${esc(i.title)}</h3> ${SAMPLE}</div>
+   <div>${i.fixed?'<span class="chip fixed"><span class="dot ok"></span>Fixed</span>':i.change?`<span class="chip"><span class="dot pri"></span>${esc(i.change)} · ${esc(causeStatus(i))}</span>`:'<span class="chip">No change yet</span>'}</div></div>
+   <div class="path" title="${esc(i.path)}">${esc(i.path)}</div>
+   <p style="margin:0 0 10px">${esc(i.plain)}</p>
+   <div class="facts"><div><span>${routing?'Records affected':'Open errors'}</span><b>${cnt}</b></div><div><span>First seen</span><b>${i.first}</b></div><div style="min-width:0"><span>Suggested fix</span>${esc(i.fix)}</div></div>
+   <div class="acts">${acts}</div>
+   ${exp?`<div class="expand">${recTable(i)}</div>`:''}</article>`}
+
+function routing(){
+  const tabs=[['inactive',`Inactive owners (${inactiveCount()})`],['mismatch',`Territory & pod mismatches (${mismatchCount()})`],['rr','Round-robin balance']];
+  let body='';
+  if(S.tab==='rr')body=rrTable();
+  else{const l=issues.filter(i=>i.screen==='routing'&&i.tab===S.tab);body=l.length?l.map(i=>issueCard(i,'routing')).join(''):'<p class="sub">Nothing here.</p>'}
+  return `<h1>Routing audit</h1><p class="sub">Common failure points across connected systems: who owns a record, which pod it landed in, and whether the rotation is fair.</p>
+  <div class="sub-tabs">${tabs.map(t=>`<button class="stab ${S.tab===t[0]?'on':''}" data-a="rtab" data-t="${t[0]}">${t[1]}</button>`).join('')}</div>${body}`}
+
+function rrTable(){
+  const fixed=IS('c1').fixed||IS('c1').reassigned;
+  const rows=[['Alicia Torres',V.POD2,'Active',31,'Even','No fix needed'],['Ben Reyes',V.POD2,'Active',28,'Even','No fix needed'],['Carla Mendes',V.POD2,'Active',29,'Even','No fix needed'],
+   ['Dana Webb',V.POD1,'Inactive since Oct 1',4,'Should be 0','Remove from rotation'],['Eli Sato',V.POD1,'Inactive since Oct 1',3,'Should be 0','Remove from rotation'],['Kyle Morgan',V.POD1,'Inactive since Oct 1',2,'Should be 0','Remove from rotation'],
+   ['Farah Khan','Mid-Market','Active',22,'Even','No fix needed'],['Grant Lowe','Mid-Market','Out of office Mon–Wed',14,'Uneven, explained','No fix needed']];
+  const tot=rows.reduce((a,r)=>a+r[3],0);
+  return `<div class="tw card"><table><colgroup><col style="width:17%"><col style="width:16%"><col style="width:19%"><col style="width:11%"><col style="width:12%"><col style="width:15%"><col style="width:10%"></colgroup><thead><tr><th>Rep</th><th>Pod</th><th>Status</th><th>Leads this cycle</th><th>Share</th><th>Balance</th><th>Verdict</th></tr></thead><tbody>${rows.map(r=>{const bad=r[2].startsWith('Inactive')&&!fixed;return `<tr><td>${tr(r[0])} </td><td>${tr(r[1])}</td><td>${tr(r[2])}</td><td>${r[3]}</td><td>${Math.round(r[3]/tot*100)}%</td><td>${tr(r[4])}</td><td>${bad?'<span class="chip" style="background:#FFF3DC">Fix</span>':SAMPLE}</td></tr>`}).join('')}</tbody></table></div>
+  <p class="sub" style="margin-top:10px">Grant Lowe is out Mon–Wed, so his lower count is expected. The three inactive reps are the real problem (see cause 1).</p>`}
+
+function sync(){
+  const err=openErrors(),grp=openGroups();
+  return `<h1>Sync errors (${V.CRM2} → ${V.CRM1})</h1><p class="sub">Troubleshoot and fix integration reliability at the cause. One mapping fix clears every record in the group.</p>
+  <div class="card statusbar"><span class="dot ${err?'warn':'ok'}"></span><span>Last sync 2:10 PM CT · Next 2:25 PM · ${err} open errors in ${grp} groups · ${err?'Degraded':'Healthy'}</span></div>
+  <div class="g4">${issues.filter(i=>i.screen==='sync').map(i=>issueCard(i,'sync')).join('')}</div>
+  <h2 style="margin-bottom:8px">Latest 10 sync events</h2>${eventsTable()}`}
+
+function eventsTable(){
+  const ev=[['2:10 PM','Carver & Lin Dental','Account','Synced',''],['2:10 PM','Elm Ridge Public Library','Account','Error','G1'],['2:10 PM','Northgate Freight Co.','Lead','Synced',''],['2:09 PM','Bayview Pediatrics','Account','Error','G2'],['2:09 PM','Bluepeak IT Services','Lead','Error','G3'],['2:08 PM','Summit Tech Partners','Contact','Skipped','G4'],['2:08 PM','Harbor Light Realty','Lead','Synced',''],['2:07 PM','Oakline Veterinary','Account','Error','G2'],['2:07 PM','Pinecrest Roofing','Contact','Synced',''],['2:06 PM','Maple Street Bakery','Account','Error','G1']];
+  const gm={G1:'c2',G2:'c4',G3:'c5',G4:'c6'};
+  return `<div class="tw card"><table><colgroup><col style="width:10%"><col style="width:26%"><col style="width:12%"><col style="width:20%"><col style="width:14%"><col style="width:12%"><col style="width:6%"></colgroup><thead><tr><th>Time (CT)</th><th>Record</th><th>Object</th><th>Direction</th><th>Result</th><th>Group</th><th></th></tr></thead><tbody>${ev.map(e=>{const is=e[4]?IS(gm[e[4]]):null;const res=is&&is.retried?'Synced after retry':e[3];const dot=res==='Error'?'err':res==='Skipped'?'warn':'ok';return `<tr><td>${e[0]}</td><td>${tr(e[1])}</td><td>${e[2]}</td><td>${V.CRM2} → ${V.CRM1}</td><td><span class="dot ${dot}"></span> ${res}</td><td>${e[4]||'None'}</td><td>${SAMPLE}</td></tr>`}).join('')}</tbody></table></div>`}
+
+function laneCard(c){
+  const done=c.dod[0];
+  return `<div class="lc" draggable="true" data-id="${c.id}" data-a="card">
+   <div class="r1"><span class="id">${c.id}</span>${SAMPLE}</div>
+   <div class="tt" title="${esc(c.t)}">${esc(c.t)}</div>
+   <div class="m trunc" title="Requested by ${esc(c.req)}">Req: ${esc(c.req)}</div>
+   <div class="m trunc" title="Owner ${esc(c.owner)}">Owner: ${esc(c.owner)}</div>
+   <div class="m">Due ${c.due} · DoD ${done}/${c.dod[1]}</div>
+   <div class="tags"><span class="tc ${c.type}">${c.type==='Service'?'Service request':c.type}</span><span class="tc">${c.size} · ${pts(c)} pts</span>${c.sla?'<span class="tc warn">Past SLA</span>':''}${c.aged?`<span class="tc warn">Aged ${c.aged}d</span>`:''}${c.next?'<span class="tc warn">Next cycle</span>':''}</div></div>`}
+
+function capBar(){
+  const d=capData(),tot=capTotal(),scale=Math.max(V.CAP,tot);
+  const seg=(k,col)=>`<div class="seg" style="width:${d[k]/scale*100}%;background:${col}" title="${k} ${d[k]} pts"></div>`;
+  const over=tot>V.CAP;
+  return `<div class="card cap"><div style="display:flex;justify-content:space-between;align-items:baseline"><h2>Capacity, cycle ${V.CYCLE} (Oct 12 to Oct 30)</h2><span style="font-weight:600;color:${over?'#A62A2F':'var(--text)'}">${tot} of ${V.CAP} pts committed${over?` · over by ${tot-V.CAP}`:''}</span></div>
+   <div class="bar" id="capbar">${seg('Urgent','#0E44BF')}${seg('Service','#6F93E0')}${seg('Planned','#BCCDF2')}<div class="mark" style="left:${V.CAP/scale*100}%" title="Capacity ${V.CAP} pts"></div></div>
+   <div class="legendb"><span><i style="background:#0E44BF"></i>Urgent ${d.Urgent}</span><span><i style="background:#6F93E0"></i>Service ${d.Service}</span><span><i style="background:#BCCDF2"></i>Planned ${d.Planned}</span><span>Capacity ${V.CAP} pts · Open ${Math.max(0,V.CAP-tot)} pts</span><span>Sizes: S 2 · M 4 · L 8 pts</span></div></div>`}
+
+function lane(){
+  const aging=cards.filter(c=>c.aged).length;
+  const m=(l,v,s)=>`<div class="card kpi"><div class="l">${l}</div>${SAMPLE}<div class="v">${v}</div><div class="s">${s}</div></div>`;
+  return `<h1>Delivery lane</h1><p class="sub">Own the expedited GTM systems delivery lane from intake through stabilization, in two-to-four-week delivery cycles with clear outcomes, scope, ownership, dependencies and definitions of done. Drag a card to move it.</p>
+  <div class="metrics">${m('Median cycle time','11 <small>days</small>','Target 14 days or less')}${m('Aging over 14 days',aging,'Cards open longer than 14 days')}${m('Rework rate','1 <small>of 12</small>','Released work sent back')}${m('Production defects','0 <small>critical</small>','Last 30 days')}</div>
+  ${capBar()}
+  <div class="lane-wrap"><div class="board">${COLS.map(c=>`<div class="col" data-col="${c[0]}"><h4><span>${c[1]}</span><span class="num">${cards.filter(x=>x.col===c[0]).length}</span></h4>${cards.filter(x=>x.col===c[0]).map(laneCard).join('')||'<div class="m" style="font-size:12px;color:var(--muted);padding:6px">Nothing here. Drag a card in.</div>'}</div>`).join('')}</div>
+  <aside class="card rec"><h2>Recurring issues → roadmap</h2><p class="sub" style="margin:2px 0 6px">Turn recurring issues into durable roadmap or technical-debt investments.</p>
+   <div class="it">${SAMPLE}<br><b>Inactive-owner leakage seen 3 times in 60 days</b> → propose deactivation checklist automation (DL-15, Planned).<div class="acts" style="margin-top:8px"><button class="btn sm" data-a="opencard" data-id="DL-15">Open DL-15</button></div></div>
+   <div class="it">${SAMPLE}<br><b>Picklist drift seen 2 times in 60 days</b> → propose a weekly picklist match check (technical debt, not yet scoped).<div class="acts" style="margin-top:8px"><button class="btn sm" data-a="debt">Add to roadmap</button></div></div>
+   <div class="it" style="color:var(--muted)">Surface tradeoffs early: adding an Urgent card shows what moves out of this cycle.</div></aside></div>`}
+
+function log(){
+  return `<h1>Change log</h1><p class="sub">Every change: what, why, who approved, how it was tested, and the rollback plan. Click a row for the full record.</p>
+  <div class="tw card"><table><colgroup><col style="width:6%"><col style="width:9%"><col style="width:7%"><col style="width:20%"><col style="width:16%"><col style="width:10%"><col style="width:9%"><col style="width:10%"><col style="width:13%"></colgroup><thead><tr><th>ID</th><th>When</th><th>Area</th><th>What changed</th><th>Why</th><th>Requested by</th><th>Approved by</th><th>How it was tested</th><th>Status</th></tr></thead><tbody>
+  ${changes.map(c=>`<tr class="click" data-a="chg" data-id="${c.id}"><td><b>${c.id}</b><br>${SAMPLE}</td><td>${tr(c.when)}</td><td>${tr(c.area)}</td><td>${tr(c.what)}</td><td>${tr(c.why)}</td><td>${tr(c.req)}</td><td>${tr(c.appr)}</td><td>${tr(c.test)}</td><td><span class="chip" title="${esc(c.reason||c.status)}"><span class="dot ${stDot(c.status)}"></span><span class="trunc" style="max-width:120px">${esc(c.status)}</span></span></td></tr>`).join('')}
+  </tbody></table></div>`}
+const stDot=s=>s==='Done'?'ok':s==='Rolled back'?'err':s.startsWith('Done;')||s==='Awaiting approval'||s==='Changes requested'?'warn':'pri';
+
+/* ---------- actions ---------- */
+function openFix(id){
+  const i=IS(id);
+  modal(`<h3>${i.screen==='routing'?'Fix the rule':'Fix the mapping or rule'} ${SAMPLE}</h3><div class="sub" style="margin-bottom:0">${esc(i.title)}</div>
+   <div class="path" title="${esc(i.path)}">${esc(i.path)}</div>
+   <div class="ba"><div><span>Before</span>${esc(i.before)}</div><div class="af"><span>After</span>${esc(i.after)}</div></div>
+   <div class="kv"><span>Records affected</span>${i.count} ${i.unit}</div>
+   <div class="kv"><span>Test plan</span>${esc(i.plan)}</div>
+   <div class="kv"><span>Rollback</span>Restore the saved copy of the old setting.</div>
+   <div class="mfoot"><button class="btn" data-a="close">Cancel</button><button class="btn p" data-a="sendfix" data-id="${id}">Send for approval</button></div>`)}
+function sendFix(id){
+  const i=IS(id);const nid='CL-'+(++S.seq);
+  changes.unshift({id:nid,when:'Oct 15, 2:32 PM CT',area:i.area,what:i.what+' (fix)',why:i.plain,req:'GTM Systems',appr:'Awaiting approval',test:'Sandbox plan ready',status:'Awaiting approval',before:i.before,after:i.after,recs:`${i.count} ${i.unit}`,evid:'Not run yet. Plan: '+i.plan,backup:'Current setting saved before change',rb:'Restore the saved copy of the old setting',msg:'We are fixing: '+i.title.toLowerCase()+'. '+i.plain+' No action needed from you.',issue:id});
+  const sz=i.count>6?'M':'S';
+  cards.push({id:nid,t:i.what,req:'GTM Systems',size:sz,type:'Service',owner:'GTM Systems Admin',due:'Oct 22',dod:[3,5],col:'uat'});
+  i.sent=true;i.change=nid;i.card=nid;closeLayer();render();
+  toast(`${nid} sent for approval. Added to Change log and to the UAT column.`,[['View in Change log',()=>go('log')]]);}
+function approve(id){
+  const c=changes.find(x=>x.id===id);c.status='Done';c.appr='RevOps Lead';c.test=c.test.replace('Sandbox plan ready','Sandbox: passed');
+  const i=issues.find(x=>x.change===id||x.card===id);const card=cards.find(x=>x.id===id);
+  if(card){card.col='released';card.dod=[Math.max(card.dod[0],4),5]}
+  if(i){i.fixed=true}
+  closeLayer();render();toast(`${id} approved. Status is Done${i?', the cause card shows Fixed':''}${card?', and the lane card moved to Released':''}.`)}
+function requestChanges(id){const c=changes.find(x=>x.id===id);c.status='Changes requested';c.appr='Not yet';const card=cards.find(x=>x.id===id);if(card)card.col='build';closeLayer();render();toast(`Changes requested on ${id}. Lane card moved back to In build.`)}
+function chgDrawer(id){
+  const c=changes.find(x=>x.id===id);const can=c.status==='UAT'||c.status==='Awaiting approval';
+  drawer(`<h3 style="margin:0 0 4px">${c.id} ${SAMPLE}</h3><div style="font-weight:600;margin-bottom:10px">${esc(c.what)}</div>
+   <span class="chip"><span class="dot ${stDot(c.status)}"></span>${esc(c.status)}</span>${c.reason?`<div class="kv"><span>Plain reason</span>${esc(c.reason)}</div>`:''}
+   <div class="ba"><div><span>Before</span>${esc(c.before)}</div><div class="af"><span>After</span>${esc(c.after)}</div></div>
+   <div class="kv"><span>Why</span>${esc(c.why)}</div>
+   <div class="kv"><span>Records affected</span>${esc(c.recs)}</div>
+   <div class="kv"><span>Test evidence</span>${esc(c.evid)}</div>
+   <div class="kv"><span>Backup</span>${esc(c.backup)}</div>
+   <div class="kv"><span>Rollback plan</span>${esc(c.rb)}</div>
+   <div class="kv"><span>Requested by / approved by</span>${esc(c.req)} / ${esc(c.appr)}</div>
+   <div class="kv"><span>Message to Sales (preview)</span><div class="msg">${esc(c.msg)}</div></div>
+   <div class="acts" style="margin-top:16px"><button class="btn p" data-a="approve" data-id="${c.id}" ${can?'':'disabled'}>Approve</button><button class="btn" data-a="reqchg" data-id="${c.id}" ${can?'':'disabled'}>Request changes</button></div>
+   ${can?'':'<p class="sub" style="margin-top:8px">Approval opens once the change reaches UAT.</p>'}`)}
+function reassign(id){const i=IS(id);
+  modal(`<h3>Reassign ${i.count} records ${SAMPLE}</h3><div class="sub">${esc(i.title)}</div>
+   <div class="msg" style="margin:12px 0"><b>We'll save current owners to a backup file first.</b><br>Backup: owners-backup-2026-10-15-1432CT.csv (${i.count} rows). You can restore from it at any time.</div>
+   <div class="kv"><span>New owner</span>${esc(i.reassignTo)}</div>
+   <div class="mfoot"><button class="btn" data-a="close">Cancel</button><button class="btn p" data-a="doreassign" data-id="${id}">Save backup and reassign</button></div>`)}
+function explain(id){const i=IS(id);drawer(`<h3 style="margin:0 0 4px">Explain ${i.label} ${SAMPLE}</h3><div style="font-weight:600;margin-bottom:12px">${esc(i.title)}</div><p style="font-size:14px;line-height:1.55">${esc(i.explain)}</p><div class="path">${esc(i.path)}</div>`)}
+function cardModal(id){const c=cards.find(x=>x.id===id);
+  modal(`<h3>${c.id} ${SAMPLE}</h3><div style="font-weight:600;margin-bottom:8px">${esc(c.t)}</div>
+   <div class="kv"><span>Requested by</span>${esc(c.req)}</div><div class="kv"><span>Owner</span>${esc(c.owner)}</div>
+   <div class="kv"><span>Type, size, due</span>${c.type==='Service'?'Service request':c.type} · ${c.size} (${pts(c)} pts) · due ${c.due}</div>
+   <div class="kv"><span>Definition of done (${c.dod[0]}/${c.dod[1]})</span><ul class="chk">${DOD.map((d,ix)=>`<li>${ix<c.dod[0]?'☑':'☐'} ${d}</li>`).join('')}</ul></div>
+   <div class="kv"><span>Move to</span><select id="mv" style="padding:6px;border-radius:6px;border:1px solid var(--border);font-family:inherit">${COLS.map(x=>`<option value="${x[0]}" ${c.col===x[0]?'selected':''}>${x[1]}</option>`).join('')}</select></div>
+   <div class="mfoot"><button class="btn" data-a="close">Close</button><button class="btn p" data-a="domove" data-id="${id}">Move card</button></div>`)}
+function moveCard(id,col){
+  const c=cards.find(x=>x.id===id);if(!c||c.col===col)return;const from=c.col;c.col=col;c.next=false;
+  render();const tot=capTotal();
+  if(from==='intake'&&col!=='intake'){
+    if(c.type==='Urgent'&&tot>V.CAP){
+      const d=cards.find(x=>x.id==='DL-09'&&x.col!=='intake');
+      if(d){d.col='intake';d.next=true;render()}
+      toast('Adding this pushes DL-09 (Planned) to next cycle. Send tradeoff note to RevOps lead?',[['Send note',()=>toast('Tradeoff note drafted for the RevOps lead. (Demo: nothing is sent.)')],['Dismiss',null,'ghost']]);
+    }else if(c.type==='Urgent')toast(`Urgent card added. Capacity is now ${capTotal()} of ${V.CAP} pts.`);
+    else if(tot>V.CAP)toast(`Over capacity by ${tot-V.CAP} pts. Move something out or send a tradeoff note to the RevOps lead.`,[['Send note',()=>toast('Tradeoff note drafted. (Demo: nothing is sent.)')]]);
+    else toast(`${id} added to the cycle. Capacity is now ${tot} of ${V.CAP} pts.`);
+  }else if(col==='intake')toast(`${id} moved back to intake. Capacity is now ${tot} of ${V.CAP} pts.`);
+  else toast(`${id} moved to ${colName(col)}.`);
+}
+function about(){
+  $('#pop').innerHTML=`<div class="pop"><h4>About this demo</h4><p style="margin:0 0 8px">An independent concept demo by Joe Deville for the ${V.ROLE} role at ${V.COMPANY}. All data is fictional. Not affiliated with ${V.COMPANY}.</p>
+  <p style="margin:0 0 8px"><b>Joe Deville:</b> 2 years as owner/admin of a Salesforce org (flows, permission sets, reports and dashboards, Data Loader migrations, dedupe); led HubSpot-to-Salesforce migrations; about 3 years in RevOps; previously GTM Engineer at Cortex, building agent workflows; built LangChain agents at Ignyte for forecasting and lead qualification (30% improvement).</p>
+  <p style="margin:0 0 8px"><b>Stack:</b> Clay, HubSpot, Salesforce, Gong, Trigger.dev, LangChain/CrewAI, Smartlead, Neon, Vercel.</p><button class="btn sm" data-a="closepop">Close</button></div>`}
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-a]');if(!t)return;const a=t.dataset.a,id=t.dataset.id;
+  if(a==='ovclose'){if(e.target===t)closeLayer();return}
+  switch(a){
+   case 'go':go(t.dataset.s);break;
+   case 'cause':{const i=IS(id);go(i.screen,{tab:i.tab,open:id});break}
+   case 'rtab':S.tab=t.dataset.t;S.hl=null;render();break;
+   case 'toggle':S.expanded[id]=!S.expanded[id];S.hl=null;render();break;
+   case 'fix':openFix(id);break;
+   case 'sendfix':sendFix(id);break;
+   case 'reassign':reassign(id);break;
+   case 'doreassign':{const i=IS(id);i.reassigned=true;closeLayer();render();toast(`Backup saved (owners-backup-2026-10-15-1432CT.csv). ${i.count} records reassigned.`);break}
+   case 'retry':{const i=IS(id);i.retried=true;render();toast(`${i.label}: retry finished. ${i.count} records synced, 0 errors left in this group.`);break}
+   case 'explain':explain(id);break;
+   case 'chg':chgDrawer(id);break;
+   case 'approve':approve(id);break;
+   case 'reqchg':requestChanges(id);break;
+   case 'close':closeLayer();break;
+   case 'card':cardModal(id=t.dataset.id);break;
+   case 'opencard':cardModal(id);break;
+   case 'domove':{const col=$('#mv').value;closeLayer();moveCard(id,col);break}
+   case 'debt':toast('Added to the roadmap list as a technical-debt idea (demo only).');break;
+   case 'about':about();break;
+   case 'closepop':$('#pop').innerHTML='';break;
+  }
+});
+/* drag and drop */
+document.addEventListener('dragstart',e=>{const c=e.target.closest&&e.target.closest('.lc');if(!c)return;S.dragId=c.dataset.id;c.classList.add('drag');e.dataTransfer.setData('text/plain',S.dragId);e.dataTransfer.effectAllowed='move'});
+document.addEventListener('dragend',e=>{document.querySelectorAll('.drag,.over').forEach(x=>x.classList.remove('drag','over'))});
+document.addEventListener('dragover',e=>{const c=e.target.closest&&e.target.closest('.col');if(c){e.preventDefault();document.querySelectorAll('.col.over').forEach(x=>x!==c&&x.classList.remove('over'));c.classList.add('over')}});
+document.addEventListener('drop',e=>{const c=e.target.closest&&e.target.closest('.col');if(!c)return;e.preventDefault();const id=S.dragId||e.dataTransfer.getData('text/plain');S.dragId=null;if(id)moveCard(id,c.dataset.col)});
+render();
+</script>
+</body>
+</html>
