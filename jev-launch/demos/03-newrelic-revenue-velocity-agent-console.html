@@ -682,7 +682,7 @@ var EV={
 };
 function bars(items,max,w,h,fmt){
   // items: [{label,val,kind}] kind: base|cur|other
-  var pad={l:8,r:8,t:22,b:34},iw=w-pad.l-pad.r,ih=h-pad.t-pad.b,bw=Math.min(78,iw/items.length*0.55),gap=iw/items.length;
+  var pad={l:8,r:8,t:22,b:items.some(function(i){return i.grp})?40:30},iw=w-pad.l-pad.r,ih=h-pad.t-pad.b,bw=Math.min(78,iw/items.length*0.55),gap=iw/items.length;
   var s='<svg viewBox="0 0 '+w+' '+h+'" width="100%" role="img" aria-label="Bar chart" style="display:block">';
   [0,50,100].forEach(function(g){var y=pad.t+ih-ih*g/max;s+='<line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+y+'" y2="'+y+'" stroke="#EEE"/><text x="'+(w-pad.r)+'" y="'+(y-3)+'" text-anchor="end" font-size="10" fill="#6B6F76">'+g+'%</text>'});
   items.forEach(function(it,i){
@@ -690,7 +690,8 @@ function bars(items,max,w,h,fmt){
     var fill=it.kind==='base'?'#B8BCC2':it.kind==='cur'?'#00AC69':'#CDEFE0';
     s+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" rx="3" fill="'+fill+'"><title>'+it.label+': '+it.val+'% (sample)</title></rect>';
     s+='<text x="'+(x+bw/2)+'" y="'+(y-5)+'" text-anchor="middle" font-size="12" font-weight="600" fill="#0A0A0A" font-family="Geist Mono, monospace">'+it.val+'%</text>';
-    s+='<text x="'+(x+bw/2)+'" y="'+(h-14)+'" text-anchor="middle" font-size="11.5" fill="#6B6F76">'+it.label+'</text>';
+    s+='<text x="'+(x+bw/2)+'" y="'+(h-pad.b+14)+'" text-anchor="middle" font-size="11.5" fill="#6B6F76">'+it.label+'</text>';
+    if(it.grp)s+='<text x="'+(x+bw/2+gap/2)+'" y="'+(h-4)+'" text-anchor="middle" font-size="12" font-weight="600" fill="#0A0A0A">'+it.grp+'</text>';
   });
   return s+'</svg>';
 }
@@ -708,7 +709,7 @@ function renderEvals(){
   $('#chart1').innerHTML=bars([{label:'Rules baseline',val:71,kind:'base'},{label:'Agent v1.3',val:86,kind:v==='v1.3'?'cur':'other'},{label:'Agent v1.4',val:93,kind:v==='v1.4'?'cur':'other'}],100,560,200);
   $('#chart2title').innerHTML='Agreement with human labels, agent '+v+' vs rules baseline';
   var e=EV[v],ed=(v==='v1.4'&&state.critical===0)?80:e[2][2];
-  var items=[];[[e[0][0],e[0][3],e[0][2]],[e[1][0],e[1][3],e[1][2]],['Edge cases',e[2][3],ed]].forEach(function(x){items.push({label:x[0]+' · rules',val:x[1],kind:'base'});items.push({label:x[0]+' · agent',val:x[2],kind:'cur'})});
+  var items=[];[[e[0][0],e[0][3],e[0][2]],[e[1][0],e[1][3],e[1][2]],['Edge cases',e[2][3],ed]].forEach(function(x){items.push({label:'Rules',val:x[1],kind:'base',grp:x[0]});items.push({label:'Agent',val:x[2],kind:'cur'})});
   $('#chart2').innerHTML=bars(items,100,560,170);
   // promote
   var crit=state.critical;
