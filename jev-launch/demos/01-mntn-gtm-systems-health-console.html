@@ -53,7 +53,7 @@ h2{font-size:15px;margin:0;font-weight:600}
 /* kpi */
 .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px}
 .kpi{padding:12px 14px;position:relative}
-.kpi .l{font-size:12px;color:var(--muted);padding-right:52px}
+.kpi .l{font-size:12px;color:var(--muted);padding-right:72px}
 .kpi .pill{position:absolute;top:12px;right:12px}
 .kpi .v{font-size:26px;font-weight:700;margin-top:4px;letter-spacing:-.01em}
 .kpi .v small{font-size:13px;font-weight:500;color:var(--muted);letter-spacing:0}
@@ -381,7 +381,7 @@ function lane(){
 
 function log(){
   return `<h1>Change log</h1><p class="sub">Every change: what, why, who approved, how it was tested, and the rollback plan. Click a row for the full record.</p>
-  <div class="tw card"><table><colgroup><col style="width:6%"><col style="width:9%"><col style="width:7%"><col style="width:20%"><col style="width:16%"><col style="width:10%"><col style="width:9%"><col style="width:10%"><col style="width:13%"></colgroup><thead><tr><th>ID</th><th>When</th><th>Area</th><th>What changed</th><th>Why</th><th>Requested by</th><th>Approved by</th><th>How it was tested</th><th>Status</th></tr></thead><tbody>
+  <div class="tw card"><table><colgroup><col style="width:8%"><col style="width:10%"><col style="width:7%"><col style="width:19%"><col style="width:15%"><col style="width:10%"><col style="width:9%"><col style="width:10%"><col style="width:12%"></colgroup><thead><tr><th>ID</th><th>When</th><th>Area</th><th>What changed</th><th>Why</th><th>Requested by</th><th>Approved by</th><th>How it was tested</th><th>Status</th></tr></thead><tbody>
   ${changes.map(c=>`<tr class="click" data-a="chg" data-id="${c.id}"><td><b>${c.id}</b><br>${SAMPLE}</td><td>${tr(c.when)}</td><td>${tr(c.area)}</td><td>${tr(c.what)}</td><td>${tr(c.why)}</td><td>${tr(c.req)}</td><td>${tr(c.appr)}</td><td>${tr(c.test)}</td><td><span class="chip" title="${esc(c.reason||c.status)}"><span class="dot ${stDot(c.status)}"></span><span class="trunc" style="max-width:120px">${esc(c.status)}</span></span></td></tr>`).join('')}
   </tbody></table></div>`}
 const stDot=s=>s==='Done'?'ok':s==='Rolled back'?'err':s.startsWith('Done;')||s==='Awaiting approval'||s==='Changes requested'?'warn':'pri';
