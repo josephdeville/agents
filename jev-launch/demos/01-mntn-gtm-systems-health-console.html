@@ -241,7 +241,7 @@ const cards=[
 ];
 const DOD=['Outcome and scope written down','Dependencies named','Tested in sandbox','Approved by RevOps lead','Message to Sales sent'];
 
-const S={screen:'overview',tab:'inactive',open:{},hl:null,expanded:{},dragId:null,seq:150,rrFixDone:false};
+const S={screen:'overview',tab:'inactive',open:{},hl:null,expanded:{},dragId:null,seq:149,rrFixDone:false};
 
 /* ---------- derived ---------- */
 const pts=c=>PTS[c.size];
@@ -279,7 +279,7 @@ function overview(){
     const cnt=i.screen==='sync'?(i.retried?0:i.count):(i.reassigned?0:i.count);
     return `<button class="cause" data-a="cause" data-id="${id}"><span class="n">${ix+1}</span>
     <span style="min-width:0">${tr(i.title)}<span class="w trunc" title="${esc(i.path)}">${SAMPLE} Where: ${esc(i.path)}</span></span>
-    <span class="ct">${cnt} ${i.unit}<span>${sync?'Sync errors':'Cannot be worked'}</span></span>
+    <span class="ct">${cnt} ${i.unit}<span>${sync?'Sync errors':'Need action'}</span></span>
     <span class="st"><b>${esc(i.change||'')}</b>${lanePill(i)}</span><span class="chev">›</span></button>`}).join('');
   return `<h1>Is the plumbing healthy, what broke, why, and is the fix shipped?</h1>
   <p class="sub">Monday view for ${V.CRM2} → ${V.CRM1}. Problems are grouped by cause first, so fixes happen once in configuration, not record by record.</p>

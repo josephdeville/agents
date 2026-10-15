@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thatch GTM Performance &amp; Metric Trust Board (concept demo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --primary:#F31616; --text:#0A0A0A; --muted:#6B6F76; --bg:#F7F7F7; --card:#FFFFFF; --border:#E6E6E6;
+  --warn:#F5A524; --err:#E5484D; --ok:#1F9D55; --grey-out:#B9BCC1;
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.45;
+  font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;overflow-x:hidden;min-width:1280px}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit}
+.top{position:sticky;top:0;z-index:40}
+.appbar{height:56px;background:#fff;border-bottom:2px solid var(--primary);display:flex;align-items:center;padding:0 24px;gap:16px}
+.brand{display:flex;align-items:center;gap:8px;flex:none}
+.brand img{height:26px;width:auto;display:block}
+.brand .word{font-weight:700;font-size:18px;letter-spacing:-.01em}
+.divider{width:1px;height:24px;background:var(--border);flex:none}
+.prod{font-size:13px;color:var(--muted);flex:none;white-space:nowrap}
+.tabs{display:flex;align-items:stretch;height:56px;margin-left:8px;flex:none}
+.tab{background:none;border:0;border-bottom:2px solid transparent;padding:0 12px;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:-2px;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab[aria-current="page"]{color:var(--text);font-weight:600;border-bottom-color:var(--primary)}
+.viewing{margin-left:auto;font-size:12px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.notice{height:32px;background:#FFF8EA;border-bottom:1px solid #F1DFB8;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:12px}
+.notice b{font-weight:600}
+.linkbtn{background:none;border:0;padding:0;font-size:12px;text-decoration:underline;text-decoration-color:var(--primary);text-underline-offset:3px}
+main{max-width:1440px;margin:0 auto;padding:20px 24px 16px}
+footer{max-width:1440px;margin:0 auto;padding:16px 24px 28px;font-size:12px;color:var(--muted);border-top:1px solid var(--border)}
+h1{font-size:20px;line-height:28px;margin:0;font-weight:600;letter-spacing:-.01em}
+h2{font-size:15px;margin:0 0 12px;font-weight:600}
+h3{font-size:13px;margin:0 0 8px;font-weight:600}
+.sub{color:var(--muted);font-size:13px;margin-top:2px}
+.pagehead{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px}
+.card.tight{padding:0}
+.grid{display:grid;gap:16px}
+.pill{display:inline-block;font-size:10px;line-height:14px;text-transform:uppercase;letter-spacing:.04em;border:1px solid #C9CCD1;color:var(--muted);border-radius:999px;padding:0 6px;font-weight:500;vertical-align:middle;white-space:nowrap}
+.muted{color:var(--muted)}
+.trunc{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* trust badge */
+.tb{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:5px;font-size:11px;font-weight:700;border:0;padding:0;vertical-align:middle;margin-left:6px;flex:none}
+.tb:focus-visible,.tab:focus-visible,.chip:focus-visible,button:focus-visible,a:focus-visible,tr:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.tb-A{background:#0A0A0A;color:#fff}
+.tb-B{background:#6B6F76;color:#fff}
+.tb-C{background:var(--warn);color:#0A0A0A}
+.tb.lg{width:28px;height:28px;font-size:14px;border-radius:7px}
+.trusted-only .val[data-grade="C"]{color:var(--grey-out)!important;opacity:.6}
+.trusted-only .val[data-grade="C"]::after{content:"";}
+/* toggle */
+.switch{display:inline-flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:999px;padding:5px 12px 5px 6px;font-size:13px;font-weight:500}
+.switch .track{width:34px;height:20px;border-radius:999px;background:#C9CCD1;position:relative;transition:background .15s}
+.switch .track::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s}
+.switch[aria-checked="true"] .track{background:var(--text)}
+.switch[aria-checked="true"] .track::after{left:16px}
+/* callout */
+.callout{display:flex;gap:14px;align-items:center;background:#fff;border:1px solid var(--border);border-left:4px solid var(--warn);border-radius:8px;padding:14px 18px;margin-bottom:14px}
+.callout .txt{flex:1;font-size:15px;line-height:22px}
+.callout .txt b{font-weight:600}
+.btn{border:1px solid var(--border);background:#fff;border-radius:7px;padding:7px 12px;font-size:13px;font-weight:500;white-space:nowrap}
+.btn:hover{border-color:#C9CCD1;background:#FAFAFA}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:600}
+.btn.primary:hover{background:#D90F0F}
+.btn[disabled]{opacity:.5;cursor:default}
+/* chips */
+.chips{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.chips .lbl{font-size:12px;color:var(--muted);margin-right:2px}
+.chip{border:1px solid var(--border);background:#fff;border-radius:999px;padding:4px 12px;font-size:12.5px}
+.chip[aria-pressed="true"]{background:var(--text);color:#fff;border-color:var(--text)}
+.sep{width:1px;height:20px;background:var(--border);margin:0 6px}
+/* tables */
+table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed}
+th{position:sticky;top:90px;z-index:5;background:#fff;text-align:left;font-size:12px;font-weight:600;color:var(--muted);height:48px;padding:0 14px;border-bottom:1px solid var(--border);white-space:nowrap}
+td{height:48px;padding:0 14px;border-bottom:1px solid var(--border);vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+th.num,td.num{text-align:right}
+tr.row{cursor:pointer}
+tr.row:hover td{background:#FAFAFA}
+td .cellwrap{display:flex;align-items:center;justify-content:flex-end}
+td.name strong{font-weight:600}
+th a,.mlink{text-decoration:underline;text-decoration-color:var(--primary);text-underline-offset:3px;text-decoration-thickness:1px;cursor:pointer;color:inherit}
+th a{color:var(--muted)}
+th a:hover,.mlink:hover{color:var(--text)}
+.chev{color:var(--muted);font-size:12px}
+/* kpi */
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:16px}
+.kpi{background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px 18px;min-height:132px}
+.kpi .k{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:6px;align-items:center}
+.kpi .v{font-size:28px;font-weight:600;letter-spacing:-.02em;margin:6px 0 4px;display:flex;align-items:center}
+.kpi .rec{font-size:12px;color:var(--muted)}
+.rec .ok{color:var(--ok);font-weight:700}.rec .no{color:var(--err);font-weight:700}
+.recs{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.rcard{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.rcard h3{font-size:14px;margin:0}
+.rcard .n{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.rcard p{margin:0;font-size:13px}
+.rcard .trade{color:var(--muted);font-size:12.5px}
+.boundary{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 18px;font-size:13px;display:flex;gap:10px;align-items:flex-start;margin-top:16px}
+.boundary .dot{width:8px;height:8px;border-radius:50%;background:var(--text);margin-top:6px;flex:none}
+/* drawer/modal */
+.backdrop{position:fixed;inset:0;background:rgba(10,10,10,.28);z-index:80}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:620px;max-width:100vw;background:#fff;z-index:90;box-shadow:-8px 0 24px rgba(0,0,0,.12);display:flex;flex-direction:column}
+.drawer.wide{width:780px}
+.drawer header{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.drawer header h2{margin:0;font-size:17px;flex:1;min-width:0}
+.drawer .body{padding:20px 24px 32px;overflow-y:auto;flex:1}
+.drawer section{margin-bottom:22px}
+.iconbtn{border:1px solid var(--border);background:#fff;border-radius:7px;width:32px;height:32px;font-size:16px;line-height:1}
+.modal{position:fixed;left:50%;top:80px;transform:translateX(-50%);width:600px;max-height:calc(100vh - 140px);overflow:auto;background:#fff;border-radius:12px;z-index:110;box-shadow:0 12px 40px rgba(0,0,0,.2);padding:22px 24px}
+.backdrop.m{z-index:100}
+.mini{width:100%}
+.mini td,.mini th{height:40px;padding:0 10px;position:static;font-size:13px}
+.mini th{font-size:11.5px;height:34px}
+.mini td.num,.mini th.num{text-align:right}
+.mini tr.total td{font-weight:600;border-top:1px solid var(--text)}
+.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+.steps li{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:start;padding:10px 0;border-bottom:1px solid var(--border);counter-increment:s}
+.steps li::before{content:counter(s);width:22px;height:22px;border-radius:50%;border:1px solid #C9CCD1;font-size:11px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.steps .eq{font-size:12px;color:var(--muted);margin-top:2px}
+.steps .res{font-weight:600;white-space:nowrap}
+.steps li.final .res{font-size:16px}
+.recon{margin-top:10px;font-size:12.5px;padding:8px 12px;border-radius:7px;background:#F2F9F5;border:1px solid #CFE9DA}
+.recon.bad{background:#FDF1F1;border-color:#F4CFD0}
+.sumrow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.sumrow div{border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.sumrow .l{font-size:11.5px;color:var(--muted)}
+.sumrow .v{font-size:18px;font-weight:600;display:flex;align-items:center;margin-top:2px}
+.chk{display:grid;grid-template-columns:14px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.dot{width:10px;height:10px;border-radius:50%;margin-top:5px}
+.dot.pass{background:var(--ok)}.dot.warn{background:var(--warn)}.dot.fail{background:var(--err)}
+.chk .t{font-weight:600;font-size:13px}.chk .d{font-size:13px}.chk .f{font-size:12px;color:var(--muted);margin-top:2px}
+/* scenario */
+.scen{display:grid;grid-template-columns:360px 1fr;gap:28px;align-items:start}
+input[type=range]{width:100%;accent-color:#0A0A0A}
+.ticks{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:2px}
+.warnbox{border:1px solid #F1DFB8;background:#FFF8EA;border-left:4px solid var(--warn);border-radius:8px;padding:10px 14px;font-size:13px;margin-top:12px}
+.okbox{border:1px solid var(--border);background:#fff;border-left:4px solid var(--ok);border-radius:8px;padding:10px 14px;font-size:13px;margin-top:12px}
+.delta-pos{color:var(--ok);font-weight:600}.delta-neg{color:var(--err);font-weight:600}
+/* conflict */
+.defs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0}
+.def{border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px}
+.def .who{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.def .cnt{font-size:20px;font-weight:600;margin:4px 0}
+.def.gov{border-color:var(--text);background:#FCFCFC}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--text);color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+.popover{position:fixed;left:50%;top:96px;transform:translateX(-50%);width:560px;background:#fff;border-radius:12px;z-index:110;box-shadow:0 12px 40px rgba(0,0,0,.2);padding:22px 24px}
+.popover ul{margin:8px 0 0 18px;padding:0}.popover li{margin-bottom:4px}
+.leak{display:flex;gap:12px;align-items:center;border-left:4px solid var(--warn);background:#fff;border:1px solid var(--border);border-left:4px solid var(--warn);border-radius:8px;padding:12px 16px;margin-top:16px}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--muted);margin:6px 0 0}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.two{display:grid;grid-template-columns:1.5fr 1fr;gap:16px}
+.cap{font-size:12px;color:var(--muted)}
+.sr{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<div class="top">
+  <header class="appbar">
+    <div class="brand">
+      <img id="logo" src="https://thatch.com/v3/favicon.svg" alt="" onerror="this.style.display='none'">
+      <span class="word">Thatch</span>
+    </div>
+    <span class="divider"></span>
+    <span class="prod">GTM Metric Trust Board</span>
+    <nav class="tabs" id="tabs" aria-label="Screens"></nav>
+    <span class="viewing" id="viewing" title="Viewing as: Head of Revenue Strategy &amp; Ops (demo)">Viewing as: Head of Revenue Strategy &amp; Ops (demo)</span>
+  </header>
+  <div class="notice"><span><b>SAMPLE DATA.</b> Every company, person and number here is fictional.</span><button class="linkbtn" data-act="about">About this demo</button></div>
+</div>
+<main id="main"></main>
+<footer>Independent concept demo by Joe Deville. Not affiliated with Thatch.</footer>
+<div id="layer"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* ============ SAMPLE DATASET (fictional). Everything on screen is computed from this. ============ */
+const GM = 0.75;               // gross margin assumption
+const MARG = 1.25;             // scenario: added Broker dollars buy customers at 1.25x today's Broker CAC
+const DQ = { brokerBlank:38, missingSource:14, stale:22, dupes:17, financeVarianceUsd:42000 };
+const PLAN = { remaining:4160000, planToDate:1760000,
+  weeks:["Jul 30","Aug 6","Aug 13","Aug 20","Aug 27","Sep 3","Sep 10","Sep 17","Sep 24","Oct 1","Oct 8","Oct 15"],
+  pipeline:[8120000,8460000,8890000,9210000,9050000,9640000,10120000,10480000,10890000,11340000,11720000,12064000],
+  seg:{ "1–49 employees":{rem:1200000,pipe:3900000}, "50–199 (Mid-Market)":{rem:1700000,pipe:4250000}, "200–999 employees":{rem:1260000,pipe:3914000} } };
+const CH = [
+ {id:"broker", name:"Broker", leads:520,Q:240,K:120,W:60,L:130,onb:56,ret:47,exp:6, acv:6000, medQuote:6,
+  days:[5,7,18,9,null,190],
+  lines:[{k:"s",label:"Broker commissions and fees",amt:124000},{k:"s",label:"Broker events and enablement",amt:22000},{k:"h",label:"Broker partnerships manager",fte:1.0,rate:40000}]},
+ {id:"direct", name:"Direct sales", leads:900,Q:260,K:80,W:28,L:100,onb:27,ret:23,exp:5, acv:24000, medQuote:4,
+  days:[3,6,41,14,null,210],
+  lines:[{k:"h",label:"Account executives and SDR time",fte:6.0,rate:70000},{k:"s",label:"Marketing programs",amt:210000},{k:"s",label:"Travel, tools and events",amt:142800}]},
+ {id:"partner", name:"Partner/PEO", leads:380,Q:140,K:52,W:24,L:58,onb:22,ret:15,exp:3, acv:22000, medQuote:9,
+  days:[6,9,33,21,null,240],
+  lines:[{k:"s",label:"Partner referral fees",amt:190400},{k:"s",label:"Partner co-marketing",amt:92000},{k:"h",label:"Partner managers",fte:2.0,rate:70000}]},
+ {id:"inbound", name:"Inbound self-serve", leads:2400,Q:170,K:70,W:28,L:90,onb:25,ret:21,exp:3, acv:10000, medQuote:2,
+  days:[2,3,12,6,null,180],
+  lines:[{k:"s",label:"Paid media and content",amt:150000},{k:"h",label:"Growth marketer",fte:1.0,rate:60000},{k:"s",label:"Tools and landing pages",amt:42000}]}
+];
+const SEG = {"1–49 employees":{cnt:.45,sp:.40,acv:.6},"50–199":{cnt:.35,sp:.35,acv:1.0},"200–999":{cnt:.20,sp:.25,acv:1.7}};
+const GEO = {West:{cnt:.35,sp:.35},Central:{cnt:.40,sp:.40},East:{cnt:.25,sp:.25}};
+const STAGES = [["leads","Lead","leads"],["Q","Qualified","qualified"],["K","Quote","quotes"],["W","Close","winrate"],["onb","Onboarded","retention12"],["ret","Retained 12m","retention12"],["exp","Expanded","retention12"]];
+const DEFS = [
+ {who:"Marketing",txt:"Lead score of 50 or more",n:1140},
+ {who:"Sales",txt:"Rep accepted the opportunity",n:902},
+ {who:"Finance",txt:"Budget confirmed and quote requested",n:655}];
+const GOV_DEF = {txt:"A named buyer with a confirmed need and a budget range, accepted by a rep. One definition for Marketing, Sales and Finance."};
+const GOV_COUNT = CH.reduce((a,c)=>a+c.Q,0);   // 810, counted from the dataset
+const LEGACY_COUNT = 902;                        // the Sales definition currently on the dashboards
+
+/* ============ METRIC DICTIONARY ============ */
+const METRICS = {
+ cac:{name:"CAC (customer acquisition cost)",def:"What we spend to win one new customer through a channel. Onboarding cost is not included.",formula:"(Sales + Marketing spend attributed to channel in period) ÷ new customers from channel",src:["Salesforce Opportunity","Salesforce Account","Finance ledger (spend)","Headcount allocation sheet"],model:"fct_channel_economics",dash:["Channel economics","Overview","Scenario slider"],owner:"RevOps",rev:"Sep 24, 2026",issues:"38% of broker deals have no broker named, so broker spend cannot be matched to customers. Headcount time is an estimate.",ch:true},
+ payback:{name:"CAC payback (months)",def:"How many months of gross profit from a new customer it takes to earn back what we spent to win them.",formula:"CAC ÷ (average first-year contract value ÷ 12 × gross margin 75%)",src:["Salesforce Opportunity","Finance ledger (spend)","Finance ledger (margin)"],model:"fct_channel_economics",dash:["Channel economics","Overview","Scenario slider"],owner:"Finance + RevOps",rev:"Sep 24, 2026",issues:"Inherits the Broker CAC problem. Gross margin is one company-wide rate, not by channel.",ch:true},
+ winrate:{name:"Win rate",def:"Of the qualified deals that reached a final answer, the share we won.",formula:"closed-won ÷ (closed-won + closed-lost)",src:["Salesforce Opportunity"],model:"fct_opportunity_outcome",dash:["Channel economics","Overview","Lifecycle funnel"],owner:"RevOps",rev:"Oct 1, 2026",issues:"Depends on how a deal is marked lost. 22 opportunities have sat in the same stage for more than 30 days.",ch:true},
+ conv:{name:"Pipeline to close conversion",def:"Of all qualified opportunities in the period, the share that were won.",formula:"closed-won ÷ qualified opportunities",src:["Salesforce Opportunity"],model:"fct_opportunity_outcome",dash:["Channel economics","Lifecycle funnel"],owner:"RevOps",rev:"Oct 1, 2026",issues:"Changes whenever the meaning of Qualified changes. Three definitions of Qualified are in use.",ch:true},
+ quotes:{name:"Quoting performance",def:"Quotes sent, the share of quotes that turn into a won deal, and the median days it takes to send a quote.",formula:"quote→close % = closed-won ÷ quotes sent; median days = middle value of (quote date − qualified date)",src:["Salesforce Quote","Salesforce Opportunity"],model:"fct_quote_cycle",dash:["Channel economics","Lifecycle funnel"],owner:"Sales Ops",rev:"Sep 17, 2026",issues:"Broker quotes are missing the broker name on 38% of deals.",ch:true},
+ leads:{name:"Leads created",def:"New people or companies that entered the funnel in the period, counted once per account.",formula:"count of distinct leads created in period, duplicates merged",src:["Salesforce Lead","Salesforce Account"],model:"fct_funnel_stage",dash:["Lifecycle funnel"],owner:"Marketing Ops",rev:"Aug 28, 2026",issues:"14% of opportunities have no lead source. 17 duplicate accounts inflate lead counts.",ch:true},
+ qualified:{name:"Qualified opportunities",def:"Opportunities that meet the single governed definition of Qualified.",formula:"count of opportunities where need, buyer and budget range are confirmed and a rep accepted it",src:["Salesforce Opportunity","Salesforce Contact Role"],model:"fct_funnel_stage",dash:["Overview","Lifecycle funnel"],owner:"RevOps",rev:"Oct 8, 2026",issues:"Three definitions of Qualified are in use (Marketing, Sales, Finance).",ch:false},
+ retention12:{name:"Onboarded, retained 12 months, expanded",def:"How many new customers finish onboarding, are still customers 12 months later, and later buy more.",formula:"stage count ÷ previous stage count, by customer start cohort",src:["Salesforce Account","Billing system export","Finance ledger (revenue)"],model:"fct_customer_lifecycle",dash:["Lifecycle funnel"],owner:"Customer Success Ops",rev:"Sep 3, 2026",issues:"Partner/PEO accounts are often created in billing before Salesforce, so cohort dates can be late.",ch:true},
+ newarr:{name:"New ARR (quarter to date)",def:"Yearly contract value of customers who signed this quarter, counted once at signing.",formula:"sum of first-year contract value for closed-won new customers in quarter",src:["Salesforce Opportunity","Finance ledger (revenue)"],model:"fct_bookings",dash:["Overview","Channel economics","Forecast inputs"],owner:"Finance + RevOps",rev:"Oct 1, 2026",issues:"CRM and Finance differ by $42K (2.3%). Timing of when a signed deal is booked differs between the two."},
+ nrr:{name:"Net revenue retention",def:"Revenue today from customers we had 12 months ago, as a share of what they paid then. Includes upgrades and cancellations.",formula:"(revenue now from customers active 12 months ago) ÷ (revenue 12 months ago from the same customers)",src:["Finance ledger (revenue)","Billing system export"],model:"fct_revenue_retention",dash:["Overview"],owner:"Finance",rev:"Sep 30, 2026",issues:"None open."},
+ coverage:{name:"Pipeline coverage",def:"How many dollars of open pipeline we have for each dollar still needed to hit plan.",formula:"open pipeline ÷ (plan − closed-won so far)",src:["Salesforce Opportunity","Plan sheet"],model:"fct_pipeline_snapshot",dash:["Forecast inputs","Overview"],owner:"RevOps",rev:"Oct 8, 2026",issues:"22 opportunities have not changed stage in over 30 days and may overstate pipeline."}
+};
+/* trust inputs: [completeness %, days since refresh, variance vs Finance % (null = not a Finance number)] */
+const TI = {
+ cac:{broker:[100-DQ.brokerBlank,1,6.1],direct:[97,1,.8],partner:[100-DQ.missingSource,1,1.9],inbound:[94,1,3.1]},
+ winrate:{broker:[88,1,1.2],direct:[97,1,.5],partner:[92,1,1.0],inbound:[95,1,.6]},
+ quotes:{broker:[100-DQ.brokerBlank,1,null],direct:[96,1,null],partner:[90,1,null],inbound:[93,1,null]},
+ retention12:{broker:[92,1,null],direct:[93,1,null],partner:[85,2,null],inbound:[92,1,null]},
+ leads:{broker:[100-DQ.missingSource,1,null],direct:[100-DQ.missingSource,1,null],partner:[100-DQ.missingSource,1,null],inbound:[100-DQ.missingSource,1,null]}
+};
+TI.payback = TI.cac; TI.conv = TI.winrate;
+const SINGLE = { newarr:[96,1,"fin"], nrr:[98,1,.6], qualified:[93,1,null], coverage:[84,1,null] };
+
+/* ============ STATE ============ */
+const S = { screen:"overview", trustedOnly:false, seg:null, geo:null, adopted:false, shift:10,
+  log:[{t:"Oct 8, 2026, 3:12 PM CT",what:"Updated known-issue note on CAC: headcount time is an estimate.",by:"RevOps (sample)"},
+       {t:"Oct 1, 2026, 10:40 AM CT",what:"Reviewed Win rate formula. No change.",by:"RevOps (sample)"}] };
+
+/* ============ COMPUTE ============ */
+const $ = (s,r=document)=>r.querySelector(s);
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const money = n=>"$"+Math.round(n).toLocaleString("en-US");
+const moneyK = n=> n>=1e6 ? "$"+(n/1e6).toFixed(2)+"M" : "$"+(n/1e3).toFixed(1)+"K";
+const pct = (x,d=0)=>(x*100).toFixed(d)+"%";
+const num = n=>Math.round(n).toLocaleString("en-US");
+
+function econ(seg,geo){
+  const sg = seg?SEG[seg]:{cnt:1,sp:1,acv:1}, go = geo?GEO[geo]:{cnt:1,sp:1};
+  const cs = sg.cnt*go.cnt, ss = sg.sp*go.sp;
+  const rows = CH.map(c=>{
+    const sc = v=>Math.max(1,Math.round(v*cs));
+    const leads=sc(c.leads), Q=sc(c.Q), K=Math.min(sc(c.K),Q), W=Math.min(sc(c.W),K);
+    const L=Math.max(0,Math.min(sc(c.L),Q-W));
+    const onb=Math.min(sc(c.onb),W), ret=Math.min(sc(c.ret),onb), exp=Math.min(sc(c.exp),ret);
+    const lines=c.lines.map(l=> l.k==="s" ? {label:l.label,basis:"Spend line",amt:Math.round(l.amt*ss)}
+      : {label:l.label+" (time allocated)",basis:(l.fte*ss).toFixed(2)+" FTE × "+money(l.rate)+" per quarter",amt:Math.round(l.fte*ss*l.rate)});
+    const spend=lines.reduce((a,l)=>a+l.amt,0), acv=Math.round(c.acv*sg.acv), arr=W*acv;
+    const gp=acv/12*GM;
+    return {id:c.id,name:c.name,leads,Q,K,W,L,onb,ret,exp,lines,spend,N:W,acv,arr,gp,cac:spend/W,payback:(spend/W)/gp,
+      winrate:W/(W+L),conv:W/Q,qc:W/K,medQuote:c.medQuote,days:c.days};
+  });
+  const T = rows.reduce((a,r)=>({spend:a.spend+r.spend,N:a.N+r.N,arr:a.arr+r.arr,W:a.W+r.W,L:a.L+r.L,Q:a.Q+r.Q}),{spend:0,N:0,arr:0,W:0,L:0,Q:0});
+  T.cac=T.spend/T.N; T.payback=T.spend/(T.arr/12*GM); T.winrate=T.W/(T.W+T.L); T.conv=T.W/T.Q;
+  return {rows,T};
+}
+const BASE = econ(null,null);
+const FIN_VAR = DQ.financeVarianceUsd/BASE.T.arr*100;   // 42,000 / 1,840,000 = 2.3%
+
+/* ============ TRUST ENGINE ============ */
+const RANK = {A:0,B:1,C:2};
+const worst = gs => gs.reduce((a,g)=>RANK[g]>RANK[a]?g:a,"A");
+function trustFor(id,ch){
+  let t;
+  if(TI[id]){ t = TI[id][ch||"broker"]; }
+  else t = SINGLE[id];
+  let [comp,fresh,recon] = t, def="ok";
+  if(recon==="fin") recon = FIN_VAR;
+  if(id==="qualified") def = S.adopted?"ok":"hard";
+  if(id==="conv") def = S.adopted?"ok":"soft";
+  if(id==="qualified" && S.adopted) comp = 93;
+  const checks=[];
+  checks.push({key:"comp",label:"Completeness",val:comp,status:comp>=90?"pass":comp>=70?"warn":"fail"});
+  checks.push({key:"fresh",label:"Freshness",val:fresh,status:fresh<=1?"pass":fresh<=3?"warn":"fail"});
+  if(recon!=null) checks.push({key:"recon",label:"Reconciles with Finance",val:recon,status:recon<=2?"pass":recon<=5?"warn":"fail"});
+  checks.push({key:"def",label:"One governed definition",val:def,status:def==="ok"?"pass":def==="soft"?"warn":"fail"});
+  const score = Math.round(.5*comp + .25*Math.max(0,100-fresh*10) + .25*(recon==null?100:Math.max(0,100-recon*10)));
+  const hasFail=checks.some(c=>c.status==="fail"), hasWarn=checks.some(c=>c.status==="warn");
+  const grade = hasFail?"C":(hasWarn||score<85)?"B":"A";
+  return {id,ch,checks,score,grade,recon};
+}
+function metricGrade(id){
+  if(TI[id]) return worst(CH.map(c=>trustFor(id,c.id).grade));
+  return trustFor(id).grade;
+}
+const gOf = (id,ch)=>trustFor(id,ch).grade;
+const badge = (id,ch,lg)=>{const g=gOf(id,ch);return `<button class="tb tb-${g}${lg?" lg":""}" data-trust="${id}" data-ch="${ch||""}" aria-label="Trust ${g}: open quality checks for ${esc(METRICS[id].name)}" title="Trust ${g}. Click for quality checks">${g}</button>`;};
+const val = (txt,id,ch)=>`<span class="val" data-grade="${gOf(id,ch)}">${txt}</span>`;
+const mlink = (id,label)=>`<a class="mlink" data-metric="${id}" tabindex="0" role="link" title="Open dictionary entry: ${esc(METRICS[id].name)}">${label||esc(METRICS[id].name)}</a>`;
+const pill = `<span class="pill">Sample</span>`;
+const chName = id=>CH.find(c=>c.id===id).name;
+function filterText(){return (S.seg||S.geo)?[S.seg&&("Segment: "+S.seg),S.geo&&("Region: "+S.geo)].filter(Boolean).join(" · "):"All segments and regions";}
+
+/* ============ SHARED UI ============ */
+const SCREENS=[["overview","Overview"],["channels","Channel economics"],["funnel","Lifecycle funnel"],["dictionary","Metric dictionary"],["quality","Data quality"],["forecast","Forecast inputs"]];
+function renderTabs(){
+  $("#tabs").innerHTML=SCREENS.map(([id,l])=>`<button class="tab" data-act="nav" data-screen="${id}" ${S.screen===id?'aria-current="page"':""}>${l}</button>`).join("");
+}
+function head(title,sub,extra){
+  return `<div class="pagehead"><div><h1>${title}</h1><div class="sub">${sub}</div></div><div style="display:flex;gap:10px;align-items:center">${extra||""}
+  <button class="switch" role="switch" aria-checked="${S.trustedOnly}" data-act="toggle-trusted"><span class="track"></span>Show only trusted numbers (A/B)</button></div></div>`;
+}
+function brokerLowest(rows){return rows.reduce((a,r)=>r.cac<a.cac?r:a).id==="broker";}
+function callout(rows){
+  const b=rows.find(r=>r.id==="broker"), g=gOf("cac","broker");
+  const low=brokerLowest(rows);
+  return `<div class="callout" id="hero-callout"><span class="tb tb-${g} lg" style="margin:0" aria-hidden="true">${g}</span>
+  <div class="txt"><b>Broker CAC ${low?"looks lowest":"is"} (${val(moneyK(b.cac),"cac","broker")}) but is rated ${g}:</b> ${DQ.brokerBlank}% of broker-sourced deals have no broker attribution. <b>Fix attribution before shifting budget.</b> ${pill}</div>
+  <button class="btn" data-trust="cac" data-ch="broker">See Broker checks</button></div>`;
+}
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("show"),3200);}
+function nowCT(){const d=new Date();const p=new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",hour:"numeric",minute:"2-digit"}).format(d);return "Oct 15, 2026, "+p+" CT";}
+
+/* ============ SCREENS ============ */
+function viewOverview(){
+  const {rows,T}=BASE;
+  const qv = S.adopted?GOV_COUNT:LEGACY_COUNT;
+  const k=(id,label,value,sub,rec,grade,ch)=>`<div class="kpi" data-kpi="${id}"><div class="k"><span>${mlink(id,label)}</span>${pill}</div>
+    <div class="v">${val(value,id,ch)}${badge(id,ch,true)}</div><div class="rec">${sub}</div><div class="rec">${rec}</div></div>`;
+  const fin = ok=>ok?`Reconciles with Finance <span class="ok">✓</span>`:`Reconciles with Finance <span class="no">✗</span>`;
+  const pbG=worst(CH.map(c=>gOf("payback",c.id)));
+  const kp = `<div class="kpis">
+   ${k("newarr","New ARR QTD",moneyK(T.arr),"Quarter to date, all channels",fin(FIN_VAR<=2)+" ("+FIN_VAR.toFixed(1)+"% gap)")}
+   <div class="kpi" data-kpi="payback"><div class="k"><span>${mlink("payback","Blended CAC payback")}</span>${pill}</div>
+    <div class="v"><span class="val" data-grade="${pbG}">${T.payback.toFixed(1)} mo</span><button class="tb tb-${pbG} lg" data-trust="payback" data-ch="broker" aria-label="Trust ${pbG}: open quality checks" title="Trust ${pbG}. Click for quality checks">${pbG}</button></div>
+    <div class="rec">All channels, months to earn back CAC</div><div class="rec">${fin(false)} (Broker spend)</div></div>
+   <div class="kpi" data-kpi="winrate"><div class="k"><span>${mlink("winrate","Win rate")}</span>${pill}</div>
+    <div class="v"><span class="val" data-grade="${metricGrade("winrate")}">${pct(T.winrate)}</span><button class="tb tb-${metricGrade("winrate")} lg" data-trust="winrate" data-ch="broker" aria-label="Trust ${metricGrade("winrate")}: open quality checks" title="Click for quality checks">${metricGrade("winrate")}</button></div>
+    <div class="rec">Won ÷ (won + lost), all channels</div><div class="rec">${fin(true)}</div></div>
+   ${k("nrr","Net revenue retention","108%","Customers from 12 months ago",fin(true))}
+   ${k("qualified","Qualified opportunities",num(qv),S.adopted?"Governed definition (adopted today)":"Sales definition; 3 definitions in use",S.adopted?fin(true):`Reconciles with Finance <span class="no">✗</span> (no shared definition)`)}
+  </div>`;
+  const b=rows.find(r=>r.id==="broker"), d=rows.find(r=>r.id==="direct"), i=rows.find(r=>r.id==="inbound"), p=rows.find(r=>r.id==="partner");
+  const stress = b.cac/(1-DQ.brokerBlank/100);
+  const sc = scenario(BASE.rows,BASE.T,10,false);
+  const pd = (p.onb-p.ret)/p.onb, od = rows.filter(r=>r.id!=="partner").map(r=>(r.onb-r.ret)/r.onb), odAvg=od.reduce((a,x)=>a+x,0)/od.length;
+  const recs = `<div class="recs">
+   <div class="rcard"><div class="n">Recommendation 1 ${pill}</div><h3>Fix broker attribution, then test the Broker shift</h3>
+    <p>Broker CAC is ${val(moneyK(b.cac),"cac","broker")}${badge("cac","broker")} with payback of ${val(b.payback.toFixed(1)+" mo","payback","broker")}${badge("payback","broker")}. Both rest on deals we cannot fully attribute.</p>
+    <p class="trade">Tradeoff: if ${DQ.brokerBlank}% of those customers are not truly broker-sourced, Broker CAC is ${val(moneyK(stress),"cac","broker")}. Still below Inbound at ${moneyK(i.cac)}, but too uncertain to move budget on.</p>
+    <div><button class="btn" data-act="goto-scenario">Open the scenario</button></div></div>
+   <div class="rcard"><div class="n">Recommendation 2 ${pill}</div><h3>Pull back Direct programs where payback is longest</h3>
+    <p>Direct has the highest CAC at ${val(moneyK(d.cac),"cac","direct")}${badge("cac","direct")} and payback of ${val(d.payback.toFixed(1)+" mo","payback","direct")}${badge("payback","direct")}.</p>
+    <p class="trade">Tradeoff: cutting 10% of Direct budget frees ${moneyK(sc.delta)} but loses about ${sc.lost.toFixed(1)} customers (${moneyK(sc.lost*d.acv)} of ARR). Direct still brings the largest deals (${moneyK(d.acv)}).</p>
+    <div><button class="btn" data-act="open-channel" data-id="direct">See Direct math</button></div></div>
+   <div class="rcard"><div class="n">Recommendation 3 ${pill}</div><h3>Invest in Inbound self-serve; fix Partner onboarding</h3>
+    <p>Inbound pays back in ${val(i.payback.toFixed(1)+" mo","payback","inbound")}${badge("payback","inbound")} at CAC ${val(moneyK(i.cac),"cac","inbound")}${badge("cac","inbound")}.</p>
+    <p class="trade">Tradeoff: Partner/PEO customers drop between onboarding and month 12 at ${pct(pd)} versus ${pct(odAvg)} for other channels (${(pd/odAvg).toFixed(1)}×)${badge("retention12","partner")}. Fix that before adding partner spend.</p>
+    <div><button class="btn" data-act="nav" data-screen="funnel">Open the funnel</button></div></div>
+  </div>`;
+  return head("Overview","Quarter to date. Every number carries a trust rating; click a badge to see why.") + kp + callout(rows) + `<h2 style="margin-top:18px">Top 3 recommendations</h2>` + recs + boundary();
+}
+function boundary(){return `<div class="boundary"><span class="dot"></span><div><b>Who does what.</b> This board defines the requirements: the definitions, the checks and the fix paths. RevOps and Engineering own the build. Nothing here changes a system of record.</div></div>`;}
+
+function viewChannels(){
+  const {rows,T}=econ(S.seg,S.geo);
+  const th=(id,t,cls)=>`<th class="${cls||"num"}">${mlink(id,t)}</th>`;
+  const body=rows.map(r=>{
+    const rowG=worst([gOf("winrate",r.id),gOf("cac",r.id),gOf("payback",r.id),gOf("conv",r.id)]);
+    const c=(id,txt,attr)=>`<td class="num"><div class="cellwrap">${val(txt,id,r.id).replace('class="val"','class="val" '+attr)}${badge(id,r.id)}</div></td>`;
+    return `<tr class="row" tabindex="0" data-act="open-channel" data-id="${r.id}" data-row="${r.id}">
+      <td class="name"><strong>${r.name}</strong> ${pill}</td>
+      ${c("winrate",pct(r.winrate),'data-win="'+r.id+'"')}${c("cac",moneyK(r.cac),'data-cac="'+r.id+'"')}${c("payback",r.payback.toFixed(1),'data-payback="'+r.id+'"')}${c("conv",pct(r.conv),'data-conv="'+r.id+'"')}
+      <td class="num"><div class="cellwrap"><span class="chev" style="margin-right:8px">${rowG==="C"?"Needs fixing":rowG==="B"?"Usable":"Reliable"}</span><button class="tb tb-${rowG} lg" data-trust="cac" data-ch="${r.id}" data-rowgrade="1" aria-label="Row trust ${rowG}" title="Row trust is the weakest of its four numbers (${rowG})">${rowG}</button></div></td></tr>`;}).join("");
+  const chips=(grp,obj)=>Object.keys(obj).map(k=>`<button class="chip" data-act="chip" data-grp="${grp}" data-val="${esc(k)}" aria-pressed="${S[grp]===k}">${k}</button>`).join("");
+  return head("Channel economics","What it costs to win a customer in each motion, how fast it pays back, and how far we can trust the answer.") + callout(rows)
+  + `<div class="chips"><span class="lbl">Segment</span>${chips("seg",SEG)}<span class="sep"></span><span class="lbl">Region</span>${chips("geo",GEO)}<span class="lbl" style="margin-left:auto">Click a row for the math.</span></div>
+  <div class="card tight"><table aria-label="Channel economics"><colgroup><col style="width:24%"><col style="width:15%"><col style="width:15%"><col style="width:16%"><col style="width:16%"><col style="width:14%"></colgroup>
+   <thead><tr><th>Channel</th>${th("winrate","Win rate")}${th("cac","CAC")}${th("payback","Payback (months)")}${th("conv","Pipeline → close")}<th class="num">Trust (A/B/C)</th></tr></thead>
+   <tbody>${body}</tbody></table></div>
+  <div class="cap" style="margin:8px 2px 0">Showing: ${filterText()}. All channels together: CAC ${moneyK(T.cac)}, payback ${T.payback.toFixed(1)} months, win rate ${pct(T.winrate)}. Gross margin assumed at ${pct(GM)}.</div>
+  <div class="card" style="margin-top:18px" id="scenario-card"><div class="pagehead" style="margin-bottom:10px"><div><h2 style="margin:0">Scenario: shift budget from Direct to Broker</h2><div class="sub">Move 10–30% of the Direct budget into Broker and see projected new customers and payback.</div></div>${pill}</div>
+  <div class="scen"><div><label for="shift" style="font-weight:600">Share of Direct budget moved: <span id="shiftv">${S.shift}%</span></label>
+   <input id="shift" type="range" min="10" max="30" step="5" value="${S.shift}" aria-label="Percent of Direct budget shifted to Broker">
+   <div class="ticks"><span>10%</span><span>15%</span><span>20%</span><span>25%</span><span>30%</span></div>
+   <div class="cap" style="margin-top:10px">Assumptions: added Broker dollars buy customers at ${MARG}× today's Broker CAC. Removed Direct dollars lose customers at today's Direct CAC. Uses the filters above.</div></div>
+   <div id="scenario-body"></div></div></div>`;
+}
+function scenario(rows,T,pctv,stress){
+  const b=rows.find(r=>r.id==="broker"), d=rows.find(r=>r.id==="direct");
+  const delta=pctv/100*d.spend, bcac=(stress?b.cac/(1-DQ.brokerBlank/100):b.cac)*MARG;
+  const add=delta/bcac, lost=delta/d.cac;
+  const N2=T.N-lost+add, arr2=T.arr-lost*d.acv+add*b.acv;
+  return {delta,add,lost,N2,arr2,cac2:T.spend/N2,pb2:T.spend/(arr2/12*GM),net:add-lost};
+}
+function renderScenario(){
+  const el=$("#scenario-body"); if(!el) return;
+  const {rows,T}=econ(S.seg,S.geo), s=scenario(rows,T,S.shift,false), st=scenario(rows,T,S.shift,true);
+  const g=gOf("cac","broker");
+  const dl=(x,fmt,goodPos)=>{const good=goodPos?x>0:x<0;return `<span class="${good?"delta-pos":"delta-neg"}">${x>0?"+":x<0?"\u2212":""}${fmt(Math.abs(x))}</span>`;};
+  const v=(t)=>`<span class="val" data-grade="${g}">${t}</span>`;
+  el.innerHTML=`<table class="mini"><thead><tr><th>Projection ${pill}</th><th class="num">Today</th><th class="num">After shift</th><th class="num">Change</th></tr></thead><tbody>
+   <tr><td>New customers</td><td class="num">${T.N.toFixed(1)}</td><td class="num" data-sc="n2">${v(s.N2.toFixed(1))}${badge("cac","broker")}</td><td class="num">${v(dl(s.N2-T.N,x=>x.toFixed(1),true))}</td></tr>
+   <tr><td>New ARR</td><td class="num">${moneyK(T.arr)}</td><td class="num">${v(moneyK(s.arr2))}</td><td class="num">${v(dl(s.arr2-T.arr,moneyK,true))}</td></tr>
+   <tr><td>Blended CAC</td><td class="num">${moneyK(T.cac)}</td><td class="num">${v(moneyK(s.cac2))}</td><td class="num">${v(dl(s.cac2-T.cac,x=>money(x),false))}</td></tr>
+   <tr><td>Blended payback (months)</td><td class="num" data-sc="pb0">${T.payback.toFixed(1)}</td><td class="num" data-sc="pb2">${v(s.pb2.toFixed(1))}${badge("payback","broker")}</td><td class="num">${v(dl(s.pb2-T.payback,x=>x.toFixed(1),false))}</td></tr>
+  </tbody></table>
+  <div class="cap" style="margin-top:8px">Moves ${moneyK(s.delta)} out of Direct: loses about ${s.lost.toFixed(1)} Direct customers, adds about ${s.add.toFixed(1)} Broker customers.</div>
+  ${g==="C"?`<div class="warnbox" id="scen-warn"><b>Warning: Broker trust is C.</b> ${DQ.brokerBlank}% of broker deals have no broker attribution, so Broker CAC could be higher than shown. If ${DQ.brokerBlank}% of today's Broker customers are not broker-sourced, Broker CAC is ${moneyK(rows.find(r=>r.id==="broker").cac/(1-DQ.brokerBlank/100))} and the same shift adds ${st.add.toFixed(1)} customers instead (payback ${st.pb2.toFixed(1)} months). Treat this as a range, not a plan. <button class="linkbtn" data-trust="cac" data-ch="broker">See Broker checks</button></div>`
+   :`<div class="okbox" id="scen-ok">Broker trust is now ${g}, so this projection can be relied on.</div>`}`;
+}
+
+function viewFunnel(){
+  const {rows,T}=econ(S.seg,S.geo);
+  const th=STAGES.map(([k,l,m])=>`<th class="num">${mlink(m,l)}${(m==="qualified")?badge("qualified"):badge(m,null)}</th>`).join("");
+  const stageG=(m,ch)=>m==="qualified"?gOf("qualified"):gOf(m,ch);
+  const body=rows.map(r=>{
+    const cells=STAGES.map(([k,l,m],i)=>{
+      const prev=i?r[STAGES[i-1][0]]:null, conv=prev?Math.round(r[k]/prev*100)+"%":"";
+      const d = r.days[i-1]; const dtxt = i===0?"":(d==null? "" : "med "+d+"d");
+      const dd = i===5? "12 mo" : dtxt;
+      return `<td class="num" style="line-height:1.2"><span class="val" data-grade="${stageG(m,r.id)}"><b>${num(r[k])}</b>${conv?` <span class="cap">→ ${conv}</span>`:""}<br><span class="cap">${i===4?"med "+r.days[3]+"d":dd}</span></span></td>`;}).join("");
+    const g=worst(STAGES.map(([k,l,m])=>stageG(m,r.id)));
+    return `<tr data-frow="${r.id}"><td class="name"><strong>${r.name}</strong> ${pill}</td>${cells}<td class="num"><button class="tb tb-${g} lg" data-trust="${g==="C"?"qualified":"retention12"}" data-ch="${r.id}" aria-label="Row trust ${g}" title="Row trust: weakest stage (${g})">${g}</button></td></tr>`;}).join("");
+  const p=rows.find(r=>r.id==="partner"), oth=rows.filter(r=>r.id!=="partner");
+  const pd=(p.onb-p.ret)/p.onb, od=oth.reduce((a,r)=>a+(r.onb-r.ret)/r.onb,0)/oth.length;
+  return head("Lifecycle funnel","Lead to expanded customer, by channel. Each cell shows the count, the conversion from the stage before, and the median days it took.") +
+  `<div class="chips"><span class="lbl">Showing: ${filterText()} (change on Channel economics)</span></div>
+  <div class="card tight"><table aria-label="Lifecycle funnel"><colgroup><col style="width:15%"><col span="7" style="width:11.2%"><col style="width:6.6%"></colgroup>
+  <thead><tr><th>Channel</th>${th}<th class="num">Trust</th></tr></thead><tbody>${body}</tbody></table></div>
+  <div class="leak" id="leakage"><span class="tb tb-B lg" style="margin:0">!</span><div><b>Leakage flag:</b> the Onboarding → Retained 12m drop is ${(pd/od).toFixed(1)}× higher for the Partner channel (${pct(pd)} of onboarded customers lost versus ${pct(od)} for other channels). ${pill} ${badge("retention12","partner")}</div></div>
+  <div class="cap" style="margin-top:10px">The Qualified column is greyed under "trusted only" until the three definitions of Qualified are replaced by one (see ${mlink("qualified","Metric dictionary")}). Median days are measured from the previous stage.</div>`;
+}
+
+function viewDictionary(){
+  const rows=Object.entries(METRICS).map(([id,m])=>{const g=metricGrade(id);
+    return `<tr class="row" tabindex="0" data-act="open-metric" data-id="${id}" data-mrow="${id}">
+    <td class="name"><span class="trunc" title="${esc(m.name)}"><strong>${esc(m.name)}</strong></span></td>
+    <td><span class="trunc" title="${esc(m.def)}">${esc(m.def)}</span></td>
+    <td><span class="trunc" title="${esc(m.formula)}">${esc(m.formula)}</span></td>
+    <td><span class="trunc" title="${esc(m.src.join(", "))}">${esc(m.src.join(", "))}</span></td>
+    <td>${esc(m.owner)}</td><td>${m.rev}</td>
+    <td><span class="val" data-grade="${g}">${g==="C"?"Low":g==="B"?"Medium":"High"}</span><button class="tb tb-${g}" data-trust="${id}" data-ch="" aria-label="Trust ${g}: open quality checks">${g}</button></td>
+    <td><span class="trunc" title="${esc(m.issues)}">${esc(m.issues)} </span></td></tr>`;}).join("");
+  const cc = S.adopted ? `<div class="card" id="conflict-card"><div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">Definition conflict resolved: one governed definition of "Qualified"</h2>${pill}</div>
+    <p style="margin:8px 0 0">Adopted on ${esc(S.adoptedAt)}. Qualified opportunities now reads <b>${num(GOV_COUNT)}</b> (was ${num(LEGACY_COUNT)} on the Sales definition). Pipeline-to-close conversion no longer depends on a disputed definition. Marketing and Finance reports should be switched by RevOps/Engineering.</p></div>`
+   : `<div class="card" id="conflict-card"><div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">3 definitions of "Qualified" found in use</h2>${pill}</div>
+    <div class="sub">The same word gives three different counts, so conversion and win-rate comparisons do not line up.</div>
+    <div class="defs">${DEFS.map(d=>`<div class="def"><div class="who">${d.who}</div><div class="cnt">${num(d.n)}</div><div>${d.txt}</div></div>`).join("")}
+    <div class="def gov" style="grid-column:1/-1"><div class="who">Proposed governed definition</div><div class="cnt">${num(GOV_COUNT)} <span class="cap">opportunities under this definition</span></div><div>${GOV_DEF.txt}</div></div></div>
+    <button class="btn primary" data-act="adopt">Adopt governed definition</button> <span class="cap" style="margin-left:8px">Updates the Qualified KPI and logs the change below. RevOps/Engineering own the switch in reports.</span></div>`;
+  const log=S.log.map(l=>`<tr><td>${l.t}</td><td><span class="trunc" title="${esc(l.what)}">${esc(l.what)}</span></td><td>${esc(l.by)}</td><td>${pill}</td></tr>`).join("");
+  return head("Metric dictionary and lineage","One governed definition per metric, with its formula, source tables and owner. Click a row to see where it comes from.")
+  + cc + `<div class="card tight" style="margin-top:16px"><table aria-label="Metric dictionary"><colgroup><col style="width:13%"><col style="width:20%"><col style="width:17%"><col style="width:12%"><col style="width:8%"><col style="width:7%"><col style="width:8.5%"><col style="width:14.5%"></colgroup>
+  <thead><tr><th>Metric</th><th>Definition</th><th>Formula</th><th>Source tables</th><th>Owner</th><th>Reviewed</th><th>Trust</th><th>Known issues</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <div class="card tight" style="margin-top:16px" id="changelog"><div style="padding:16px 20px 0"><h2 style="margin:0">Change log</h2></div><table aria-label="Change log"><colgroup><col style="width:20%"><col style="width:56%"><col style="width:16%"><col style="width:8%"></colgroup>
+  <thead><tr><th>When (CT)</th><th>Change</th><th>By</th><th></th></tr></thead><tbody>${log}</tbody></table></div>` + boundary();
+}
+
+function viewQuality(){
+  const items=[
+   {chk:"Missing source on opportunity",found:DQ.missingSource+"%",what:"of opportunities have no lead source",owner:"Sales Ops",fix:"Make Lead Source required at the first stage and backfill from campaign records.",m:"leads"},
+   {chk:"Broker attribution blank",found:DQ.brokerBlank+"%",what:"of broker deals have no broker named",owner:"RevOps",fix:"Require the broker on every broker-sourced opportunity; backfill from commission statements.",m:"cac",ch:"broker"},
+   {chk:"Stale stage",found:DQ.stale,what:"opportunities stuck in one stage for more than 30 days",owner:"Sales managers",fix:"Weekly review list; auto-flag at 30 days and ask for a next step or close-lost.",m:"coverage"},
+   {chk:"Duplicate accounts",found:DQ.dupes,what:"accounts exist more than once",owner:"RevOps",fix:"Merge the 17 pairs; add a duplicate rule on company domain at account create.",m:"leads"},
+   {chk:"Finance ARR vs CRM ARR",found:money(DQ.financeVarianceUsd),what:`gap (${FIN_VAR.toFixed(1)}%) between Finance ledger ARR and CRM ARR`,owner:"Finance + RevOps",fix:"Agree one booking date rule; reconcile month-end with a shared list of differences.",m:"newarr"}];
+  const rows=items.map(i=>`<tr data-dq="${i.m}"><td class="name"><span class="trunc" title="${esc(i.chk)}"><strong>${i.chk}</strong></span> </td>
+   <td><b>${i.found}</b> <span class="muted">${i.what}</span></td><td>${mlink(i.m)}${badge(i.m,i.ch||"")}</td><td>${i.owner}</td><td><span class="trunc" title="${esc(i.fix)}">${i.fix}</span></td><td>${pill}</td></tr>`).join("");
+  return head("Data quality","Five checks that decide how far each number can be trusted, with an owner and a fix path for each.")
+  + `<div class="boundary" style="margin:0 0 16px"><span class="dot"></span><div><b>RevOps/Engineering own the build — this board defines the requirement.</b> Each fix path below is a requirement for them to schedule, not a change made from here.</div></div>
+  <div class="card tight"><table aria-label="Data quality checks"><colgroup><col style="width:17%"><col style="width:27%"><col style="width:15%"><col style="width:11%"><col style="width:24%"><col style="width:6%"></colgroup>
+  <thead><tr><th>Check</th><th>What we found</th><th>Most affected metric</th><th>Owner</th><th>Fix path</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function viewForecast(){
+  const P=PLAN, last=P.pipeline[P.pipeline.length-1], cov=last/P.remaining, closed=BASE.T.arr, pace=closed/P.planToDate;
+  const segs=Object.entries(P.seg).map(([n,s])=>({n,cov:s.pipe/s.rem,pipe:s.pipe,rem:s.rem}));
+  const low=segs.reduce((a,s)=>s.cov<a.cov?s:a);
+  const W=760,H=240,pl=56,pb=30,pt=14,max=14000000, bw=(W-pl-10)/P.weeks.length;
+  const y=v=>pt+(H-pt-pb)*(1-v/max);
+  const bars=P.pipeline.map((v,i)=>`<rect x="${pl+i*bw+6}" y="${y(v)}" width="${bw-12}" height="${H-pb-y(v)}" rx="2" fill="${i===P.pipeline.length-1?"#0A0A0A":"#C9CCD1"}"><title>Week of ${P.weeks[i]}: ${moneyK(v)} open pipeline (sample)</title></rect>
+   <text x="${pl+i*bw+bw/2}" y="${H-10}" font-size="10" text-anchor="middle" fill="#6B6F76">${P.weeks[i]}</text>`).join("");
+  const grid=[0,3.5e6,7e6,10.5e6,14e6].map(v=>`<line x1="${pl}" x2="${W-10}" y1="${y(v)}" y2="${y(v)}" stroke="#E6E6E6"/><text x="${pl-8}" y="${y(v)+4}" font-size="10" text-anchor="end" fill="#6B6F76">${v?("$"+(v/1e6)+"M"):"$0"}</text>`).join("");
+  const target=3*P.remaining;
+  const stageRows=(()=>{const {rows,T}=BASE;const Q=T.Q,K=rows.reduce((a,r)=>a+r.K,0),Wn=T.W;return [["Qualified → Quote",K/Q],["Quote → Close",Wn/K],["Qualified → Close",Wn/Q]];})();
+  return head("Forecast inputs","Weekly pipeline snapshot, coverage, stage conversion and pacing. Inputs for the forecast, not the forecast itself.")
+  + `<div class="callout" id="risk-flag" style="border-left-color:var(--warn)"><span class="tb tb-B lg" style="margin:0">!</span><div class="txt"><b>Risk flag:</b> Q4 coverage is below 3× for Mid-Market. ${low.n} sits at ${val(low.cov.toFixed(1)+"×","coverage")}${badge("coverage")} against a 3× rule of thumb. ${pill}</div></div>
+  <div class="kpis" style="grid-template-columns:repeat(4,1fr)">
+   <div class="kpi" style="min-height:110px"><div class="k"><span>${mlink("coverage","Pipeline coverage")}</span>${pill}</div><div class="v">${val(cov.toFixed(1)+"×","coverage")}${badge("coverage",null,true)}</div><div class="rec">${moneyK(last)} open ÷ ${moneyK(P.remaining)} still needed</div></div>
+   <div class="kpi" style="min-height:110px"><div class="k"><span>${mlink("newarr","Pacing vs plan")}</span>${pill}</div><div class="v">${val(pct(pace),"newarr")}${badge("newarr",null,true)}</div><div class="rec">${moneyK(closed)} won vs ${moneyK(P.planToDate)} planned to date</div></div>
+   <div class="kpi" style="min-height:110px"><div class="k"><span>${mlink("winrate","Win rate")}</span>${pill}</div><div class="v">${val(pct(BASE.T.winrate),"winrate")}${badge("winrate","direct",true)}</div><div class="rec">Blended, all channels</div></div>
+   <div class="kpi" style="min-height:110px"><div class="k"><span>${mlink("conv","Pipeline → close")}</span>${pill}</div><div class="v">${val(pct(BASE.T.conv),"conv","direct")}${badge("conv","direct",true)}</div><div class="rec">Blended, all channels</div></div>
+  </div>
+  <div class="two"><div class="card"><h2>Weekly open pipeline snapshot ${pill}</h2>
+   <svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Bar chart of weekly open pipeline, rising from 8.1 million to 12.1 million dollars, below the 3 times coverage line">${grid}${bars}
+   <line x1="${pl}" x2="${W-10}" y1="${y(target)}" y2="${y(target)}" stroke="#F31616" stroke-dasharray="5 4"/><text x="${W-12}" y="${y(target)-5}" font-size="10.5" text-anchor="end" fill="#0A0A0A">3× coverage line (${moneyK(target)})</text></svg>
+   <div class="legend"><span><i style="background:#C9CCD1"></i>Earlier weeks</span><span><i style="background:#0A0A0A"></i>Today (Oct 15)</span><span><i style="background:#F31616"></i>3× line</span></div></div>
+  <div class="card tight"><div style="padding:16px 20px 0"><h2 style="margin:0">Coverage by segment</h2></div><table class="mini" aria-label="Coverage by segment"><thead><tr><th>Segment</th><th class="num">Open pipeline</th><th class="num">Needed</th><th class="num">Coverage</th></tr></thead><tbody>
+   ${segs.map(s=>`<tr data-seg="${esc(s.n)}"><td><span class="trunc" title="${esc(s.n)}">${s.n}</span></td><td class="num">${moneyK(s.pipe)}</td><td class="num">${moneyK(s.rem)}</td><td class="num"><span class="val" data-grade="${gOf("coverage")}" style="${s.cov<3?"font-weight:700":""}">${s.cov.toFixed(1)}×</span>${badge("coverage")}</td></tr>`).join("")}</tbody></table>
+   <div style="padding:6px 20px 0"><h3 style="margin:8px 0 0">Stage conversion (all channels)</h3></div>
+   <table class="mini"><tbody>${stageRows.map(([n,v])=>`<tr><td>${n}</td><td class="num"><span class="val" data-grade="${metricGrade("quotes")}">${pct(v)}</span>${badge("quotes","direct")}</td></tr>`).join("")}</tbody></table></div></div>`;
+}
+
+/* ============ DRAWERS / MODALS ============ */
+function layer(html){ $("#layer").innerHTML=html; }
+function closeLayer(){ $("#layer").innerHTML=""; if(closeLayer.back){closeLayer.back.focus&&closeLayer.back.focus();closeLayer.back=null;} }
+function openChannel(id){
+  const {rows}=econ(S.seg,S.geo), r=rows.find(x=>x.id===id), dispG=worst([gOf("cac",id),gOf("payback",id)]);
+  const tableCac=moneyK(r.cac), tablePb=r.payback.toFixed(1);
+  const lines=r.lines.map(l=>`<tr><td><span class="trunc" title="${esc(l.label)}">${esc(l.label)}</span><div class="cap">${l.basis}</div></td><td class="num">${money(l.amt)}</td></tr>`).join("");
+  const acv=r.arr/r.N;
+  layer(`<div class="backdrop" data-act="close-layer"></div><aside class="drawer" role="dialog" aria-modal="true" aria-label="${r.name} math" id="drawer" data-drawer="${id}">
+  <header><h2>${r.name} ${pill}</h2><button class="iconbtn" data-act="close-layer" aria-label="Close drawer">×</button></header><div class="body">
+  <div class="cap" style="margin:-6px 0 14px">${filterText()}. Quarter to date.</div>
+  <div class="sumrow"><div><div class="l">${mlink("winrate","Win rate")}</div><div class="v">${val(pct(r.winrate),"winrate",id)}${badge("winrate",id)}</div></div>
+   <div><div class="l">${mlink("cac","CAC")}</div><div class="v">${val(tableCac,"cac",id)}${badge("cac",id)}</div></div>
+   <div><div class="l">${mlink("payback","Payback (months)")}</div><div class="v">${val(tablePb,"payback",id)}${badge("payback",id)}</div></div>
+   <div><div class="l">${mlink("conv","Pipeline → close")}</div><div class="v">${val(pct(r.conv),"conv",id)}${badge("conv",id)}</div></div></div>
+  <section><h3>1. CAC build: where the money goes</h3>
+   <table class="mini"><thead><tr><th>Spend line</th><th class="num">Amount</th></tr></thead><tbody>${lines}
+   <tr class="total"><td>Total attributed spend</td><td class="num" data-d="spend">${money(r.spend)}</td></tr></tbody></table>
+   <div class="cap" style="margin-top:6px">Headcount lines are time allocated to this channel, not extra payroll. Onboarding cost is excluded.</div></section>
+  <section><h3>2. Payback, step by step ${badge("payback",id)}</h3>
+   <ol class="steps" data-steps>
+    <li><div>New customers won<div class="eq">Closed-won deals from this channel</div></div><span></span><span class="res" data-d="n">${r.N}</span></li>
+    <li><div>CAC<div class="eq">${money(r.spend)} ÷ ${r.N} customers</div></div><span></span><span class="res" data-d="cac">${money(r.cac)}</span></li>
+    <li><div>Average first-year contract value<div class="eq">${money(r.arr)} new ARR ÷ ${r.N} customers</div></div><span></span><span class="res" data-d="acv">${money(acv)}</span></li>
+    <li><div>Monthly gross profit per customer<div class="eq">${money(acv)} ÷ 12 × ${pct(GM)} gross margin</div></div><span></span><span class="res" data-d="gp">${money(r.gp)}</span></li>
+    <li class="final"><div>Payback<div class="eq">${money(r.cac)} ÷ ${money(r.gp)} per month</div></div><span></span><span class="res" data-d="payback">${val((r.cac/r.gp).toFixed(1)+" months","payback",id)}</span></li></ol>
+   <div class="recon" data-recon>Table shows CAC <b>${tableCac}</b> and payback <b>${tablePb}</b> months. Drawer math gives ${money(r.cac)} and ${(r.cac/r.gp).toFixed(1)} months. <b>Matches ✓</b></div></section>
+  <section><h3>3. Quoting performance ${badge("quotes",id)}</h3>
+   <table class="mini"><tbody><tr><td>${mlink("quotes","Quotes sent")}</td><td class="num">${val(num(r.K),"quotes",id)}</td></tr>
+   <tr><td>Quote → close</td><td class="num">${val(num(r.W)+" ÷ "+num(r.K)+" = "+pct(r.qc),"quotes",id)}</td></tr>
+   <tr><td>Median days to send a quote</td><td class="num">${val(r.medQuote+" days","quotes",id)}</td></tr>
+   <tr><td>Win rate</td><td class="num">${val(num(r.W)+" ÷ ("+num(r.W)+" + "+num(r.L)+") = "+pct(r.winrate),"winrate",id)}</td></tr></tbody></table></section>
+  </div></aside>`);
+  closeLayer.back=document.activeElement; $("#drawer .iconbtn").focus();
+}
+function lineageSVG(id){
+  const m=METRICS[id], cols=[["Source",m.src],["Warehouse model",["stg_salesforce","stg_finance_ledger",m.model].filter((x,i)=>i===2||m.src.some(s=>i===0?s.startsWith("Salesforce"):s.startsWith("Finance")||s.startsWith("Billing")||s.startsWith("Headcount")||s.startsWith("Plan")))],["Metric",[m.name]],["Used in",m.dash]];
+  const cw=150,gap=32,nh=34,sp=46,top=30, n=Math.max(...cols.map(c=>c[1].length)), H=top+n*sp+6, W=cols.length*cw+(cols.length-1)*gap;
+  const pos=cols.map((c,ci)=>c[1].map((t,i)=>({x:ci*(cw+gap),y:top+(i+(n-c[1].length)/2)*sp,t})));
+  let edges="";
+  for(let ci=0;ci<3;ci++) pos[ci].forEach(a=>pos[ci+1].forEach(b=>{edges+=`<path d="M${a.x+cw},${a.y+nh/2} C${a.x+cw+gap/2},${a.y+nh/2} ${b.x-gap/2},${b.y+nh/2} ${b.x},${b.y+nh/2}" fill="none" stroke="#B9BCC1" stroke-width="1.2" marker-end="url(#ar)"/>`;}));
+  const nodes=pos.map((col,ci)=>col.map(p=>{const t=p.t.length>22?p.t.slice(0,21)+"…":p.t;
+    const fill=ci===2?"#0A0A0A":"#fff",tc=ci===2?"#fff":"#0A0A0A";
+    return `<g><title>${esc(p.t)}</title><rect x="${p.x}" y="${p.y}" width="${cw}" height="${nh}" rx="6" fill="${fill}" stroke="#C9CCD1"/><text x="${p.x+10}" y="${p.y+21}" font-size="11.5" fill="${tc}">${esc(t)}</text></g>`;}).join("")).join("");
+  const heads=cols.map((c,ci)=>`<text x="${ci*(cw+gap)}" y="14" font-size="11" fill="#6B6F76" font-weight="600">${c[0]}</text>`).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Lineage for ${esc(m.name)}: sources to warehouse model to metric to dashboards"><defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#B9BCC1"/></marker></defs>${heads}${edges}${nodes}</svg>`;
+}
+function openMetric(id){
+  const m=METRICS[id], g=metricGrade(id);
+  layer(`<div class="backdrop" data-act="close-layer"></div><aside class="drawer wide" role="dialog" aria-modal="true" aria-label="${esc(m.name)} dictionary entry" id="drawer" data-mdrawer="${id}">
+  <header><h2>${esc(m.name)} ${pill}</h2><button class="tb tb-${g} lg" data-trust="${id}" data-ch="" aria-label="Trust ${g}: open quality checks">${g}</button><button class="iconbtn" data-act="close-layer" aria-label="Close drawer">×</button></header><div class="body">
+  <section><h3>Definition</h3><p style="margin:0">${esc(m.def)}</p></section>
+  <section><h3>Formula</h3><p style="margin:0;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:#F7F7F7;padding:10px 12px;border-radius:7px">${esc(m.formula)}</p></section>
+  <section><h3>Lineage: where this number comes from</h3>${lineageSVG(id)}<div class="cap">Salesforce and the Finance ledger feed warehouse models, which compute the metric, which the dashboards read.</div></section>
+  <section><table class="mini"><tbody><tr><td class="muted">Owner</td><td>${esc(m.owner)}</td></tr><tr><td class="muted">Last reviewed</td><td>${m.rev}</td></tr><tr><td class="muted">Known issues</td><td style="white-space:normal;height:auto;padding:10px">${esc(m.issues)}</td></tr></tbody></table></section>
+  ${id==="qualified"&&!S.adopted?`<section><button class="btn primary" data-act="adopt">Adopt governed definition</button></section>`:""}
+  </div></aside>`);
+  closeLayer.back=document.activeElement; $("#drawer .iconbtn").focus();
+}
+const FIX = {
+ comp:(id,ch)=> (ch==="broker"||id==="quotes"&&ch==="broker")?{o:"RevOps",f:"Require the broker on every broker-sourced opportunity and backfill the blank "+DQ.brokerBlank+"% from commission statements."}:{o:"Sales Ops",f:"Make the missing fields required at the right stage and backfill from the source system."},
+ fresh:()=>({o:"Data engineering",f:"Move the refresh to daily, before 6 AM CT."}),
+ recon:()=>({o:"Finance + RevOps",f:"Map every spend line to a Finance ledger account and reconcile at month end."}),
+ def:()=>({o:"RevOps",f:"Adopt one governed definition (Metric dictionary)."})};
+function openTrust(id,ch){
+  ch = ch||(TI[id]?"broker":"");
+  const t=trustFor(id,ch), m=METRICS[id], chs=ch&&TI[id]?" · "+chName(ch):"";
+  const txt = c=>c.key==="comp"?`${c.val}% of records have what this number needs.`+((id==="cac"||id==="payback"||id==="quotes")&&ch==="broker"?` ${DQ.brokerBlank}% of broker deals have no broker named.`:"")
+    : c.key==="fresh"?`Last refreshed ${c.val} day${c.val===1?"":"s"} ago.`
+    : c.key==="recon"?`${c.val.toFixed(1)}% gap versus the Finance ledger (limit 2%).`
+    : c.val==="ok"?"Yes, one definition is in use.":c.val==="soft"?"Depends on Qualified, which has 3 definitions in use.":"3 definitions in use.";
+  const rows=t.checks.map(c=>{const f=FIX[c.key](id,ch);return `<div class="chk" data-check="${c.key}"><span class="dot ${c.status}"></span><div><div class="t">${c.label} <span class="muted" style="font-weight:400">· ${c.status==="pass"?"Pass":c.status==="warn"?"Watch":"Fails"}</span></div><div class="d">${txt(c)}</div>${c.status!=="pass"?`<div class="f">Owner: ${f.o}. Fix path: ${f.f} RevOps/Engineering own the build; this board defines the requirement.</div>`:""}</div></div>`;}).join("");
+  layer(`<div class="backdrop m" data-act="close-layer"></div><div class="modal" role="dialog" aria-modal="true" aria-label="Quality checks" id="trustmodal" data-trustmodal="${id}">
+   <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px"><span class="tb tb-${t.grade} lg" style="margin:0">${t.grade}</span><div style="flex:1;min-width:0"><h2 style="margin:0">${esc(m.name)}${chs}</h2><div class="cap">Trust score ${t.score} of 100 ${pill}</div></div><button class="iconbtn" data-act="close-layer" aria-label="Close">×</button></div>
+   <p class="cap" style="margin:8px 0 4px">How the grade works: A means every check passes and the score is 85 or more. B means something to watch. C means at least one check fails. Score = 50% completeness + 25% freshness + 25% match to Finance.</p>
+   ${rows}<div style="margin-top:14px;display:flex;gap:8px"><button class="btn" data-metric="${id}">Open dictionary entry</button>${t.checks.some(c=>c.key==="def"&&c.status!=="pass")?`<button class="btn" data-act="to-conflict">Go to definition conflict</button>`:""}</div></div>`);
+  closeLayer.back=document.activeElement; $("#trustmodal .iconbtn").focus();
+}
+function openAbout(){
+  layer(`<div class="backdrop m" data-act="close-layer"></div><div class="popover" role="dialog" aria-modal="true" aria-label="About this demo" id="about">
+  <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">About this demo</h2><button class="iconbtn" data-act="close-layer" aria-label="Close">×</button></div>
+  <p>An independent concept demo by Joe Deville for the GTM Analytics Lead role. All data is fictional (SAMPLE). Nothing here is Thatch's real data.</p>
+  <p style="margin-bottom:0"><b>About the builder</b></p><ul>
+  <li>2 years as owner/admin of a Salesforce org: flows, permission sets, reports and dashboards, Data Loader migrations, dedupe.</li>
+  <li>Led HubSpot-to-Salesforce migrations; about 3 years in RevOps.</li>
+  <li>Previously GTM Engineer at Cortex, building agent workflows.</li>
+  <li>Built LangChain agents at Ignyte for forecasting and lead qualification (30% improvement).</li>
+  <li>Stack: Clay, HubSpot, Salesforce, Gong, Trigger.dev, LangChain/CrewAI, Smartlead, Neon, Vercel.</li></ul>
+  <p style="margin-bottom:0"><b>Boundary:</b> the board defines requirements; RevOps and Engineering own the build.</p></div>`);
+  closeLayer.back=document.activeElement; $("#about .iconbtn").focus();
+}
+
+/* ============ ROUTER / EVENTS ============ */
+const VIEWS={overview:viewOverview,channels:viewChannels,funnel:viewFunnel,dictionary:viewDictionary,quality:viewQuality,forecast:viewForecast};
+function render(keepScroll){
+  const y=window.scrollY;
+  document.body.classList.toggle("trusted-only",S.trustedOnly);
+  renderTabs(); $("#main").innerHTML=VIEWS[S.screen]();
+  if(S.screen==="channels") renderScenario();
+  if(keepScroll) window.scrollTo(0,y);
+}
+function go(screen,keep){ S.screen=screen; if(location.hash!=="#"+screen) history.replaceState(null,"","#"+screen); render(keep); if(!keep) window.scrollTo(0,0); }
+document.addEventListener("click",e=>{
+  const tr=e.target.closest("[data-trust]"); if(tr){e.stopPropagation(); openTrust(tr.dataset.trust,tr.dataset.ch); return;}
+  const ml=e.target.closest("[data-metric]"); if(ml){e.preventDefault(); closeLayer.back=null; closeLayer(); if(S.screen!=="dictionary"){S.screen="dictionary";history.replaceState(null,"","#dictionary");render();window.scrollTo(0,0);} openMetric(ml.dataset.metric); return;}
+  const a=e.target.closest("[data-act]"); if(!a) return;
+  switch(a.dataset.act){
+   case "nav": closeLayer(); go(a.dataset.screen); break;
+   case "toggle-trusted": S.trustedOnly=!S.trustedOnly; render(true); break;
+   case "chip": S[a.dataset.grp]= S[a.dataset.grp]===a.dataset.val?null:a.dataset.val; render(true); break;
+   case "open-channel": openChannel(a.dataset.id); break;
+   case "open-metric": openMetric(a.dataset.id); break;
+   case "close-layer": closeLayer(); break;
+   case "about": openAbout(); break;
+   case "goto-scenario": go("channels"); setTimeout(()=>$("#scenario-card").scrollIntoView({block:"start"}),0); break;
+   case "to-conflict": closeLayer(); go("dictionary"); break;
+   case "adopt": {
+     if(S.adopted) break;
+     S.adopted=true; S.adoptedAt=nowCT();
+     S.log.unshift({t:S.adoptedAt,what:`Adopted governed definition of Qualified. Qualified opportunities KPI changed from ${num(LEGACY_COUNT)} to ${num(GOV_COUNT)}; trust moved from C to ${gOf("qualified")}.`,by:"Head of Revenue Strategy & Ops (demo)"});
+     closeLayer(); render(true); toast(`Qualified opportunities now ${num(GOV_COUNT)} (was ${num(LEGACY_COUNT)}). Change logged.`); break; }
+  }
+});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"&&$("#layer").innerHTML){closeLayer();return;}
+  if((e.key==="Enter"||e.key===" ")&&(e.target.matches("tr.row")||e.target.matches("a.mlink"))){e.preventDefault();e.target.click();}
+});
+document.addEventListener("input",e=>{ if(e.target.id==="shift"){S.shift=+e.target.value;$("#shiftv").textContent=S.shift+"%";renderScenario();} });
+window.addEventListener("hashchange",()=>{const h=location.hash.slice(1); if(VIEWS[h]&&h!==S.screen){S.screen=h;render();}});
+(function init(){const h=location.hash.slice(1); if(VIEWS[h]) S.screen=h; render();})();
+</script>
+</body>
+</html>

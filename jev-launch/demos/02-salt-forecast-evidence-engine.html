@@ -68,7 +68,7 @@ svg text{font-family:var(--ui);font-variant-numeric:tabular-nums}
 .wf g.seg:hover .bar{opacity:.85}
 .wf g.seg:focus-visible{outline:none}
 .wf g.seg:focus-visible .hit{stroke:var(--purple);stroke-width:2}
-.grid2{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;margin-top:20px}
+.grid2{align-items:start;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;margin-top:20px}
 .pace{height:26px;background:#EEEEF1;border-radius:6px;position:relative;overflow:hidden;display:flex}
 .pace span{display:block;height:100%}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;margin-top:10px;color:var(--ink)}
@@ -96,7 +96,7 @@ svg text{font-family:var(--ui);font-variant-numeric:tabular-nums}
 .activefilter{background:var(--purple-soft);border:1px solid #DCCBF7;border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:12px;margin-bottom:12px;font-size:13px;color:var(--navy)}
 .tablewrap{background:#fff;border:1px solid var(--line);border-radius:12px;overflow-x:hidden;overflow-y:auto;max-height:calc(100vh - 300px);min-height:300px}
 table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:13px}
-th{position:sticky;top:0;background:#fff;z-index:2;text-align:left;font-weight:600;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:0 10px;height:42px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+th{position:sticky;top:0;background:#fff;z-index:2;text-align:left;font-weight:600;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:0 10px;height:42px;border-bottom:1px solid var(--line);white-space:normal;line-height:1.2;overflow:hidden}
 td{padding:0 10px;height:48px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
 tbody tr{cursor:pointer}
 tbody tr:hover td{background:#FAF7FF}
@@ -406,11 +406,11 @@ function viewForecast(){
    +'</div>';
 }
 
-function colW(){ return S.planhat ? [19,8,6,7.5,14,10,5.5,7,15,8] : [22,9,6,7.5,14.5,10.5,5.5,7,18]; }
+function colW(){ return S.planhat ? [18,8,6,7.5,13.5,12,5.5,7,12.5,10] : [22,8.5,6,7.5,14,12,5.5,7.5,17]; }
 function spark(a){
   const mn=Math.min(...a),mx=Math.max(...a),r=mx-mn||1;
-  const pts=a.map((v,i)=>(i*11+2)+','+(16-((v-mn)/r)*13)).join(' ');
-  return '<svg width="58" height="18" viewBox="0 0 58 18" aria-hidden="true"><polyline points="'+pts+'" fill="none" stroke="#7A3EDE" stroke-width="1.6"/></svg>';
+  const pts=a.map((v,i)=>(i*6.4+2)+','+(16-((v-mn)/r)*13)).join(' ');
+  return '<svg width="36" height="18" viewBox="0 0 36 18" aria-hidden="true"><polyline points="'+pts+'" fill="none" stroke="#7A3EDE" stroke-width="1.6"/></svg>';
 }
 function usageCell(d){
   if (!d.use) return '<span class="muted">No usage yet</span>';
