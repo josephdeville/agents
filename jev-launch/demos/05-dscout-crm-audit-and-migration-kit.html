@@ -151,7 +151,7 @@ input[type=checkbox]:disabled{cursor:not-allowed}
 .phase.rb.fail{border-color:var(--err);box-shadow:0 0 0 2px rgba(229,72,77,.18)}
 .step{display:grid;grid-template-columns:28px minmax(0,1fr) 190px 90px;gap:12px;align-items:center;min-height:48px;padding:0 20px;border-bottom:1px solid var(--border)}
 .step:last-child{border-bottom:0}
-.step.vstep{grid-template-columns:28px minmax(0,1fr) 90px 110px 120px 190px}
+.step.vstep{grid-template-columns:28px minmax(0,1fr) 140px 210px 130px 160px}.step.vstep>span{white-space:nowrap}
 .step .tx{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .step.done .tx{color:var(--muted);text-decoration:line-through}
 .numin{width:96px;font:inherit;padding:5px 8px;border:1px solid var(--border);border-radius:6px;text-align:right}
@@ -301,7 +301,7 @@ footer.foot{padding:20px 32px 28px;text-align:center;color:var(--muted);font-siz
       <div class="chips" id="mapchips" role="group" aria-label="Filter by status"></div>
       <div class="tablewrap">
         <table>
-          <colgroup><col style="width:22%"><col style="width:90px"><col style="width:22%"><col style="width:100px"><col><col style="width:150px"></colgroup>
+          <colgroup><col style="width:22%"><col style="width:90px"><col style="width:22%"><col style="width:100px"><col><col style="width:200px"></colgroup>
           <thead><tr><th>HubSpot object / property</th><th>Type</th><th>Salesforce object / field</th><th>Type</th><th>What changes on the way</th><th>Status</th></tr></thead>
           <tbody id="mtbody"></tbody>
         </table>
@@ -606,10 +606,11 @@ function docHTML(){
   }
   var bx=function(x,y,w,t1,t2,hi){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="64" rx="10" fill="'+(hi?'#D9E5FF':'#fff')+'" stroke="'+(hi?'#2D62FF':'#cfd2d8')+'"/><text x="'+(x+w/2)+'" y="'+(y+27)+'" text-anchor="middle" font-size="13" font-weight="600" fill="#080331">'+t1+'</text><text x="'+(x+w/2)+'" y="'+(y+46)+'" text-anchor="middle" font-size="11" fill="#6B6F76">'+t2+'</text>'};
   var ar=function(x1,x2,y){return '<line x1="'+x1+'" y1="'+y+'" x2="'+(x2-6)+'" y2="'+y+'" stroke="#6B6F76" stroke-width="1.5"/><path d="M'+(x2-6)+' '+(y-5)+' L'+x2+' '+y+' L'+(x2-6)+' '+(y+5)+' Z" fill="#6B6F76"/>'};
+  var al=function(x1,x2,y){return '<line x1="'+x1+'" y1="'+y+'" x2="'+(x2+6)+'" y2="'+y+'" stroke="#6B6F76" stroke-width="1.5"/><path d="M'+(x2+6)+' '+(y-5)+' L'+x2+' '+y+' L'+(x2+6)+' '+(y+5)+' Z" fill="#6B6F76"/>'};
   return '<svg viewBox="0 0 960 190" width="100%" role="img" aria-label="Data flow from web form through HubSpot and sync into Salesforce, one lead flow, then reports"><rect width="960" height="190" fill="#fff"/>'+
-   bx(20,20,150,'Web form','Visitor fills it in')+ar(170,210,52)+bx(210,20,150,'HubSpot','Marketing contacts')+ar(360,400,52)+bx(400,20,160,'Sync','Every 15 min, owner kept')+ar(560,600,52)+bx(600,20,160,'Salesforce Lead','Status set once',1)+ar(760,800,52)+bx(800,20,140,'Lead intake flow','One record-triggered flow',1)+
+   bx(20,20,150,'Web form','Visitor fills it in')+ar(170,210,52)+bx(210,20,150,'HubSpot','Marketing contacts')+ar(360,400,52)+bx(400,20,160,'Sync','Every 15 min, owner kept')+ar(560,600,52)+bx(600,20,160,'Salesforce Lead','Status set once',1)+ar(760,800,52)+bx(800,20,150,'Lead intake flow','One triggered flow',1)+
    '<path d="M870 84 V118 H680" fill="none" stroke="#6B6F76" stroke-width="1.5"/><path d="M686 113 L680 118 L686 123 Z" fill="#6B6F76"/>'+
-   bx(520,100,160,'Contact + Account','Created on convert')+ar(520,480,132)+bx(300,100,180,'Opportunity','Stages Discovery to Closed')+ar(300,260,132)+bx(80,100,180,'Reports & dashboards','Rebuilt on current types')+
+   bx(520,100,160,'Contact + Account','Created on convert')+al(520,480,132)+bx(300,100,180,'Opportunity','Stages Discovery to Closed')+al(300,260,132)+bx(80,100,180,'Reports & dashboards','Rebuilt on current types')+
    '<text x="20" y="182" font-size="11" fill="#6B6F76">Sample diagram. Blue boxes are the parts changed by the week-1 fixes.</text></svg>';
 }
 

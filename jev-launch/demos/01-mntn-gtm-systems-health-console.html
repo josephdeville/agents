@@ -14,7 +14,7 @@
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{font-family:var(--font);color:var(--text);background:var(--bg);font-size:14px;line-height:1.4;font-variant-numeric:tabular-nums;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+body{font-family:var(--font);color:var(--text);background:var(--bg);font-size:14px;line-height:1.4;font-variant-numeric:tabular-nums;height:auto;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
 button{font-family:inherit;font-size:13px;cursor:pointer}
 .num,td,th,.kpi .v{font-variant-numeric:tabular-nums}
 /* app bar */
@@ -86,7 +86,7 @@ h2{font-size:15px;margin:0;font-weight:600}
 table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed}
 th{position:sticky;top:56px;background:#FAFAFA;text-align:left;font-size:12px;color:var(--muted);font-weight:600;padding:0 12px;height:40px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);z-index:2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 td{height:48px;padding:0 12px;border-bottom:1px solid var(--border);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-tr.click{cursor:pointer}
+tr.click{cursor:pointer;scroll-margin-top:110px}
 tr.click:hover td{background:#F9FAFD}
 .tw{overflow:hidden;border-radius:10px}
 /* subtabs */
@@ -157,7 +157,7 @@ tr.click:hover td{background:#F9FAFD}
 .chk{margin:8px 0;padding:0;list-style:none;font-size:13px}.chk li{padding:2px 0}
 .pop{position:absolute;top:50px;right:32px;width:380px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.15);padding:16px 18px;z-index:50;font-size:13px;white-space:normal;color:var(--text)}
 .pop h4{margin:0 0 6px}
-footer{border-top:1px solid var(--border);background:#fff;text-align:center;color:var(--muted);font-size:12px;height:36px;line-height:36px}
+footer{border-top:1px solid var(--border);background:#fff;text-align:center;color:var(--muted);font-size:12px;height:36px;line-height:35px;flex:none}
 .legendb{display:flex;gap:16px;font-size:12px;color:var(--muted)}
 .legendb i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 </style>
@@ -398,13 +398,13 @@ function openFix(id){
    <div class="mfoot"><button class="btn" data-a="close">Cancel</button><button class="btn p" data-a="sendfix" data-id="${id}">Send for approval</button></div>`)}
 function sendFix(id){
   const i=IS(id);const nid='CL-'+(++S.seq);
-  changes.unshift({id:nid,when:'Oct 15, 2:32 PM CT',area:i.area,what:i.what+' (fix)',why:i.plain,req:'GTM Systems',appr:'Awaiting approval',test:'Sandbox plan ready',status:'Awaiting approval',before:i.before,after:i.after,recs:`${i.count} ${i.unit}`,evid:'Not run yet. Plan: '+i.plan,backup:'Current setting saved before change',rb:'Restore the saved copy of the old setting',msg:'We are fixing: '+i.title.toLowerCase()+'. '+i.plain+' No action needed from you.',issue:id});
+  changes.unshift({id:nid,when:'Oct 15, 2:32 PM CT',area:i.area,what:i.what+' (fix)',why:i.plain,req:'GTM Systems',appr:'Awaiting approval',test:'Plan ready, not run yet',status:'Awaiting approval',before:i.before,after:i.after,recs:`${i.count} ${i.unit}`,evid:'Not run yet. Plan: '+i.plan,backup:'Current setting saved before change',rb:'Restore the saved copy of the old setting',msg:'We are fixing: '+i.title.toLowerCase()+'. '+i.plain+' No action needed from you.',issue:id});
   const sz=i.count>6?'M':'S';
   cards.push({id:nid,t:i.what,req:'GTM Systems',size:sz,type:'Service',owner:'GTM Systems Admin',due:'Oct 22',dod:[3,5],col:'uat'});
   i.sent=true;i.change=nid;i.card=nid;closeLayer();render();
   toast(`${nid} sent for approval. Added to Change log and to the UAT column.`,[['View in Change log',()=>go('log')]]);}
 function approve(id){
-  const c=changes.find(x=>x.id===id);c.status='Done';c.appr='RevOps Lead';c.test=c.test.replace('Sandbox plan ready','Sandbox: passed');
+  const c=changes.find(x=>x.id===id);c.status='Done';c.appr='RevOps Lead';c.test=c.test.replace('Plan ready, not run yet','Sandbox: passed');
   const i=issues.find(x=>x.change===id||x.card===id);const card=cards.find(x=>x.id===id);
   if(card){card.col='released';card.dod=[Math.max(card.dod[0],4),5]}
   if(i){i.fixed=true}

@@ -494,13 +494,13 @@ function buildSteps(r,ver){
 function traceHTML(r,ver,opts){
   opts=opts||{};
   var d=decision(r,ver), steps=buildSteps(r,ver);
-  var human=state.resolved[r.id];
+  var human=state.resolved[r.id];var held=r.status==='Needs review'&&!human;
   var total=steps.reduce(function(a,s){return a+parseFloat(s.dur)},0).toFixed(1);
   var cost=steps.reduce(function(a,s){return a+parseFloat(s.cost.slice(1))},0).toFixed(3);
   var statusTxt=statusLabel(r);
   var h='<div class="trace-head"><span class="who" title="'+esc(r.name+', '+r.title+', '+r.co)+'">'+esc(r.name)+', '+esc(r.title)+', '+esc(r.co)+'</span>'+PILL+(ver==='v1.4'&&r.hero&&state.replayed?'<span class="replaytag">Replayed with v1.4</span>':'')+'<span class="spacer"></span><span class="mono muted" style="font-size:12px">'+r.id+'</span>'+statusChip(r)+'</div>';
   h+='<div class="decision"><div><div class="k">Confidence</div><div class="v mono">'+(r.errored?'n/a':d.conf.toFixed(2))+'</div></div><div><div class="k">Routed owner</div><div class="v">'+esc(human&&human.owner?short(human.owner):d.owner)+'</div></div><div><div class="k">Score</div><div class="v mono">'+r.score+' / 100</div></div><div></div>';
-  h+='<div class="act"><span class="k" style="flex:none">Proposed action (draft only)</span><span class="t" title="'+esc(d.action)+'">'+esc(held&&!human?'None until a person reviews':d.action)+'</span></div></div>';
+  h+='<div class="act"><span class="k" style="flex:none">Proposed action (draft only)</span><span class="t" title="'+esc(d.action)+'">'+esc(held?'None until a person reviews':d.action)+'</span></div></div>';
   h+='<div class="timeline"><div class="node"><div class="num hook">API</div><div><div class="stephead" style="cursor:default"><span class="nm">Webhook received</span><span class="chip">Boomi flow</span><span class="meta"><span class="mono">'+r.t+' CT</span></span></div><p class="stepsum" style="margin-bottom:2px">A "Request a demo" form submission arrived and started the run.</p></div></div>';
   steps.forEach(function(s,i){
     var open=(opts.open===undefined?2:opts.open)===i;
