@@ -1,0 +1,27 @@
+{
+  "model": "jev-latest",
+  "state": "Name: {{Full Name}}. Title: {{Job Title}}. Company: {{Company Name}}. Employees: {{Employee Count}}. Industry: {{Industry}}. Headline: {{LinkedIn Headline}}",
+  "questions": {
+    "persona": {
+      "type": "choice",
+      "instructions": "Which best describes this person's role in a purchase of [PRODUCT]?",
+      "criteria": {
+        "economic_buyer": "Owns the budget for [PROBLEM AREA]: VP/Head/Director of [DEPT] or founder at a company under 200 people",
+        "champion": "Manager or senior individual contributor who would use [PRODUCT] daily",
+        "influencer": "Adjacent team that would be consulted but would not own it",
+        "not_relevant": "No connection to [PROBLEM AREA]",
+        "unclear": "Not enough information to tell"
+      }
+    },
+    "icp_fit": {
+      "type": "score",
+      "instructions": "How well does this company fit: [INDUSTRY], [MIN]-[MAX] employees, selling to [BUYER TYPE]?",
+      "criteria": [
+        "No fit",
+        "Weak fit: one criterion met",
+        "Partial fit: two criteria met",
+        "Strong fit: all criteria met"
+      ]
+    }
+  }
+}

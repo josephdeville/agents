@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forecast Evidence Gate (Salt Security concept demo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --purple:#7A3EDE; --purple-soft:#F1EAFC; --blue:#00C3F0; --green-dot:#45E485;
+  --navy:#190041; --ink:#0A0A0A; --muted:#6B6F76; --bg:#F7F7F7; --card:#FFFFFF; --line:#E6E6E6;
+  --warn:#F5A524; --err:#E5484D; --ok:#1F9D55; --amber-bg:#FFF4DC; --amber-ink:#7A4B00;
+  --head:"Space Grotesk","Segoe UI",system-ui,sans-serif; --ui:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 var(--ui);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--head);color:var(--navy);margin:0;font-weight:600}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:var(--purple)}
+:focus-visible{outline:2px solid var(--purple);outline-offset:2px}
+.appbar{height:56px;background:#fff;border-bottom:2px solid var(--purple);display:flex;align-items:center;padding:0 24px;gap:16px}
+.logo{display:flex;align-items:center;height:26px}
+.logo img{height:26px;width:auto;display:block}
+.logo .fallback{font:700 24px/1 var(--head);color:var(--navy);letter-spacing:-.02em}
+.divider{width:1px;height:24px;background:var(--line)}
+.prod{font:600 15px/1 var(--head);color:var(--navy);white-space:nowrap}
+.tabs{display:flex;gap:4px;margin-left:12px;height:100%}
+.tab{background:none;border:0;padding:0 14px;height:100%;font-weight:500;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tab:hover{color:var(--navy)}
+.tab[aria-current=page]{color:var(--purple);border-bottom-color:var(--purple);font-weight:600}
+.right{margin-left:auto;display:flex;align-items:center;gap:14px;position:relative}
+.viewing{font-size:13px;color:var(--muted)}.viewing b{color:var(--navy);font-weight:600}
+.linkbtn{background:none;border:0;color:var(--purple);font-weight:500;padding:4px 2px;text-decoration:underline;text-underline-offset:3px}
+.notice{background:#EFEAF8;color:var(--navy);font-size:12.5px;padding:7px 24px;display:flex;justify-content:space-between;border-bottom:1px solid #E1D8F2}
+.notice span:last-child{color:var(--muted)}
+.pop{position:absolute;top:36px;right:0;width:420px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 28px rgba(25,0,65,.14);padding:16px 18px;z-index:40;font-size:13px}
+.pop h3{font-size:15px;margin-bottom:6px}.pop p{margin:6px 0}
+.pop[hidden]{display:none}
+main{width:100%;max-width:1440px;margin:0 auto;padding:20px 40px 28px}
+.pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:12px}
+.pagehead h1{font-size:22px}
+.pagehead .sub{color:var(--muted);font-size:13px;margin-top:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 24px}
+.card h2{font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.sample{display:inline-block;font:600 10px/1 var(--ui);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid #C9CBD1;border-radius:999px;padding:3px 7px;white-space:nowrap;vertical-align:middle;background:#fff;flex:none}
+.filters{display:flex;flex-wrap:wrap;align-items:center;gap:6px 22px;margin-bottom:14px}
+.fgroup{display:flex;align-items:center;gap:6px}
+.fgroup .lbl{font-size:12px;color:var(--muted);margin-right:2px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 11px;font-size:12.5px;color:var(--ink)}
+.chip:hover{border-color:var(--purple)}
+.chip[aria-pressed=true]{background:var(--purple);border-color:var(--purple);color:#fff}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:32px;align-items:center;padding:22px 28px}
+.bignums{display:flex;gap:28px}
+.big .lab{font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:center;margin-bottom:4px}
+.big .num{font:700 46px/1.05 var(--head);color:var(--navy);letter-spacing:-.02em}
+.big.adj .num{color:var(--purple)}
+.big .meta{font-size:12px;color:var(--muted);margin-top:3px}
+.gap{display:inline-flex;align-items:center;gap:8px;margin-top:16px;background:var(--amber-bg);color:var(--amber-ink);border:1px solid #F1D8A0;border-radius:8px;padding:8px 12px;font-weight:600;font-size:15px}
+.gap i{width:9px;height:9px;border-radius:50%;background:var(--warn);display:inline-block}
+.gap.ok i{background:var(--ok)}
+.heronote{font-size:12px;color:var(--muted);margin-top:10px;max-width:520px}
+.wf-title{font-size:12.5px;color:var(--muted);margin-bottom:2px}
+svg text{font-family:var(--ui);font-variant-numeric:tabular-nums}
+.wf g.seg{cursor:pointer}
+.wf g.seg:hover .bar{opacity:.85}
+.wf g.seg:focus-visible{outline:none}
+.wf g.seg:focus-visible .hit{stroke:var(--purple);stroke-width:2}
+.grid2{align-items:start;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;margin-top:20px}
+.pace{height:26px;background:#EEEEF1;border-radius:6px;position:relative;overflow:hidden;display:flex}
+.pace span{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;margin-top:10px;color:var(--ink)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.tick{position:absolute;right:0;top:0;bottom:0;width:2px;background:var(--navy)}
+.inspect{list-style:none;margin:0;padding:0}
+.inspect li{border-top:1px solid var(--line)}
+.inspect li:first-child{border-top:0}
+.inspect button{display:grid;grid-template-columns:minmax(0,1fr) 64px;gap:10px;align-items:center;width:100%;text-align:left;background:none;border:0;padding:9px 4px;min-height:48px}
+.inspect button:hover{background:#FAF7FF}
+.inspect .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.inspect .why{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:400}
+.inspect .amt{text-align:right;font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;margin-top:20px}
+.kpi{padding:16px 20px}
+.kpi .v{font:700 28px/1.1 var(--head);color:var(--navy)}
+.kpi .l{font-size:12.5px;color:var(--muted);margin-top:4px}
+.kpi .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12.5px;font-weight:600;color:var(--navy)}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px 24px;align-items:center;margin-bottom:12px}
+.seg-ctl{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+.seg-ctl button{border:0;background:#fff;padding:6px 12px;font-size:12.5px;border-right:1px solid var(--line)}
+.seg-ctl button:last-child{border-right:0}
+.seg-ctl button[aria-pressed=true]{background:var(--purple-soft);color:var(--purple);font-weight:600}
+.tlabel{font-size:12px;color:var(--muted);margin-right:6px}
+.activefilter{background:var(--purple-soft);border:1px solid #DCCBF7;border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:12px;margin-bottom:12px;font-size:13px;color:var(--navy)}
+.tablewrap{background:#fff;border:1px solid var(--line);border-radius:12px;overflow-x:hidden;overflow-y:auto;max-height:calc(100vh - 300px);min-height:300px}
+table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:13px}
+th{position:sticky;top:0;background:#fff;z-index:2;text-align:left;font-weight:600;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:0 10px;height:42px;border-bottom:1px solid var(--line);white-space:normal;line-height:1.2;overflow:hidden}
+td{padding:0 10px;height:48px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:#FAF7FF}
+tbody tr:last-child td{border-bottom:0}
+.r{text-align:right}
+.dealcell{display:flex;align-items:center;gap:8px;min-width:0}
+.dealcell .nm{overflow:hidden;text-overflow:ellipsis;font-weight:500;color:var(--navy)}
+.dealcell .nm small{font-weight:400;color:var(--muted)}
+.rp{display:inline-flex;align-items:center;gap:7px;font-weight:500}
+.rp i{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.d-ok{background:var(--ok)}.d-warn{background:var(--warn)}.d-err{background:var(--err)}.d-mute{background:#B9BCC3}
+.muted{color:var(--muted)}
+.sc{display:inline-flex;align-items:center;gap:8px}
+.sc .b{width:38px;height:6px;background:#EBEBEE;border-radius:3px;position:relative;overflow:hidden}
+.sc .b u{position:absolute;left:0;top:0;bottom:0;background:var(--purple);border-radius:3px}
+.empty{padding:40px;text-align:center;color:var(--muted)}
+.accgrid{display:grid;grid-template-columns:400px minmax(0,1fr);gap:20px}
+.slider{margin-bottom:20px}
+.slider .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.slider label{font-weight:600;color:var(--navy)}
+.slider output{font:700 18px var(--head);color:var(--purple)}
+.slider .d{font-size:12px;color:var(--muted);margin-top:2px}
+input[type=range]{width:100%;accent-color:var(--purple)}
+.live{border-top:1px solid var(--line);padding-top:14px}
+.live .n{display:flex;justify-content:space-between;padding:3px 0}
+.live .n b{font-family:var(--head);font-size:17px;color:var(--navy)}
+.caption{font-size:12.5px;color:var(--muted);margin-top:8px}
+.btn{border:1px solid var(--purple);background:var(--purple);color:#fff;border-radius:8px;padding:8px 14px;font-weight:600;font-size:13px}
+.btn:hover{background:#6A30C8}
+.btn.ghost{background:#fff;color:var(--purple)}
+.btn.ghost:hover{background:var(--purple-soft)}
+.stat2{display:flex;gap:28px;margin:0 0 12px;flex-wrap:wrap}
+.stat2 div{font-size:12.5px;color:var(--muted)}.stat2 b{display:block;font:700 22px var(--head);color:var(--navy)}
+.feed{list-style:none;margin:0;padding:0}
+.feed li{display:grid;grid-template-columns:44px minmax(0,1fr) auto auto;gap:16px;align-items:center;padding:16px 0;border-top:1px solid var(--line)}
+.feed li:first-child{border-top:0}
+.feed .cnt{font:700 28px var(--head);color:var(--navy);text-align:center}
+.feed .tt{font-weight:600;color:var(--navy)}
+.feed .ds{font-size:12.5px;color:var(--muted)}
+footer{max-width:1440px;margin:0 auto;padding:12px 40px 28px;color:var(--muted);font-size:12.5px;text-align:center}
+.scrim{position:fixed;inset:0;background:rgba(25,0,65,.28);z-index:50}
+.scrim[hidden]{display:none}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:600px;max-width:100%;background:#fff;z-index:51;box-shadow:-10px 0 30px rgba(25,0,65,.16);overflow-y:auto;border-left:2px solid var(--purple)}
+.drawer[hidden]{display:none}
+.dh{padding:18px 24px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:3}
+.dh .x{position:absolute;top:14px;right:16px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 10px;font-size:12.5px}
+.dh h2{font-size:19px;padding-right:80px}
+.dh .meta{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:6px;font-size:12.5px;color:var(--muted);align-items:center}
+.dbody{padding:6px 24px 28px}
+.dsec{margin-top:20px}
+.dsec h3{font-size:14px;margin-bottom:8px}
+.rules{display:grid;gap:6px}
+.rule{display:flex;gap:10px;align-items:flex-start;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:8px}
+.rule i{margin-top:5px;width:9px;height:9px;border-radius:50%;flex:none}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mc{border:1px solid var(--line);border-radius:8px;padding:9px 11px;min-width:0}
+.mc .h{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--navy);font-size:12.5px}
+.mc .h .ltr{width:22px;height:22px;border-radius:6px;background:var(--purple-soft);color:var(--purple);display:grid;place-items:center;font:700 12px var(--head);flex:none}
+.mc .st{margin-left:auto;font-size:11px;font-weight:600;white-space:nowrap}
+.st.C{color:var(--ok)}.st.R{color:#9A6400}.st.M{color:var(--err)}
+.mc .sn{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.4}
+.mc.C{border-left:3px solid var(--blue)}.mc.R{border-left:3px solid var(--warn)}.mc.M{border-left:3px solid #D9DBE0;background:#FCFCFC}
+.mc .src{font-size:11px;color:var(--purple);margin-top:3px}
+.tl{list-style:none;margin:0;padding:0}
+.tl li{display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:10px;padding:10px 0;border-top:1px solid var(--line);align-items:start}
+.tl li:first-child{border-top:0}
+.tl .dt{font-weight:600;color:var(--navy)}.tl .dt small{display:block;font-weight:400;color:var(--muted);font-size:11.5px}
+.tl .pp{font-size:12px;color:var(--muted)}
+.cnt-yes{font-size:11.5px;font-weight:600;color:var(--ok);white-space:nowrap}
+.cnt-no{font-size:11.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+.flag{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:8px;background:var(--amber-bg);border:1px solid #F1D8A0;color:var(--amber-ink);font-weight:600;font-size:13px}
+.flag i{width:9px;height:9px;border-radius:50%;background:var(--warn);flex:none}
+.flag.fine{background:#F4F9F6;border-color:#D3E8DB;color:#17603A}.flag.fine i{background:var(--ok)}
+.explain{background:var(--purple-soft);border:1px solid #DCCBF7;border-radius:10px;padding:14px 16px}
+.explain p{margin:0 0 8px;font-size:13.5px}.explain p:last-of-type{margin-bottom:6px}
+.explain .cap{font-size:11.5px;color:var(--muted)}
+.modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:620px;max-width:94vw;max-height:88vh;overflow:auto;background:#fff;border-radius:12px;z-index:60;padding:22px 24px;box-shadow:0 18px 50px rgba(25,0,65,.3);border-top:3px solid var(--purple)}
+.modal[hidden]{display:none}
+.modal h2{font-size:18px;margin-bottom:10px}
+.modal .f{display:grid;grid-template-columns:60px 1fr;gap:8px;font-size:13px;margin-bottom:6px;align-items:center}
+.modal .f span{color:var(--muted)}
+.modal input[type=text],.modal textarea{width:100%;font:inherit;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.modal textarea{min-height:230px;resize:vertical;line-height:1.5}
+.modal .acts{display:flex;gap:10px;margin-top:14px;align-items:center}
+.modal .note{font-size:12px;color:var(--muted);margin-left:auto}
+.modal ul{padding-left:18px;margin:6px 0}
+@media (prefers-reduced-motion:no-preference){.chip,.btn,.tab{transition:background .12s,border-color .12s,color .12s}}
+</style>
+</head>
+<body>
+<header class="appbar">
+  <div class="logo" id="logo"><img id="logoimg" alt="Salt Security" onerror="this.parentNode.innerHTML='<span class=&quot;fallback&quot;>Salt</span>'" src="https://cdn.prod.website-files.com/6334717ca56db63e16270dc4/639a2b8f05979d1c4e9581c8_Salt-full%20logo-purple-navy.svg"></div>
+  <div class="divider"></div>
+  <div class="prod">Forecast Evidence Gate</div>
+  <nav class="tabs" id="tabs" aria-label="Screens"></nav>
+  <div class="right">
+    <button class="linkbtn" data-act="about" aria-expanded="false">About this demo</button>
+    <span class="viewing">Viewing as: <b>CRO (demo)</b></span>
+    <div class="pop" id="about" hidden role="dialog" aria-label="About this demo">
+      <h3>About this demo</h3>
+      <p>A concept demo of a forecast evidence gate, built by Joe Deville for the Revenue Operations Manager role at Salt Security. The idea: a deal's CRM stage is a claim, the conversation record is the evidence, and the forecast only trusts claims with evidence behind them.</p>
+      <p><b>About the builder.</b> Joe Deville: 2 years as owner/admin of a Salesforce org (flows, permission sets, reports and dashboards, Data Loader migrations, dedupe). Led HubSpot-to-Salesforce migrations. About 3 years in RevOps. Previously GTM Engineer at Cortex, building agent workflows. Built LangChain agents at Ignyte for forecasting and lead qualification (30% improvement).</p>
+      <p><b>Stack.</b> Clay, HubSpot, Salesforce, Gong, Trigger.dev, LangChain/CrewAI, Smartlead, Neon, Vercel.</p>
+      <p class="muted" style="font-size:12px">All companies, people and numbers shown here are fictional sample data.</p>
+      <button class="btn ghost" data-act="about">Close</button>
+    </div>
+  </div>
+</header>
+<div class="notice"><span>SAMPLE DATA. Every company, person and number here is fictional.</span><span>Thursday, Oct 15, 2026 · Q4 FY26 · all times in Central Time (CT)</span></div>
+<main id="view"></main>
+<footer>Independent concept demo by Joe Deville. Not affiliated with Salt Security.</footer>
+
+<div class="scrim" id="scrim" hidden data-act="closeall"></div>
+<aside class="drawer" id="drawer" hidden role="dialog" aria-label="Deal evidence"></aside>
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true"></div>
+
+<script>
+'use strict';
+/* ---------- constants & state ---------- */
+const TODAY = new Date(2026, 9, 15);
+const STALE = 45, LOW = 30;
+const DEF = {days:14, secs:180, floor:55};
+const S = {days:14, secs:180, floor:55, rep:'All', seg:'All', reg:'All', rule:null, view:'all', planhat:false};
+const REPS = ['Maya Chen','Luis Ortega','Priya Natarajan','Tom Becker','Sasha Ivanova'];
+const RULES = {fresh:'No fresh evidence', eb:'No economic buyer on a call', floor:'MEDDICC below floor'};
+const RULE_ORDER = ['fresh','eb','floor'];
+const MNAMES = ['Metrics','Economic buyer','Decision criteria','Decision process','Identify pain','Champion','Competition'];
+const MLTR = ['M','E','D','D','I','C','C'];
+const SNIP = [
+ ['"We need to cut API incident triage from days to hours. That is the number our board asked about."','"If triage time drops by half, that is real analyst time back every month."'],
+ ['"I own the security budget and I will sign this if the pilot results hold."','"Budget sits with me. I just need the business case in writing."'],
+ ['"It has to cover our shadow APIs and plug into our existing ticketing."','"Coverage of undocumented endpoints is the first thing we will score you on."'],
+ ['"Security review, then procurement, then legal. We expect about two weeks for each."','"We sign off in steering committee, then procurement. Legal comes last."'],
+ ['"We found three undocumented APIs last quarter by accident. That scared everyone."','"Our current tooling misses anything that is not in the gateway."'],
+ ['"I will walk this through our steering group myself next Tuesday."','"I have already shown the demo to my director and she wants to move."'],
+ ['"We are also looking at a larger platform vendor, mostly for consolidation."','"Another vendor is in the mix, but they cannot show agent traffic."']
+];
+/* deal: [id, company, what, owner, seg, reg, amt($K), cat, stage, close, disc%, crmEB, ebTitle, meddicc(7 chars; index 1 is derived), calls[[daysAgo, seconds, ebOnCall, kind]], usage(6 weekly pts or null)] */
+const RAW = [
+['d01','Harborview Logistics','API security expansion','Maya Chen','Enterprise','East',820,'Commit','Negotiate','Nov 20',18,1,'CISO','C-CCCCR',[[3,2400,1,'Technical review'],[10,1800,1,'Pricing review'],[21,2600,0,'Demo']],[62,64,66,69,71,74]],
+['d02','Northpass Health','Agentic platform','Luis Ortega','Strategic','East',760,'Commit','Negotiate','Nov 25',22,1,'CIO','C-RCCRR',[[6,3100,1,'Executive alignment'],[17,2200,0,'Technical review']],null],
+['d03','Kestrel Bank','new logo','Priya Natarajan','Strategic','West',640,'Commit','Proposal','Dec 4',32,1,'CFO','R-CRCRM',[[4,2100,0,'Security review'],[13,2700,1,'Executive alignment'],[26,1500,0,'Discovery']],null],
+['d04','Lumen Ridge Retail','MCP discovery','Tom Becker','Commercial','West',590,'Commit','Proposal','Nov 30',15,1,'VP Security','R-RRCRM',[[9,1500,1,'Demo'],[20,1300,0,'Discovery']],null],
+['d05','Ostara Insurance','API security','Sasha Ivanova','Enterprise','EMEA',440,'Commit','Negotiate','Nov 13',12,1,'CISO','C-CRCRM',[[2,2900,1,'Pricing review'],[12,2000,1,'Technical review']],[40,41,41,43,44,46]],
+['d06','Birchline Energy','Agentic platform','Maya Chen','Commercial','West',360,'Commit','Proposal','Dec 11',10,1,'VP Engineering','R-CRCRM',[[7,1900,1,'Demo'],[14,2200,0,'Discovery']],null],
+['d07','Cobalt Freight','API security expansion','Luis Ortega','Enterprise','East',310,'Commit','Proposal','Nov 27',27,1,'CISO','R-CRCRM',[[8,140,0,'Check-in'],[22,2500,1,'Technical review']],[55,54,56,53,52,52]],
+['d08','Tidewater Mutual','MCP discovery','Tom Becker','Strategic','East',230,'Commit','Proposal','Dec 15',8,1,'CIO','R-RRMRM',[[52,2300,1,'Discovery'],[60,1700,0,'Intro call']],null],
+['d09','Juniper Credit Union','Agentic platform','Priya Natarajan','Commercial','West',220,'Commit','Proposal','Nov 18',24,1,'CFO','C-CRRRM',[[4,2000,0,'Demo'],[11,1700,0,'Technical review']],null],
+['d10','Redwood Biologics','API security','Sasha Ivanova','Enterprise','EMEA',190,'Commit','Proposal','Dec 2',14,1,'CISO','R-RRRRM',[[6,1600,0,'Demo'],[15,900,0,'Discovery']],[30,29,31,30,32,31]],
+['d11','Alder Point Hospitality','MCP discovery','Tom Becker','Commercial','West',120,'Commit','Negotiate','Nov 10',5,1,'VP Security','R-RRMRM',[[5,1400,1,'Pricing review']],null],
+['d12','Quillon Telecom','API security','Luis Ortega','Commercial','EMEA',80,'Commit','Negotiate','Nov 6',0,1,'CISO','R-RMMRM',[[10,1200,1,'Technical review']],[12,12,13,12,14,13]],
+['d13','Sandpiper Foods','MCP discovery','Priya Natarajan','Commercial','East',60,'Commit','Proposal','Nov 14',8,1,'CFO','R-MMMMM',[[12,900,1,'Discovery']],null],
+['d14','Zephyr Payments','new logo','Priya Natarajan','Strategic','West',520,'Best Case','Proposal','Dec 9',14,1,'CISO','C-CCCRC',[[3,2800,1,'Executive alignment'],[9,2100,1,'Technical review']],null],
+['d15','Fernhill Pharma','Agentic platform','Sasha Ivanova','Enterprise','EMEA',480,'Best Case','Solution','Dec 16',10,1,'CIO','R-RRRMM',[[19,1900,0,'Demo']],null],
+['d16','Granite Peak Media','API security','Tom Becker','Commercial','West',350,'Best Case','Solution','Dec 12',5,1,'VP Security','R-RRMMM',[[16,1600,0,'Discovery']],[20,21,20,22,21,23]],
+['d17','Wexford Systems','MCP discovery','Maya Chen','Commercial','East',270,'Best Case','Proposal','Dec 5',16,1,'CFO','C-CRRRM',[[8,1700,1,'Demo']],null],
+['d18','Pinecrest Utilities','Agentic platform','Maya Chen','Enterprise','East',410,'Pipeline','Qualify','Dec 18',0,1,'CIO','R-MMMMM',[[33,1300,0,'Discovery']],null],
+['d19','Oakmere Education','API security','Luis Ortega','Commercial','East',150,'Pipeline','Discovery','Dec 18',0,0,'CFO','M-MMMMM',[],null],
+['d20','Silverton Retail Group','MCP discovery','Sasha Ivanova','Commercial','EMEA',210,'Pipeline','Qualify','Dec 17',0,0,'CISO','R-MMMMM',[[27,1000,0,'Discovery']],null]
+];
+const DEALS = RAW.map(r => {
+  const d = {id:r[0],co:r[1],what:r[2],own:r[3],seg:r[4],reg:r[5],amt:r[6],cat:r[7],stage:r[8],close:r[9],disc:r[10],crmEB:!!r[11],ebT:r[12],m:r[13],calls:r[14],use:r[15]};
+  d.name = d.co + ' — ' + d.what;
+  const good = d.calls.map((c,i)=>[c,i]).filter(x=>x[0][1]>=DEF.secs).map(x=>x[1]);
+  d.src = [...d.m].map((ch,i)=> (ch==='C' && good.length) ? good[i % good.length] : -1);
+  return d;
+});
+const byId = id => DEALS.find(d=>d.id===id);
+
+/* ---------- gate logic (real code, no hard-coded results) ---------- */
+function gate(d){
+  const mc = d.calls.filter(c => c[1] >= S.secs);
+  const last = mc.length ? Math.min(...mc.map(c=>c[0])) : null;
+  const ebOn = mc.some(c => c[2]);
+  const st = [...d.m].map((ch,i) => {
+    if (i===1) return ebOn ? 'C' : (d.crmEB ? 'R' : 'M');
+    if (ch==='C') { const sc = d.calls[d.src[i]]; return (sc && sc[1] >= S.secs) ? 'C' : 'R'; }
+    return ch;
+  });
+  const sum = st.reduce((a,x)=>a+(x==='C'?1:x==='R'?0.5:0),0);
+  const score = Math.round(sum/7*100);
+  const fails = [];
+  if (last===null || last > S.days) fails.push('fresh');
+  if (!ebOn) fails.push('eb');
+  if (score < S.floor) fails.push('floor');
+  const gated = d.cat==='Commit';
+  let dest = d.cat, toPipe = false;
+  if (gated && fails.length) {
+    toPipe = (last===null || last>STALE || score<LOW);
+    dest = toPipe ? 'Pipeline' : 'Best Case';          // never promotes: only ever moves down from Commit
+  }
+  const shortRecent = d.calls.filter(c=>c[1]<S.secs && c[0]<=S.days).length;
+  const why = {
+    fresh: last===null ? 'No meaningful call on record' : 'Last meaningful call was '+last+' days ago (limit '+S.days+')' + (shortRecent?'; '+shortRecent+' recent call'+(shortRecent>1?'s':'')+' under '+S.secs+' seconds did not count':''),
+    eb: d.crmEB ? 'Economic buyer is named in Salesforce but has not joined a meaningful call' : 'No economic buyer named or on a call',
+    floor: 'MEDDICC score '+score+' is below the '+S.floor+' floor'
+  };
+  const reasons = fails.map(k=>why[k]);
+  let destNote = '';
+  if (gated && fails.length && toPipe) destNote = (last===null || last>STALE) ? 'Evidence is older than '+STALE+' days, so it drops to Pipeline' : 'MEDDICC is under '+LOW+', so it drops to Pipeline';
+  return {d,gated,mc,last,ebOn,st,score,fails,first:fails[0]||null,dest,toPipe,reasons,destNote,demoted:gated&&fails.length>0};
+}
+const visible = d => (S.rep==='All'||d.own===S.rep) && (S.seg==='All'||d.seg===S.seg) && (S.reg==='All'||d.reg===S.reg);
+function totals(list){
+  const t = {rep:0,adj:0,gap:0,n:0,nRep:0,by:{fresh:{amt:0,n:0},eb:{amt:0,n:0},floor:{amt:0,n:0}},res:[]};
+  list.forEach(d=>{
+    const g = gate(d); t.res.push(g);
+    if (!g.gated) return;
+    t.rep += d.amt; t.nRep++;
+    if (g.demoted) { t.gap += d.amt; t.n++; t.by[g.first].amt += d.amt; t.by[g.first].n++; }
+    else t.adj += d.amt;
+  });
+  return t;
+}
+/* ---------- formatting ---------- */
+const fmtM = k => '$' + (k/1000).toFixed(2) + 'M';
+const fmtK = k => k>=1000 ? '$'+(k/1000).toFixed(2)+'M' : '$'+k+'K';
+const dstr = n => { const x=new Date(TODAY); x.setDate(x.getDate()-n); return x.toLocaleDateString('en-US',{month:'short',day:'numeric'}); };
+const dur = s => Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+const SP = '<span class="sample">Sample</span>';
+const TIMES = ['9:30 AM','11:00 AM','1:30 PM','3:00 PM','10:15 AM'];
+function pill(g){
+  if (g.dest==='Commit' && g.gated) return '<span class="rp"><i class="d-ok"></i>Kept</span>';
+  if (!g.gated) return '<span class="rp muted"><i class="d-mute"></i>Kept as '+g.d.cat+'</span>';
+  return '<span class="rp"><i class="'+(g.dest==='Pipeline'?'d-err':'d-warn')+'"></i>Demoted to '+g.dest+'</span>';
+}
+
+/* ---------- routing ---------- */
+const VIEWS = [['forecast','Forecast'],['deals','Deal gate table'],['accuracy','Accuracy history'],['hygiene','Data hygiene']];
+let curView = 'forecast', openId = null, lastFocus = null;
+function parseHash(){
+  const h = location.hash.replace('#','').split('/');
+  curView = VIEWS.some(v=>v[0]===h[0]) ? h[0] : 'forecast';
+  openId = h[1] && byId(h[1]) ? h[1] : null;
+}
+function go(view, id){ const h='#'+view+(id?'/'+id:''); if(location.hash===h) render(); else location.hash=h; }
+function renderTabs(){
+  $('#tabs').innerHTML = VIEWS.map(v=>'<button class="tab" data-act="nav" data-v="'+v[0]+'"'+(v[0]===curView?' aria-current="page"':'')+'>'+v[1]+'</button>').join('');
+}
+const $ = s => document.querySelector(s);
+
+/* ---------- filters ---------- */
+function filterBar(){
+  const g = [['Segment',['All','Commercial','Enterprise','Strategic'],'seg'],['Region',['All','East','West','EMEA'],'reg'],['Rep',['All'].concat(REPS),'rep']];
+  return '<div class="filters" role="group" aria-label="Filters">'+g.map(([l,opts,k])=>'<div class="fgroup"><span class="lbl">'+l+'</span>'+opts.map(o=>'<button class="chip" data-act="chip" data-k="'+k+'" data-val="'+o+'" aria-pressed="'+(S[k]===o)+'">'+o+'</button>').join('')+'</div>').join('')+'</div>';
+}
+
+/* ---------- waterfall ---------- */
+function waterfall(t){
+  const W=720,x0=236,bw=392,max=Math.max(t.rep,1), sx=v=>x0+v/max*bw;
+  const f=t.by.fresh.amt,e=t.by.eb.amt,m=t.by.floor.amt;
+  const rows=[
+    {k:null,l:'Rep-called Commit',s:t.nRep+' deals',a:0,b:t.rep,c:'#190041',v:fmtM(t.rep)},
+    {k:'fresh',l:RULES.fresh,s:t.by.fresh.n+' deal'+(t.by.fresh.n===1?'':'s')+' · no meaningful call in '+S.days+' days',a:t.rep-f,b:t.rep,c:'#F5A524',v:'−'+fmtM(f)},
+    {k:'eb',l:RULES.eb,s:t.by.eb.n+' deal'+(t.by.eb.n===1?'':'s'),a:t.rep-f-e,b:t.rep-f,c:'#F5A524',v:'−'+fmtM(e)},
+    {k:'floor',l:RULES.floor,s:t.by.floor.n+' deal'+(t.by.floor.n===1?'':'s')+' · floor '+S.floor,a:t.adj,b:t.adj+m,c:'#F5A524',v:'−'+fmtM(m)},
+    {k:null,l:'Evidence-adjusted Commit',s:(t.nRep-t.n)+' deals',a:0,b:t.adj,c:'#7A3EDE',v:fmtM(t.adj)}
+  ];
+  let s='<svg class="wf" viewBox="0 0 '+W+' 198" width="100%" role="img" aria-label="Waterfall: Commit removed by each rule">';
+  rows.forEach((r,i)=>{
+    const y=6+i*38, x1=sx(r.a), w=Math.max(sx(r.b)-x1,r.b>r.a?3:0);
+    const sel = r.k && S.rule===r.k;
+    const inner='<rect class="hit" x="0" y="'+(y-4)+'" width="'+W+'" height="36" rx="6" fill="'+(sel?'#F1EAFC':'transparent')+'" stroke="none"/>'
+      +'<text x="6" y="'+(y+11)+'" font-size="13" font-weight="600" fill="#190041">'+r.l+'</text>'
+      +'<text x="6" y="'+(y+25)+'" font-size="11.5" fill="#6B6F76">'+r.s+'</text>'
+      +'<rect class="bar" x="'+x1+'" y="'+y+'" width="'+w+'" height="24" rx="3" fill="'+r.c+'"/>'
+      +'<text x="'+(sx(r.b)+8)+'" y="'+(y+17)+'" font-size="13.5" font-weight="700" fill="#190041">'+r.v+'</text>';
+    s += r.k ? '<g class="seg" tabindex="0" role="button" data-act="rule" data-rule="'+r.k+'" aria-label="'+r.l+' '+r.v+'. Show these deals in the table"><title>Click to show only the deals removed by "'+r.l+'"</title>'+inner+'</g>' : '<g>'+inner+'</g>';
+  });
+  // connectors
+  const cx=[t.rep,t.rep-f,t.rep-f-e,t.adj];
+  cx.forEach((v,i)=>{ const y=6+i*38+24; s+='<line x1="'+sx(v)+'" x2="'+sx(v)+'" y1="'+y+'" y2="'+(y+14)+'" stroke="#9AA0A8" stroke-dasharray="2 2"/>'; });
+  return s+'</svg>';
+}
+
+/* ---------- screens ---------- */
+function viewForecast(){
+  const list = DEALS.filter(visible), t = totals(list);
+  const all = totals(DEALS);
+  const custom = S.days!==DEF.days||S.secs!==DEF.secs||S.floor!==DEF.floor;
+  const repLabel = S.rep==='All'?'All reps':S.rep;
+  const demoted = t.res.filter(g=>g.demoted).sort((a,b)=>b.d.amt-a.d.amt);
+  const closed=2100, target=7500;
+  return '<div class="pagehead"><div><h1>Forecast · Q4 FY26</h1><div class="sub">CRO weekly view. Rep-called Commit versus the Commit the call record supports.</div></div>'
+   +'<div class="sub">Rules in use: <b>'+S.days+' days</b> · <b>'+S.secs+' seconds</b> · <b>'+S.floor+'/100</b> floor '+(custom?'<span class="muted">(changed from defaults)</span> ':'')+'<button class="linkbtn" data-act="nav" data-v="accuracy">Adjust rules</button></div></div>'
+   + filterBar()
+   +'<section class="card hero" aria-label="Headline">'
+   +'<div><div class="bignums">'
+   +'<div class="big"><div class="lab">Rep-called Commit '+SP+'</div><div class="num" id="heroRep">'+fmtM(t.rep)+'</div><div class="meta">'+t.nRep+' deals · '+repLabel+'</div></div>'
+   +'<div class="big adj"><div class="lab">Evidence-adjusted Commit '+SP+'</div><div class="num" id="heroAdj">'+fmtM(t.adj)+'</div><div class="meta">'+(t.nRep-t.n)+' deals pass all three rules</div></div></div>'
+   +(t.n? '<div class="gap" id="heroGap"><i></i>'+fmtM(t.gap)+' at risk across '+t.n+' deal'+(t.n===1?'':'s')+'</div>' : '<div class="gap ok" id="heroGap"><i></i>No Commit at risk under these rules</div>')
+   +'<div class="heronote">Evidence-adjusted Commit keeps only the deals that pass fresh evidence, economic buyer on a call, and the MEDDICC floor. The gate only moves deals down, never up.</div></div>'
+   +'<div><div class="wf-title">Where the gap comes from. Each deal is counted once, under the first rule it fails. Click a bar to see those deals.</div>'+waterfall(t)+'</div>'
+   +'</section>'
+   +'<div class="grid2">'
+   +'<section class="card"><h2>Quarter pacing, team view '+SP+'</h2>'
+   +'<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span><b style="font:700 22px var(--head);color:var(--navy)">$2.10M</b> closed won of $7.5M target</span><span class="muted">'+Math.round(closed/target*100)+'% of target</span></div>'
+   +'<div class="pace" role="img" aria-label="Closed won, evidence-adjusted Commit and at-risk Commit against target"><span style="width:'+(closed/target*100)+'%;background:#190041"></span><span style="width:'+(all.adj/target*100)+'%;background:#7A3EDE"></span><span style="width:'+(all.gap/target*100)+'%;background:repeating-linear-gradient(45deg,#F5A524 0 4px,#FBD58F 4px 8px)"></span><div class="tick" title="Target $7.5M"></div></div>'
+   +'<div class="legend"><span><i style="background:#190041"></i>Closed won $2.10M</span><span><i style="background:#7A3EDE"></i>Evidence-adjusted Commit '+fmtM(all.adj)+'</span><span><i style="background:#F5A524"></i>Commit at risk '+fmtM(all.gap)+'</span><span><i style="background:#EEEEF1;border:1px solid #D5D5DA"></i>Target $7.5M (right edge)</span></div>'
+   +'<p class="caption">Closed won plus evidence-adjusted Commit is <b>'+fmtM(closed+all.adj)+'</b>, '+Math.round((closed+all.adj)/target*100)+'% of target. Rep-called Commit alone would suggest '+fmtM(closed+all.rep)+'.</p></section>'
+   +'<section class="card"><h2>Deals to inspect this week '+SP+'</h2>'
+   +(demoted.length? '<ul class="inspect">'+demoted.slice(0,6).map(g=>'<li><button data-act="deal" data-id="'+g.d.id+'"><span><span class="t" title="'+esc(g.d.name)+'">'+esc(g.d.name)+'</span><span class="why" title="'+esc(g.reasons.join('. '))+'">'+esc(g.d.own)+' · '+esc(g.reasons[0])+'</span></span><span class="amt">'+fmtK(g.d.amt)+'</span></button></li>').join('')+'</ul>' : '<div class="empty">No demoted deals for this selection.</div>')
+   +'</section></div>'
+   +'<div class="kpis">'
+   +[['Pipeline coverage','3.1×','Open pipeline compared with the remaining target'],['Pipeline velocity','$41K / day','Deal value moving to closed won each day'],['Win rate','24%','Share of closed deals that were won'],['Average sales cycle','71 days','From first meeting to signature'],['Net revenue retention','112%','Revenue kept and grown from existing customers']].map(k=>'<div class="card kpi"><div class="top"><span>'+k[0]+'</span>'+SP+'</div><div class="v">'+k[1]+'</div><div class="l">'+k[2]+'</div></div>').join('')
+   +'</div>';
+}
+
+function colW(){ return S.planhat ? [18,8,6,7.5,13.5,12,5.5,7,12.5,10] : [22,8.5,6,7.5,14,12,5.5,7.5,17]; }
+function spark(a){
+  const mn=Math.min(...a),mx=Math.max(...a),r=mx-mn||1;
+  const pts=a.map((v,i)=>(i*6.4+2)+','+(16-((v-mn)/r)*13)).join(' ');
+  return '<svg width="36" height="18" viewBox="0 0 36 18" aria-hidden="true"><polyline points="'+pts+'" fill="none" stroke="#7A3EDE" stroke-width="1.6"/></svg>';
+}
+function usageCell(d){
+  if (!d.use) return '<span class="muted">No usage yet</span>';
+  const p = Math.round((d.use[5]-d.use[0])/d.use[0]*100);
+  return '<span style="display:inline-flex;align-items:center;gap:8px">'+spark(d.use)+'<span>'+(p>=3?'Up '+p+'%':p<=-3?'Down '+Math.abs(p)+'%':'Flat')+'</span></span>';
+}
+function tableRows(){
+  const order = {Commit:0,'Best Case':1,Pipeline:2};
+  let res = DEALS.filter(visible).map(gate);
+  if (S.rule) res = res.filter(g=>g.first===S.rule);
+  if (S.view==='demoted') res = res.filter(g=>g.demoted);
+  if (S.view==='kept') res = res.filter(g=>!g.demoted);
+  res.sort((a,b)=>order[a.d.cat]-order[b.d.cat]||b.d.amt-a.d.amt);
+  return res;
+}
+function viewDeals(){
+  const res = tableRows(), w = colW();
+  const heads = ['Deal','Owner','Amount','Rep category','Gate result','Last meaningful call','EB on call?','MEDDICC score'].concat(S.planhat?[]:[]).concat(S.planhat?['Reason','Usage trend (Planhat)']:['Reason']);
+  const rows = res.map(g=>{
+    const d=g.d;
+    const last = g.last===null ? '<span class="muted">None on record</span>' : g.last+' days ago <span class="muted">('+dstr(g.last)+')</span>';
+    const rsn = g.demoted ? g.reasons.join('. ') + (g.destNote?'. '+g.destNote:'') : (g.gated ? 'Passed all three rules' : (g.fails.length ? 'Rep called '+d.cat+'; gate only reviews Commit and never promotes' : 'Rep called '+d.cat+'; would pass the rules, but the gate never promotes'));
+    return '<tr tabindex="0" data-act="deal" data-id="'+d.id+'" aria-label="Open '+esc(d.name)+'">'
+     +'<td><div class="dealcell"><span class="nm" title="'+esc(d.name)+'">'+esc(d.co)+' <small>— '+esc(d.what)+'</small></span>'+SP+'</div></td>'
+     +'<td title="'+esc(d.own)+'">'+esc(d.own)+'</td><td class="r"><b>'+fmtK(d.amt)+'</b></td><td>'+d.cat+'</td><td>'+pill(g)+'</td><td>'+last+'</td>'
+     +'<td>'+(g.ebOn?'Yes':'<span title="'+(d.crmEB?'Named in Salesforce only':'Not named')+'">No</span>')+'</td>'
+     +'<td><span class="sc"><b>'+g.score+'</b><span class="b"><u style="width:'+g.score+'%"></u></span></span></td>'
+     +'<td title="'+esc(rsn)+'" class="'+(g.demoted?'':'muted')+'">'+esc(rsn)+'</td>'
+     +(S.planhat?'<td>'+usageCell(d)+'</td>':'')+'</tr>';
+  }).join('');
+  const t = totals(DEALS.filter(visible));
+  return '<div class="pagehead"><div><h1>Deal gate table</h1><div class="sub">Every deal with the gate result and the reason. Click a deal to open its evidence. '+SP.replace('Sample','20 sample deals')+'</div></div></div>'
+   + filterBar()
+   +'<div class="toolbar"><div><span class="tlabel">Evidence source</span><div class="seg-ctl" role="group" aria-label="Evidence source"><button data-act="src" data-v="0" aria-pressed="'+!S.planhat+'">Gong + Salesforce</button><button data-act="src" data-v="1" aria-pressed="'+S.planhat+'">+ Planhat usage</button></div></div>'
+   +'<div><span class="tlabel">Show</span><div class="seg-ctl" role="group" aria-label="Show"><button data-act="vw" data-v="all" aria-pressed="'+(S.view==='all')+'">All deals</button><button data-act="vw" data-v="demoted" aria-pressed="'+(S.view==='demoted')+'">Demoted only</button><button data-act="vw" data-v="kept" aria-pressed="'+(S.view==='kept')+'">Kept only</button></div></div>'
+   +'<div class="muted" style="margin-left:auto;font-size:12.5px">Commit '+fmtM(t.rep)+' → evidence-adjusted '+fmtM(t.adj)+' · gap '+fmtM(t.gap)+' across '+t.n+' deals</div></div>'
+   +(S.rule?'<div class="activefilter">Showing only deals removed for <b>'+RULES[S.rule]+'</b> ('+res.length+')<button class="btn ghost" data-act="clearrule" style="padding:4px 10px">Clear</button></div>':'')
+   +'<div class="tablewrap"><table><colgroup>'+w.map(x=>'<col style="width:'+x+'%">').join('')+'</colgroup><thead><tr>'+heads.map((h,i)=>'<th class="'+(i===2?'r':'')+'" title="'+h+'">'+h+'</th>').join('')+'</tr></thead><tbody>'+(rows||'<tr><td colspan="'+heads.length+'" class="empty" style="height:120px;white-space:normal">No deals match these filters.</td></tr>')+'</tbody></table></div>'
+   +'<p class="caption">Last meaningful call counts only external calls of at least '+S.secs+' seconds. EB on call means the economic buyer spoke on one of those calls, not just a name in Salesforce.'+(S.planhat?' Planhat usage trend is shown as extra context and does not change the gate result.':'')+'</p>';
+}
+
+/* backtest data: illustrative */
+const BT = [['Sep 10',4.35,3.40,3.30],['Sep 17',4.60,3.70,3.85],['Sep 24',4.90,3.95,3.75],['Oct 1',4.70,3.65,3.55],['Oct 8',5.05,3.85,3.90]];
+function btRows(){
+  const t = totals(DEALS);
+  return BT.map(r=>({w:r[0],rep:r[1],adj:r[2],act:r[3]})).concat([{w:'Oct 15',rep:t.rep/1000,adj:t.adj/1000,act:null,now:true}]);
+}
+function chart(rows){
+  const W=900,H=330,L=56,R=150,T=18,B=44, pw=W-L-R, ph=H-T-B, sx=i=>L+i*pw/(rows.length-1), sy=v=>T+ph-(v/6)*ph;
+  let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="Rep-called, evidence-adjusted and actual closed Commit by week">';
+  for(let v=0;v<=6;v++){ s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+sy(v)+'" y2="'+sy(v)+'" stroke="#E6E6E6"/><text x="'+(L-8)+'" y="'+(sy(v)+4)+'" font-size="11.5" fill="#6B6F76" text-anchor="end">$'+v+'M</text>'; }
+  rows.forEach((r,i)=>{ s+='<text x="'+sx(i)+'" y="'+(H-20)+'" font-size="11.5" fill="#6B6F76" text-anchor="middle">'+r.w+(r.now?' (today)':'')+'</text>'; });
+  const line=(key,col,dash,label,off)=>{
+    const pts=rows.map((r,i)=>r[key]==null?null:[sx(i),sy(r[key]),r[key],r.w]).filter(Boolean);
+    let o='<polyline fill="none" stroke="'+col+'" stroke-width="2.5" '+(dash?'stroke-dasharray="'+dash+'" ':'')+'points="'+pts.map(p=>p[0]+','+p[1]).join(' ')+'"/>';
+    pts.forEach(p=>{ o+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="4" fill="#fff" stroke="'+col+'" stroke-width="2"><title>'+label+', week of '+p[3]+': $'+p[2].toFixed(2)+'M</title></circle>'; });
+    const lp=pts[pts.length-1];
+    o+='<text x="'+(lp[0]+12)+'" y="'+(lp[1]+4+off)+'" font-size="12.5" font-weight="600" fill="'+col+'">'+label+'</text>';
+    return o;
+  };
+  s+=line('rep','#190041','','Rep-called',0)+line('adj','#7A3EDE','','Evidence-adjusted',0)+line('act','#0AA3CC','6 5','Actual closed',0);
+  return s+'</svg>';
+}
+function accLive(){
+  const t=totals(DEALS);
+  return '<div class="n"><span>Rep-called Commit</span><b>'+fmtM(t.rep)+'</b></div><div class="n"><span>Evidence-adjusted Commit</span><b style="color:#7A3EDE">'+fmtM(t.adj)+'</b></div><div class="n"><span>Commit at risk</span><b>'+fmtM(t.gap)+' · '+t.n+' deals</b></div>'
+   +'<div class="n"><span>No fresh evidence</span><span>'+fmtM(t.by.fresh.amt)+' · '+t.by.fresh.n+'</span></div><div class="n"><span>No economic buyer on a call</span><span>'+fmtM(t.by.eb.amt)+' · '+t.by.eb.n+'</span></div><div class="n"><span>MEDDICC below floor</span><span>'+fmtM(t.by.floor.amt)+' · '+t.by.floor.n+'</span></div>';
+}
+function accBody(){
+  const rows=btRows(), done=rows.filter(r=>r.act!=null);
+  const mr=done.reduce((a,r)=>a+Math.abs(r.rep-r.act),0)/done.length, ma=done.reduce((a,r)=>a+Math.abs(r.adj-r.act),0)/done.length;
+  const pr=done.reduce((a,r)=>a+Math.abs(r.rep-r.act)/r.act,0)/done.length*100, pa=done.reduce((a,r)=>a+Math.abs(r.adj-r.act)/r.act,0)/done.length*100;
+  const sg=v=>(v>=0?'+':'−')+'$'+Math.abs(v).toFixed(2)+'M';
+  return {
+   chart: chart(rows),
+   stats: '<div class="stat2"><div>Rep-called average miss<b>$'+mr.toFixed(2)+'M ('+pr.toFixed(0)+'%)</b></div><div>Evidence-adjusted average miss<b style="color:#7A3EDE">$'+ma.toFixed(2)+'M ('+pa.toFixed(0)+'%)</b></div><div class="muted" style="align-self:end">Average over '+done.length+' weeks with a known result</div></div>',
+   table: '<div class="tablewrap" style="max-height:none"><table><colgroup><col style="width:14%"><col style="width:15%"><col style="width:17%"><col style="width:15%"><col style="width:19%"><col style="width:20%"></colgroup><thead><tr><th>Week of</th><th class="r">Rep-called</th><th class="r">Evidence-adjusted</th><th class="r">Actual closed</th><th class="r">Rep-called variance</th><th class="r">Adjusted variance</th></tr></thead><tbody>'
+    +rows.map(r=>'<tr style="cursor:default"><td><span class="dealcell">'+r.w+(r.now?' (today)':'')+' '+SP+'</span></td><td class="r">$'+r.rep.toFixed(2)+'M</td><td class="r">$'+r.adj.toFixed(2)+'M</td><td class="r">'+(r.act==null?'<span class="muted">Not closed yet</span>':'$'+r.act.toFixed(2)+'M')+'</td><td class="r">'+(r.act==null?'—':sg(r.rep-r.act)+' ('+((r.rep-r.act)/r.act*100).toFixed(0)+'%)')+'</td><td class="r">'+(r.act==null?'—':sg(r.adj-r.act)+' ('+((r.adj-r.act)/r.act*100).toFixed(0)+'%)')+'</td></tr>').join('')
+    +'</tbody></table></div>'
+  };
+}
+function slider(id,label,min,max,val,unit,desc){
+  return '<div class="slider"><div class="row"><label for="'+id+'">'+label+'</label><output id="o_'+id+'">'+val+unit+'</output></div><input type="range" id="'+id+'" min="'+min+'" max="'+max+'" step="1" value="'+val+'"><div class="d">'+desc+'</div></div>';
+}
+function viewAccuracy(){
+  const a=accBody();
+  return '<div class="pagehead"><div><h1>Accuracy history</h1><div class="sub">How close each version of Commit came to what actually closed.</div></div></div>'
+   +'<div class="accgrid"><section class="card"><h2>Gate rules</h2>'
+   +slider('s_days','Fresh evidence window',7,30,S.days,' days','A meaningful external call must be at least this recent.')
+   +slider('s_secs','Shortest call that counts',60,600,S.secs,' sec','Calls shorter than this do not count as evidence.')
+   +slider('s_floor','MEDDICC floor',30,80,S.floor,'/100','Call-corroborated field = 1, Salesforce-only text = 0.5, absent = 0.')
+   +'<div class="live"><div class="tlabel" style="margin-bottom:6px">Live result on this week’s Commit '+SP+'</div><div id="accLive">'+accLive()+'</div></div>'
+   +'<div style="margin-top:14px;display:flex;gap:10px"><button class="btn ghost" data-act="reset">Reset to defaults</button><button class="btn" data-act="nav" data-v="deals">See deals</button></div></section>'
+   +'<section class="card"><h2>Rep-called vs evidence-adjusted vs actual closed '+SP+'</h2><div class="muted" style="font-size:12.5px;margin:-6px 0 8px">Illustrative backtest on sample data. Weekly snapshot of Commit, compared with what from that Commit actually closed.</div><div id="accStats">'+a.stats+'</div><div id="accChart">'+a.chart+'</div></section></div>'
+   +'<section style="margin-top:20px"><h2 style="margin-bottom:10px">Forecast variance by week</h2><div id="accTable">'+a.table+'</div><p class="caption">Rules are tunable: move the sliders above and the Forecast headline, the waterfall and the deal table recompute. The latest row follows your slider settings; earlier weeks are illustrative history.</p></section>';
+}
+function refreshAcc(){
+  const a=accBody();
+  $('#accLive').innerHTML=accLive(); $('#accChart').innerHTML=a.chart; $('#accStats').innerHTML=a.stats; $('#accTable').innerHTML=a.table;
+  $('#o_s_days').textContent=S.days+' days'; $('#o_s_secs').textContent=S.secs+' sec'; $('#o_s_floor').textContent=S.floor+'/100';
+}
+
+const HYG = [
+ {n:11,t:'Opportunities missing a Close Date update after the stage changed',ds:'The stage moved but nobody re-confirmed when the deal will close.',rule:'Close Date must be re-confirmed when Stage changes',own:'Sales Ops (Salesforce flow)',fix:['Open the Salesforce report "Stage changed, Close Date unchanged".','Ask each owner to confirm a real close date from their last buyer conversation.','Turn on the required-field prompt so a stage change cannot be saved without a close date check.'],ex:['Quillon Telecom — API security','Alder Point Hospitality — MCP discovery','Sandpiper Foods — MCP discovery']},
+ {n:4,t:'Deals where the economic buyer is named but has no contact role',ds:'The buyer is mentioned in notes, but the contact is not linked with a role, so the gate cannot tie calls to them.',rule:'Economic buyer needs a contact role on the opportunity',own:'Revenue Operations (data quality)',fix:['Open the list of opportunities with an economic buyer in notes and no matching contact role.','Add the buyer as a contact on the opportunity and set the role to Economic Buyer.','Re-run the gate; calls with that person will then count toward the economic buyer rule.'],ex:['Juniper Credit Union — Agentic platform','Redwood Biologics — API security']},
+ {n:6,t:'Calls not linked to an opportunity',ds:'These calls cannot count as evidence for any deal until they are attached to the right opportunity.',rule:'Every external call must link to an open opportunity',own:'Revenue Operations (Gong and Salesforce sync)',fix:['Open the list of unlinked calls from the last 14 days.','Match each call to an opportunity using the attendee email domain.','Fix the sync mapping so future calls from known accounts link automatically.'],ex:['Call on Oct 13, 34 min, attendees from Granite Peak Media','Call on Oct 12, 41 min, attendees from Cobalt Freight','Call on Oct 9, 52 min, attendees from Tidewater Mutual']}
+];
+function viewHygiene(){
+  return '<div class="pagehead"><div><h1>Data hygiene feed</h1><div class="sub">Gaps in Salesforce and call records that weaken the gate. Fixing these makes the forecast more trustworthy.</div></div></div>'
+   +'<section class="card"><ul class="feed">'+HYG.map((h,i)=>'<li><div class="cnt">'+h.n+'</div><div><div class="tt">'+h.n+' '+h.t.charAt(0).toLowerCase()+h.t.slice(1)+'</div><div class="ds">'+h.ds+'</div></div><div>'+SP+'</div><div><button class="btn ghost" data-act="fix" data-i="'+i+'">Fix: '+h.rule+'</button></div></li>').join('')+'</ul></section>'
+   +'<p class="caption">Example: a call that is not linked to a deal cannot count as fresh evidence, so the deal can be demoted even when the rep did talk to the buyer.</p>';
+}
+
+/* ---------- deal drawer ---------- */
+function explain(g){
+  const d=g.d, rep=d.own.split(' ')[0];
+  if (g.gated && !g.demoted) return ['Rep called this deal Commit at '+fmtK(d.amt)+' and the gate agrees.','The latest meaningful call was '+g.last+' days ago, the economic buyer has joined a call, and the MEDDICC score is '+g.score+' against a floor of '+S.floor+'.','Nothing to fix before the forecast call; keep a call on the calendar so the evidence stays fresh.'];
+  if (g.demoted) {
+    const fix={fresh:'get a call of '+Math.ceil(S.secs/60)+' minutes or more with the buyer inside '+S.days+' days',eb:'get the economic buyer onto a call',floor:'back up the weak MEDDICC fields with call evidence'};
+    return ['Rep called this deal Commit at '+fmtK(d.amt)+', but the gate moves it to '+g.dest+'.',
+      'The reason'+(g.fails.length>1?'s are: ':' is: ')+g.reasons.join('; ').toLowerCase()+(g.destNote?'; '+g.destNote.toLowerCase():'')+'.',
+      'To earn Commit back, '+rep+' needs to '+g.fails.map(k=>fix[k]).join(', and to ')+'.'];
+  }
+  return ['Rep called this deal '+d.cat+', and the gate leaves it there because it only reviews Commit and never promotes.',
+    g.fails.length?'If it were Commit it would fail: '+g.reasons.join('; ').toLowerCase()+'.':'If it were Commit it would pass all three rules (score '+g.score+', last meaningful call '+g.last+' days ago).',
+    'Any move up has to come from the rep and a manager review, not from the gate.'];
+}
+function drawerHTML(id){
+  const d=byId(id), g=gate(d);
+  const ruleRow=(k,ok,txt)=>'<div class="rule"><i class="'+(ok?'d-ok':'d-err')+'"></i><div><b>'+RULES[k].replace('No fresh evidence','Fresh evidence').replace('No economic buyer on a call','Economic buyer on a call').replace('MEDDICC below floor','MEDDICC floor')+':</b> '+(ok?'Pass':'Fail')+'. <span class="muted">'+esc(txt)+'</span></div></div>';
+  const rules = ruleRow('fresh',!g.fails.includes('fresh'),g.last===null?'No meaningful call on record.':'Last meaningful call '+g.last+' days ago; limit is '+S.days+'.')
+   +ruleRow('eb',!g.fails.includes('eb'),g.ebOn?'Economic buyer ('+d.ebT+') spoke on a call.':(d.crmEB?'Named in Salesforce only; not on any meaningful call.':'Not named and not on a call.'))
+   +ruleRow('floor',!g.fails.includes('floor'),'Score '+g.score+' of 100; floor is '+S.floor+'.');
+  const mg = g.st.map((s,i)=>{
+    const lab = s==='C'?'Corroborated by call':s==='R'?'In Salesforce only':'Missing';
+    let sn, src='';
+    if (s==='C'){
+      let ci = i===1 ? d.calls.findIndex(c=>c[1]>=S.secs&&c[2]) : d.src[i];
+      const c = d.calls[ci] || d.calls[0];
+      sn = i===1 ? '"I will sign off on this once legal and security are comfortable." ('+d.ebT+')' : SNIP[i][(+d.id.slice(1)+i)%2];
+      src = 'Call on '+dstr(c[0])+' ('+c[3]+', '+dur(c[1])+')';
+    } else if (s==='R') sn = i===1 ? 'Named in Salesforce as '+d.ebT+', but not heard on a meaningful call.' : 'Free-text note in Salesforce. No meaningful call backs it up yet.';
+    else sn = 'Not in Salesforce and not mentioned on any meaningful call.';
+    return '<div class="mc '+s+'"><div class="h"><span class="ltr">'+MLTR[i]+'</span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+MNAMES[i]+'">'+MNAMES[i]+'</span><span class="st '+s+'">'+lab+'</span></div><div class="sn">'+esc(sn)+'</div>'+(src?'<div class="src">'+src+'</div>':'')+'</div>';
+  }).join('');
+  const calls = d.calls.length ? d.calls.map((c,i)=>{
+    const ok=c[1]>=S.secs;
+    const who='AE'+(c[3]==='Technical review'||c[3]==='Demo'||c[3]==='Security review'?', Solutions engineer':'')+' · Champion (Head of Security Engineering)'+(c[2]?' · Economic buyer ('+d.ebT+')':'');
+    return '<li><div class="dt">'+dstr(c[0])+'<small>'+TIMES[(+d.id.slice(1)+i)%5]+' CT</small></div><div><div style="font-weight:500">'+c[3]+' · '+dur(c[1])+' '+SP+'</div><div class="pp">'+who+'</div></div><div class="'+(ok?'cnt-yes':'cnt-no')+'">'+(ok?'Counts as evidence':'Under '+S.secs+' sec, not counted')+'</div></li>';
+  }).join('') : '<li style="display:block" class="muted">No external calls on record.</li>';
+  const disc = d.disc>20 ? '<div class="flag"><i></i>Discount '+d.disc+'% vs 20% guideline → Deal desk review</div>' : '<div class="flag fine"><i></i>Discount '+d.disc+'% is within the 20% guideline. No Deal desk review needed.</div>';
+  const ex = explain(g);
+  return '<div class="dh"><button class="x" data-act="closeall">Close</button><h2 title="'+esc(d.name)+'">'+esc(d.name)+'</h2><div class="meta">'+SP+'<span>'+esc(d.own)+'</span><span><b style="color:#190041">'+fmtK(d.amt)+'</b></span><span>'+d.seg+' · '+d.reg+'</span><span>Stage: '+d.stage+' · close '+d.close+'</span>'+pill(g)+'</div></div>'
+   +'<div class="dbody"><div class="dsec"><h3>Explain this deal</h3><div class="explain">'+ex.map(x=>'<p>'+esc(x)+'</p>').join('')+'<div class="cap">Plain-language summary written from this deal’s data. Template-based in this demo; no live AI call is made.</div></div>'
+   +'<div style="margin-top:10px"><button class="btn" data-act="coach" data-id="'+d.id+'">Send rep a coaching note</button> <span class="muted" style="font-size:12px;margin-left:6px">Opens a prefilled draft. Nothing is sent.</span></div></div>'
+   +'<div class="dsec"><h3>Gate rules for this deal</h3><div class="rules">'+rules+'</div></div>'
+   +'<div class="dsec"><h3>MEDDICC evidence, score '+g.score+' of 100</h3><div class="mgrid">'+mg+'</div></div>'
+   +'<div class="dsec"><h3>Call timeline (Gong)</h3><ul class="tl">'+calls+'</ul></div>'
+   +'<div class="dsec"><h3>Discount</h3>'+disc+'</div>'
+   +(S.planhat?'<div class="dsec"><h3>Usage trend (Planhat)</h3>'+usageCell(d)+'</div>':'')
+   +'</div>';
+}
+function openDrawer(id){
+  lastFocus = document.activeElement;
+  $('#drawer').innerHTML = drawerHTML(id); $('#drawer').hidden=false; $('#scrim').hidden=false;
+  $('#drawer').scrollTop=0; const x=$('#drawer .x'); if(x) x.focus();
+}
+function closeDrawer(){ $('#drawer').hidden=true; if($('#modal').hidden) $('#scrim').hidden=true; }
+function coachText(g){
+  const d=g.d, rep=d.own.split(' ')[0];
+  if (g.demoted) {
+    const ask={fresh:'a call of '+Math.ceil(S.secs/60)+' minutes or more with the buyer in the next '+S.days+' days',eb:'the economic buyer ('+d.ebT+') on the next call',floor:'call evidence for the weakest MEDDICC fields'};
+    return {subj:d.co+': Commit check',body:'Hi '+rep+',\n\nThe forecast gate moved '+d.name+' ('+fmtK(d.amt)+') from Commit to '+g.dest+' this week.\n\nWhat it saw:\n'+g.reasons.map(r=>'- '+r).join('\n')+'\n\nTo get it back into Commit, I need:\n'+g.fails.map(k=>'- '+ask[k]).join('\n')+'\n\nIf the deal is real and the evidence just is not logged yet, tell me and we will fix the record. I can look at it with you before Friday.\n\nThanks,\nCRO (demo)'};
+  }
+  return {subj:d.co+': nice evidence',body:'Hi '+rep+',\n\n'+d.name+' ('+fmtK(d.amt)+') passes the forecast gate: last meaningful call '+g.last+' days ago, the economic buyer has been on a call, and the MEDDICC score is '+g.score+'.\n\nKeep the next call on the calendar so the evidence stays fresh.\n\nThanks,\nCRO (demo)'};
+}
+function openModal(html){ $('#modal').innerHTML=html; $('#modal').hidden=false; $('#scrim').hidden=false; const f=$('#modal textarea,#modal button'); if(f) f.focus(); }
+function closeModal(){ $('#modal').hidden=true; if($('#drawer').hidden) $('#scrim').hidden=true; }
+function coachModal(id){
+  const g=gate(byId(id)), c=coachText(g);
+  openModal('<h2>Coaching note to '+esc(g.d.own)+' '+SP+'</h2><div class="f"><span>To</span><input type="text" value="'+esc(g.d.own)+' (sample rep)" aria-label="To"></div><div class="f"><span>Subject</span><input type="text" value="'+esc(c.subj)+'" aria-label="Subject"></div><textarea aria-label="Note body">'+esc(c.body)+'</textarea><div class="acts"><button class="btn" data-act="copynote">Copy note</button><button class="btn ghost" data-act="closemodal">Close</button><span class="note" id="copymsg">Draft only. This demo does not send anything.</span></div>');
+}
+function fixModal(i){
+  const h=HYG[i];
+  openModal('<h2>'+esc(h.rule)+'</h2><p class="muted" style="margin:0 0 8px">Owning rule · owned by '+esc(h.own)+'</p><p><b>'+h.n+' records affected.</b> Examples '+SP+'</p><ul>'+h.ex.map(e=>'<li>'+esc(e)+'</li>').join('')+'<li class="muted">and '+(h.n-h.ex.length)+' more</li></ul><p><b>How to fix it</b></p><ol>'+h.fix.map(f=>'<li>'+esc(f)+'</li>').join('')+'</ol><div class="acts"><button class="btn ghost" data-act="closemodal">Close</button><span class="note">Concept demo. No records are changed.</span></div>');
+}
+
+/* ---------- render & events ---------- */
+function render(){
+  parseHash(); renderTabs();
+  $('#view').innerHTML = ({forecast:viewForecast,deals:viewDeals,accuracy:viewAccuracy,hygiene:viewHygiene})[curView]();
+  if (openId) { $('#drawer').innerHTML=drawerHTML(openId); $('#drawer').hidden=false; $('#scrim').hidden=false; }
+  else if (!$('#drawer').hidden) { $('#drawer').hidden=true; if($('#modal').hidden) $('#scrim').hidden=true; }
+  if (curView==='accuracy') bindSliders();
+}
+function bindSliders(){
+  [['s_days','days'],['s_secs','secs'],['s_floor','floor']].forEach(([id,k])=>{ const el=$('#'+id); el.addEventListener('input',()=>{ S[k]=+el.value; refreshAcc(); }); });
+}
+document.addEventListener('click', e=>{
+  const el = e.target.closest('[data-act]'); if(!el) return;
+  const a=el.dataset.act;
+  if (a==='nav') { S.rule = null; go(el.dataset.v); }
+  else if (a==='chip') { S[el.dataset.k]=el.dataset.val; render(); }
+  else if (a==='rule') { S.rule = S.rule===el.dataset.rule ? null : el.dataset.rule; S.view='all'; go('deals'); }
+  else if (a==='clearrule') { S.rule=null; render(); }
+  else if (a==='src') { S.planhat = el.dataset.v==='1'; render(); }
+  else if (a==='vw') { S.view=el.dataset.v; render(); }
+  else if (a==='deal') { lastFocus=el; go(curView, el.dataset.id); }
+  else if (a==='closeall') { if(!$('#modal').hidden) closeModal(); else go(curView); }
+  else if (a==='closemodal') closeModal();
+  else if (a==='coach') coachModal(el.dataset.id);
+  else if (a==='fix') fixModal(+el.dataset.i);
+  else if (a==='reset') { Object.assign(S,DEF); render(); }
+  else if (a==='about') { const p=$('#about'); p.hidden=!p.hidden; document.querySelector('[data-act=about]').setAttribute('aria-expanded',String(!p.hidden)); }
+  else if (a==='copynote') {
+    const ta=$('#modal textarea'); let ok=false;
+    try { navigator.clipboard.writeText(ta.value).then(()=>{$('#copymsg').textContent='Copied to clipboard. Not sent.';},()=>{ta.select();$('#copymsg').textContent='Select and copy the text. Not sent.';}); ok=true; } catch(_){}
+    if(!ok){ ta.select(); $('#copymsg').textContent='Select and copy the text. Not sent.'; }
+  }
+});
+document.addEventListener('keydown', e=>{
+  if (e.key==='Escape') {
+    if(!$('#modal').hidden) closeModal();
+    else if(!$('#drawer').hidden) go(curView);
+    else if(!$('#about').hidden) $('#about').hidden=true;
+  }
+  if ((e.key==='Enter'||e.key===' ') && e.target.matches('[data-act][tabindex]')) { e.preventDefault(); e.target.click(); }
+});
+document.addEventListener('mousedown', e=>{ const p=$('#about'); if(!p.hidden && !e.target.closest('#about') && !e.target.closest('[data-act=about]')) p.hidden=true; });
+window.addEventListener('hashchange', ()=>{ const wasOpen=openId; render(); if(wasOpen && !openId && lastFocus && document.contains(lastFocus)) { try{lastFocus.focus();}catch(_){} } else if(openId) { const x=$('#drawer .x'); if(x) x.focus(); } });
+/* logo fallback */
+render();
+window.__gate = {DEALS, S, gate, totals, DEF};
+</script>
+</body>
+</html>

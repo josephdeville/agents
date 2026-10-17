@@ -1,0 +1,12 @@
+# Reading notes: Devon Canup, "Your Entire Life Changes When You Realize Getting Rich Is A Skill Issue" (Oct 7)
+
+Source: https://devoncnp.substack.com/p/you-need-to-be-delusional-if-you (read in full; it resolves to the "Lowkey Rich" newsletter, posted Sep 30, 2026). The page title differs from the URL slug. A related note by the same author (https://substack.com/@devoncnp/note/p-217796125) was described to me as motivational with self-reported income claims; I did not re-read it here.
+
+- **What it says:** getting rich is a skill. Pick a fast "vehicle" (YouTube, agency, affiliate, a boring business), do many reps, study people who already have the result, adopt the identity first, and change your environment for six months. It is motivational writing, not a method with steps you can test.
+- **Unverified, self-reported:** "$10 million made online," "$100,000 days," "record revenue month," 4,000+ videos, 20,000 posts, "$500K spent on courses." None is documented on the page. The author sells a free training and a subscriber list, so the post is also a funnel.
+- **Weak or overstated:** the psychology references (self-perception theory, a habit study, a "90-day window") are cited loosely and not linked to sources. "Move out of your parents' house" and "disappear for six months" are generic advice, not evidence for Joseph's situation.
+- **Applies: fast feedback loops.** Inputs, process, outputs, feedback; "reps = data points = pattern." This matches the outcome ledger and Friday review in `05-gtm-system.md` (`ledger.csv`, reply rates by opener, signal and CTA). Keep the loop tight: every send logged, every reply classified.
+- **Applies: don't rent out only your time.** The "you're not going to get rich renting out your time" quote supports moving from $55/hr hours toward productized offers (A, B, E in `01-offers.md`) and the retainer (D). The author's own examples are all high-variance bets, so treat it as direction, not proof.
+- **Applies: study why you buy.** His exercise is to note, on each purchase, what got you to buy. Use it on the tools and offers Joseph buys, then reuse the pattern in outreach copy. It costs nothing.
+- **Caution: spending on courses.** The post pushes buying courses and mentors (author claims $500K) and ends with a free-training funnel. Joseph should not spend on courses for now; the free reps in the plan (pilots, case study, ledger) teach more.
+- **Not applicable:** identity "LARPing," relocating, and the daily-life visualization exercise. No effect on the Jev plan; skip.

@@ -1,0 +1,17 @@
+{
+  "model": "jev-latest",
+  "state": "Job title: {{Job Title}}",
+  "questions": {
+    "buyer_score": {
+      "type": "score",
+      "instructions": "How likely is someone with this title to buy or use [PRODUCT], which [ONE-LINE WHAT IT DOES]?",
+      "criteria": [
+        "Excluded department ([EXCLUDE DEPT])",
+        "Unrelated role",
+        "Adjacent department",
+        "Daily user of the product",
+        "Buyer or owner of the problem"
+      ]
+    }
+  }
+}

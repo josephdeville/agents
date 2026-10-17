@@ -1,0 +1,38 @@
+{
+  "model": "jev-latest",
+  "state": "Cold email that was sent: {{Email Text}}",
+  "questions": {
+    "opener": {
+      "type": "choice",
+      "instructions": "What kind of opening line does the email have?",
+      "criteria": {
+        "person_specific": "Refers to something specific about the recipient personally",
+        "company_specific": "Refers to something specific about their company",
+        "generic": "Could be sent to anyone",
+        "unclear": "Cannot tell"
+      }
+    },
+    "signal": {
+      "type": "choice",
+      "instructions": "Which trigger does the email mention as its reason for reaching out?",
+      "criteria": {
+        "recent_hire": "A recent hire or role change",
+        "funding": "A funding round",
+        "job_post": "An open job post",
+        "pain_point": "A stated or inferred pain point",
+        "none": "No trigger mentioned",
+        "unclear": "Cannot tell"
+      }
+    },
+    "cta": {
+      "type": "choice",
+      "instructions": "What does the call to action ask for?",
+      "criteria": {
+        "direct_meeting_request": "Asks for a call or meeting",
+        "soft_permission_ask": "Asks permission or a small question first",
+        "no_cta": "No call to action",
+        "unclear": "Cannot tell"
+      }
+    }
+  }
+}

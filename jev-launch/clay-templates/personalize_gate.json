@@ -1,0 +1,32 @@
+{
+  "model": "jev-latest",
+  "state": "Our offer: {{Offer One Line}}. Source type: {{Source Type}}. Text about the company (job post, About page or description, trimmed): {{Source Text}}",
+  "questions": {
+    "relevance": {
+      "type": "score",
+      "instructions": "How relevant is this text to the problem our offer solves?",
+      "criteria": [
+        "Unrelated",
+        "Loosely related",
+        "Clearly related",
+        "Directly about the problem our offer solves"
+      ]
+    },
+    "usable_first_line": {
+      "type": "noul",
+      "instructions": "Does the text contain one specific, concrete detail we could mention in a first line without guessing?"
+    },
+    "role_family": {
+      "type": "choice",
+      "instructions": "Which team does this text mainly concern?",
+      "criteria": {
+        "sales": "Sales or business development",
+        "marketing": "Marketing or growth",
+        "revops": "Revenue, sales or marketing operations",
+        "engineering": "Engineering or product",
+        "other": "Anything else",
+        "unclear": "Cannot tell"
+      }
+    }
+  }
+}

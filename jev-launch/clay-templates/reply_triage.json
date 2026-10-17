@@ -1,0 +1,22 @@
+{
+  "model": "jev-latest",
+  "state": "Our email: {{Last Sent Step Subject}}. Their reply: {{Reply Body}}",
+  "questions": {
+    "intent": {
+      "type": "choice",
+      "instructions": "What does this reply mean for the sales sequence?",
+      "criteria": {
+        "interested": "Wants a call, demo, pricing or more info now",
+        "not_now": "Open in principle but says timing is wrong or asks to follow up later",
+        "never": "Clearly not interested, or asks to stop contact",
+        "wrong_person": "Says they are not the right contact, with or without a referral",
+        "out_of_office": "Automatic out-of-office or away message",
+        "unclear": "Cannot tell from the text"
+      }
+    },
+    "has_referral": {
+      "type": "noul",
+      "instructions": "Does the reply name or point to another person to contact?"
+    }
+  }
+}

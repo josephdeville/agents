@@ -1,0 +1,21 @@
+{
+  "model": "jev-latest",
+  "state": "Roster title: {{Title}}. Headline: {{Headline}}. About: {{About}}. Current roles: {{Current Roles}}. Last two past roles: {{Past Roles}}. Still at account: {{Still At Account}}. Buyer rules: [PASTE THE CLIENT'S WRITTEN BUYER RULES]",
+  "questions": {
+    "score": {
+      "type": "score",
+      "instructions": "Using the buyer rules, how relevant is this person to buying [PRODUCT] at [ACCOUNT]?",
+      "criteria": [
+        "1: excluded department",
+        "2: everyone else",
+        "3: department next door",
+        "4: would use it daily",
+        "5: buyer or owning department"
+      ]
+    },
+    "currently_owns_problem": {
+      "type": "noul",
+      "instructions": "Does the profile show this person currently works on [PROBLEM AREA]?"
+    }
+  }
+}

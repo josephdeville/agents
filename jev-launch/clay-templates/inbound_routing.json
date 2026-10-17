@@ -1,0 +1,18 @@
+{
+  "model": "jev-latest",
+  "state": "Form message: {{Message}}. Title: {{Job Title}}. Company: {{Company Name}}. Employees: {{Employee Count}}. Country: {{Country}}",
+  "questions": {
+    "route": {
+      "type": "choice",
+      "instructions": "Where should this inbound lead go?",
+      "criteria": {
+        "sales_now": "Fits ICP and is asking to buy, see a demo, or talk pricing",
+        "nurture": "Fits ICP but is researching, not asking to buy",
+        "support": "Existing customer asking for help",
+        "partner_or_vendor": "Selling to us, a partnership pitch, or a job seeker",
+        "spam": "Spam or nonsense",
+        "unclear": "Cannot tell"
+      }
+    }
+  }
+}
